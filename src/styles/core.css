@@ -1,0 +1,276 @@
+/* ============================================
+   小愈 · 公共基础样式
+   从原型 common.css 迁移
+   ============================================ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text-main);
+  background: var(--body-bg);
+  min-height: 100vh;
+  overflow: hidden;
+}
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: none; cursor: pointer; }
+img { max-width: 100%; display: block; }
+ul, ol { list-style: none; }
+input, textarea { font: inherit; }
+
+h1, h2, h3, h4 { font-weight: 600; color: var(--text-main); }
+h1 { font-size: 22px; }
+h2 { font-size: 18px; }
+h3 { font-size: 16px; }
+
+.text-sub { color: var(--text-sub); }
+.text-mute { color: var(--text-mute); }
+.text-accent { color: var(--accent-deep); }
+
+/* 状态栏 */
+.status-bar {
+  height: var(--safe-top);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 28px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 5;
+}
+.status-bar .icons { display: flex; gap: 6px; align-items: center; }
+
+/* 顶部导航 */
+.nav-bar {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 4;
+}
+.nav-bar .title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+.nav-bar .left, .nav-bar .right { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
+.nav-bar .icon-btn { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-sub); }
+.nav-bar .icon-btn:active { background: var(--cream-2); }
+.nav-bar.center .title { position: absolute; left: 50%; transform: translateX(-50%); }
+
+/* 内容滚动区 */
+.scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+.scroll-area::-webkit-scrollbar { display: none; }
+
+/* 底部 Tabbar */
+.tabbar {
+  height: var(--tabbar-h);
+  background: var(--tabbar-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-around;
+  padding-top: 10px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 5;
+}
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--text-mute);
+  padding: 4px 0;
+}
+.tab-item .ic { width: 24px; height: 24px; }
+.tab-item.active { color: var(--accent-deep); font-weight: 600; }
+.tab-item.active .ic { color: var(--accent-deep); }
+
+/* 通用按钮 */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 14px 24px;
+  border-radius: var(--radius-pill);
+  font-size: 15px; font-weight: 600;
+  transition: all 0.2s;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+  color: #fff;
+  box-shadow: var(--shadow-md);
+}
+.btn-primary:active { transform: scale(0.97); }
+.btn-ghost {
+  background: var(--cream-2);
+  color: var(--text-main);
+}
+.btn-text { color: var(--accent-deep); font-weight: 600; padding: 8px 12px; }
+
+/* 卡片 */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+/* 输入框 */
+.input-box {
+  background: var(--input-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  padding: 10px 16px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 15px;
+}
+.input-box input, .input-box textarea {
+  flex: 1; border: none; outline: none; background: transparent; font: inherit; color: var(--text-main);
+}
+.input-box textarea { resize: none; min-height: 22px; max-height: 100px; }
+
+/* 头像 */
+.avatar {
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--peach) 0%, var(--apricot) 100%);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+}
+.avatar.lg { width: 64px; height: 64px; font-size: 32px; }
+.avatar.md { width: 44px; height: 44px; font-size: 22px; }
+.avatar.sm { width: 32px; height: 32px; font-size: 16px; }
+
+/* 标签 chip */
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  background: var(--cream-2);
+  color: var(--text-sub);
+}
+.chip.accent { background: var(--accent-soft); color: var(--accent-deep); }
+
+/* 治愈气泡背景装饰 */
+.deco-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.5;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* 模态浮层 */
+.modal-mask {
+  position: absolute; inset: 0;
+  background: var(--overlay-bg);
+  z-index: 100;
+  display: flex; align-items: flex-end;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.modal-mask.show { opacity: 1; pointer-events: auto; }
+.modal-card {
+  width: 100%;
+  background: var(--cream);
+  border-radius: 24px 24px 0 0;
+  padding: 24px 20px 32px;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+.modal-mask.show .modal-card { transform: translateY(0); }
+.modal-handle { width: 40px; height: 4px; background: var(--line); border-radius: 2px; margin: 0 auto 16px; }
+
+/* SVG icon 基础 */
+svg { display: block; }
+
+/* 浮动按钮（情绪急救） */
+.fab {
+  position: absolute;
+  right: 16px; bottom: calc(var(--tabbar-h) + 16px);
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-lg);
+  z-index: 10;
+  animation: pulse 2.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
+/* 打字气泡 */
+.typing {
+  display: inline-flex; gap: 4px; align-items: center; padding: 4px 0;
+}
+.typing span {
+  width: 6px; height: 6px; background: var(--text-mute); border-radius: 50%;
+  animation: bounce 1.2s ease-in-out infinite;
+}
+.typing span:nth-child(2) { animation-delay: 0.15s; }
+.typing span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* 渐入动画 */
+.fade-in { animation: fadeIn 0.4s ease both; }
+.fade-up { animation: fadeUp 0.4s ease both; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* 隐藏滚动条 */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+/* 工具类 */
+.row { display: flex; align-items: center; }
+.col { display: flex; flex-direction: column; }
+.gap-4 { gap: 4px; } .gap-8 { gap: 8px; } .gap-12 { gap: 12px; } .gap-16 { gap: 16px; } .gap-20 { gap: 20px; } .gap-24 { gap: 24px; }
+.flex-1 { flex: 1; }
+.center { display: flex; align-items: center; justify-content: center; }
+.between { display: flex; align-items: center; justify-content: space-between; }
+.tac { text-align: center; }
+.mt-8 { margin-top: 8px; } .mt-12 { margin-top: 12px; } .mt-16 { margin-top: 16px; } .mt-20 { margin-top: 20px; } .mt-24 { margin-top: 24px; }
+.mb-8 { margin-bottom: 8px; } .mb-12 { margin-bottom: 12px; } .mb-16 { margin-bottom: 16px; } .mb-20 { margin-bottom: 20px; } .mb-24 { margin-bottom: 24px; }
+.px-16 { padding-left: 16px; padding-right: 16px; }
+.py-12 { padding-top: 12px; padding-bottom: 12px; }
+.py-16 { padding-top: 16px; padding-bottom: 16px; }
+.py-20 { padding-top: 20px; padding-bottom: 20px; }
+
+/* 电话外壳 — PC 预览用，移动端不需要 */
+.phone-frame {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  max-width: 100%;
+  max-height: 100vh;
+  background: var(--cream);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}

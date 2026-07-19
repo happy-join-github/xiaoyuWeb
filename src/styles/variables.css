@@ -1,0 +1,189 @@
+/* ============================================
+   小愈 · 多主题 CSS 变量系统
+   从原型 common.css 迁移，适配 Vue 项目
+   ============================================ */
+
+:root {
+  /* 颜色系统 */
+  --cream: #FFF8F1;
+  --cream-2: #FFEFDF;
+  --apricot: #FFE7D1;
+  --peach: #FFD4C2;
+  --peach-soft: #FFE4D6;
+  --blue-mist: #CDE3F2;
+  --blue-soft: #E5F1F8;
+  --coffee: #E8D5C4;
+  --sage: #D8E4D2;
+
+  --text-main: #4A3A2E;
+  --text-sub: #9C8B7E;
+  --text-mute: #C4B5A6;
+  --line: #F1E5D7;
+
+  --accent: #F4A988;
+  --accent-deep: #E88A6B;
+  --accent-soft: #FCE3D5;
+
+  --shadow-sm: 0 2px 8px rgba(244, 169, 136, 0.08);
+  --shadow-md: 0 6px 20px rgba(244, 169, 136, 0.12);
+  --shadow-lg: 0 12px 32px rgba(228, 138, 107, 0.16);
+
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  /* 尺寸 */
+  --safe-top: 44px;
+  --safe-bottom: 34px;
+  --tabbar-h: 70px;
+
+  /* 主题可配置变量 */
+  --card-bg: #FFFFFF;
+  --input-bg: #FFFFFF;
+  --tabbar-bg: rgba(255,248,241,0.92);
+  --overlay-bg: rgba(74,58,46,0.4);
+  --body-bg:
+    radial-gradient(1200px 800px at 10% 10%, #FFE4D1 0%, transparent 50%),
+    radial-gradient(900px 700px at 100% 100%, #E5F1F8 0%, transparent 50%),
+    linear-gradient(180deg, #FBEFE0 0%, #F4E3D0 100%);
+}
+
+/* ██ 晨光 — 金色晨曦，温暖治愈 */
+[data-theme="morning"] {
+  --cream: #FFF8EC;
+  --cream-2: #FFEFD8;
+  --apricot: #FFE4BE;
+  --peach: #FFD79E;
+  --peach-soft: #FFE4BE;
+  --blue-mist: #FFECD4;
+  --blue-soft: #FFF4E4;
+  --coffee: #F0DCC0;
+  --sage: #F5E8D4;
+  --text-main: #4A3525;
+  --text-sub: #9C8B7E;
+  --text-mute: #C4B5A6;
+  --line: #EDE0CC;
+  --accent: #FFB74D;
+  --accent-deep: #FF9800;
+  --accent-soft: #FFF3E0;
+  --body-bg:
+    radial-gradient(1200px 800px at 10% 10%, #FFE4BE 0%, transparent 50%),
+    radial-gradient(900px 700px at 100% 100%, #FFECD4 0%, transparent 50%),
+    linear-gradient(180deg, #FFF8EC 0%, #FFEFD8 100%);
+  --shadow-sm: 0 2px 8px rgba(255, 183, 77, 0.08);
+  --shadow-md: 0 6px 20px rgba(255, 183, 77, 0.12);
+  --shadow-lg: 0 12px 32px rgba(255, 152, 0, 0.16);
+}
+
+/* ██ 森语 — 薄荷森林，自然疗愈 */
+[data-theme="forest"] {
+  --cream: #F0F7EE;
+  --cream-2: #E2EFDE;
+  --apricot: #D4E8CE;
+  --peach: #C4DEC0;
+  --peach-soft: #D4E8CE;
+  --blue-mist: #BDD4B0;
+  --blue-soft: #D8E8D0;
+  --coffee: #A8C0A0;
+  --sage: #90B888;
+  --text-main: #2D4A28;
+  --text-sub: #5A7A50;
+  --text-mute: #8AAA80;
+  --line: #DCE8D4;
+  --accent: #7CB86E;
+  --accent-deep: #5CA050;
+  --accent-soft: #E8F4E2;
+  --card-bg: #FFFFFF;
+  --input-bg: #FFFFFF;
+  --tabbar-bg: rgba(240, 247, 238, 0.92);
+  --overlay-bg: rgba(45, 74, 40, 0.4);
+  --body-bg:
+    radial-gradient(1200px 800px at 10% 10%, #C4DEC0 0%, transparent 50%),
+    radial-gradient(900px 700px at 100% 100%, #BDD4B0 0%, transparent 50%),
+    linear-gradient(180deg, #F0F7EE 0%, #E2EFDE 100%);
+}
+
+/* ██ 花信 — 樱花和风，温柔浪漫 */
+[data-theme="flower"] {
+  --cream: #FEF5F7;
+  --cream-2: #FDE8EC;
+  --apricot: #FCD5DC;
+  --peach: #FBC4CE;
+  --peach-soft: #FCD5DC;
+  --blue-mist: #FDE0E6;
+  --blue-soft: #FEF0F2;
+  --coffee: #E8CCD0;
+  --sage: #DEB8C0;
+  --text-main: #4A2E38;
+  --text-sub: #9C7E86;
+  --text-mute: #C4AEB4;
+  --line: #F0E0E2;
+  --accent: #F48FB1;
+  --accent-deep: #E06080;
+  --accent-soft: #FCE4EC;
+  --card-bg: #FFFFFF;
+  --input-bg: #FFFFFF;
+  --tabbar-bg: rgba(254, 245, 247, 0.92);
+  --overlay-bg: rgba(74, 46, 56, 0.4);
+  --body-bg:
+    radial-gradient(1200px 800px at 10% 10%, #FCD5DC 0%, transparent 50%),
+    radial-gradient(900px 700px at 100% 100%, #FDE0E6 0%, transparent 50%),
+    linear-gradient(180deg, #FEF0F2 0%, #FDE8EC 100%);
+}
+
+/* ██ 月汐 — 深蓝月色，平静安宁（暗色模式） */
+[data-theme="moon"] {
+  --cream: #1A1D2E;
+  --cream-2: #232740;
+  --apricot: #2D3150;
+  --peach: #383D60;
+  --peach-soft: #2D3150;
+  --blue-mist: #1E2340;
+  --blue-soft: #252A48;
+  --coffee: #2A2E4A;
+  --sage: #343858;
+  --text-main: #E8E4F0;
+  --text-sub: #9C98B0;
+  --text-mute: #6A6880;
+  --line: #2E3250;
+  --accent: #7C9ED0;
+  --accent-deep: #5880B8;
+  --accent-soft: #283050;
+  --card-bg: #2D3150;
+  --input-bg: #2D3150;
+  --tabbar-bg: rgba(26, 29, 46, 0.92);
+  --overlay-bg: rgba(0, 0, 0, 0.6);
+  --body-bg:
+    radial-gradient(1200px 800px at 10% 10%, #2D3150 0%, transparent 50%),
+    radial-gradient(900px 700px at 100% 100%, #1E2340 0%, transparent 50%),
+    linear-gradient(180deg, #1A1D2E 0%, #232740 100%);
+}
+
+/* ██ 暖茶 — 焦糖暖意，温润醇厚 */
+[data-theme="tea"] {
+  --cream: #FDF6EE;
+  --cream-2: #F8EDE0;
+  --apricot: #F0E0CC;
+  --peach: #E8D0B8;
+  --peach-soft: #F0E0CC;
+  --blue-mist: #E8DCC8;
+  --blue-soft: #F0E8D8;
+  --coffee: #D8C4A8;
+  --sage: #CDB898;
+  --text-main: #4A3528;
+  --text-sub: #9C8870;
+  --text-mute: #C4B098;
+  --line: #E8DCC8;
+  --accent: #C9A87C;
+  --accent-deep: #B89060;
+  --accent-soft: #F0E8D8;
+  --card-bg: #FFFFFF;
+  --input-bg: #FFFFFF;
+  --tabbar-bg: rgba(253, 246, 238, 0.92);
+  --overlay-bg: rgba(74, 53, 40, 0.4);
+  --body-bg:
+    radial-gradient(1200px 800px at 10% 10%, #F0E0CC 0%, transparent 50%),
+    radial-gradient(900px 700px at 100% 100%, #E8DCC8 0%, transparent 50%),
+    linear-gradient(180deg, #FDF6EE 0%, #F8EDE0 100%);
+}
