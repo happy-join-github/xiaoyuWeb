@@ -45,17 +45,27 @@
     </div>
 
     <div class="bottom">
-      <router-link to="/register" class="btn btn-primary start-btn">开始和{{ userStore.aiName }}聊天</router-link>
-      <router-link to="/login" class="login-link">我已经有账号</router-link>
+      <el-button class="btn btn-primary start-btn" @click="goChat">开始和{{ userStore.aiName }}聊天</el-button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
 import StatusBar from '../components/StatusBar.vue'
 import { useUserStore } from '../stores/user'
 
+const router = useRouter()
 const userStore = useUserStore()
+
+const goChat = () => {
+  const info = sessionStorage.getItem('userInfo')
+  if (info) {
+    router.replace('/chat')
+  } else {
+    router.replace('/login')
+  }
+}
 </script>
 
 <style scoped>
