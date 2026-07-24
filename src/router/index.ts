@@ -95,4 +95,14 @@ const router = createRouter({
   },
 })
 
+// 无需登录的白名单
+const whiteList = ['/welcome', '/register', '/login']
+
+router.beforeEach((to) => {
+  if (whiteList.includes(to.path)) return true
+  const userInfo = sessionStorage.getItem('userInfo')
+  if (!userInfo) return '/login'
+  return true
+})
+
 export default router
