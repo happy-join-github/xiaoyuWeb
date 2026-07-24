@@ -17,16 +17,10 @@ export const useUserStore = defineStore('user', () => {
 
   /** 退出登录：清空用户态并移除 localStorage 中的凭证 */
   function logout() {
-    name.value = ''
-    aiName.value = ''
-    avatar.value = ''
-    companionDays.value = 0
-  
-    diaryCount.value = 0
-    collectionCount.value = 0
-    phone.value = ''
+
     try {
-      localStorage.removeItem('userInfo')
+      sessionStorage.removeItem('userInfo')
+      localStorage.removeItem("theme")
     } catch {
       /* 忽略 localStorage 不可用的情况 */
     }

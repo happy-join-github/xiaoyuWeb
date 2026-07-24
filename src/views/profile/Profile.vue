@@ -38,17 +38,14 @@
           <div class="num">14</div>
           <div class="label">陪伴天数</div>
         </div>
-        <div class="divider"></div>
         <div class="item">
           <div class="num">86</div>
           <div class="label">聊天轮次</div>
         </div>
-        <div class="divider"></div>
         <div class="item">
           <div class="num">14</div>
-          <div class="label">日记数</div>
+          <div class="label">日记录</div>
         </div>
-        <div class="divider"></div>
         <div class="item">
           <div class="num">12</div>
           <div class="label">收藏卡片</div>
@@ -58,7 +55,6 @@
 
     <!-- AI 伙伴卡 -->
     <router-link class="ai-card fade-up" to="/profile/ai-settings">
-      <div class="av">🌸</div>
       <div class="info">
         <div class="name">{{ userStore.aiName }} · 你的伙伴</div>
         <div class="desc">称呼你为「{{ userStore.name }}」· 温柔陪伴中</div>
@@ -147,19 +143,6 @@
         <SvgIcon class="right" name="right" :size="18" />
       </router-link>
     </div>
-
-    <!-- 紧急提示 -->
-    <div class="emergency">
-      <div class="ic">
-        <SvgIcon name="phone" :size="16" />
-      </div>
-      <div>
-        如果你正在经历困难，请拨打 24 小时心理援助热线：
-        <b style="color: #E88A6B">400-161-9995</b>
-      </div>
-    </div>
-
-    <div style="height: 16px"></div>
   </div>
 
   <TabBar activeKey="me" />
@@ -268,38 +251,35 @@ function onEditProfile() {
   margin: 0 16px 16px;
   background: #fff;
   border-radius: 20px;
-  padding: 20px 16px;
-  box-shadow: var(--shadow-sm);
+  padding: 20px 16px 12px;
+  box-shadow: 0 2px 12px rgba(232, 138, 107, 0.12);
+  border: 1.5px solid #FFE0CB;
 }
 
 .data-panel .row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: 1fr 1fr;
+  row-gap: 16px;
   text-align: center;
 }
 
 .data-panel .item .num {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   color: #E88A6B;
+  line-height: 1.2;
 }
 
 .data-panel .item .label {
   font-size: 11px;
   color: #9C8B7E;
-  margin-top: 4px;
-}
-
-.data-panel .divider {
-  width: 1px;
-  background: #F1E5D7;
-  align-self: stretch;
+  margin-top: 2px;
 }
 
 /* AI 伙伴卡 */
 .ai-card {
   margin: 0 16px 16px;
-  padding: 16px;
+  padding: 18px 16px;
   background: linear-gradient(135deg, #4A3A2E 0%, #2B1F18 100%);
   border-radius: 20px;
   color: #FFE9D6;
@@ -307,18 +287,6 @@ function onEditProfile() {
   align-items: center;
   gap: 14px;
   box-shadow: 0 6px 20px rgba(74, 58, 46, 0.2);
-}
-
-.ai-card .av {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #FFD4C2 0%, #FFE7D1 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 30px;
-  flex-shrink: 0;
 }
 
 .ai-card .info {
@@ -423,24 +391,5 @@ function onEditProfile() {
   padding: 2px 8px;
   border-radius: 999px;
   margin-right: 6px;
-}
-
-/* 紧急提示 */
-.emergency {
-  margin: 0 16px 16px;
-  padding: 12px 16px;
-  background: #FFF4E8;
-  border-radius: 14px;
-  font-size: 11px;
-  color: #9C8B7E;
-  line-height: 1.6;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.emergency .ic {
-  color: #E88A6B;
-  flex-shrink: 0;
 }
 </style>

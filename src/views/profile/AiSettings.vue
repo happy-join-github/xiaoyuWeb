@@ -12,12 +12,6 @@
     </div>
 
     <div class="preview-card fade-in">
-      <div class="av">
-        🌸
-        <div class="change">
-          <SvgIcon name="edit" :size="12" />
-        </div>
-      </div>
       <div class="name">{{ aiName }}</div>
       <div class="preview">"{{ userName }}，今天也辛苦啦 💛"</div>
     </div>
@@ -38,21 +32,6 @@
         <span class="label">小愈称呼你为</span>
         <span class="input">{{ userName }}</span>
         <SvgIcon class="arrow" name="right" :size="14" />
-      </div>
-    </div>
-
-    <div class="section fade-up">
-      <div class="section-title">选择小愈的样子</div>
-      <div class="avatar-grid">
-        <div
-          v-for="avatar in avatars"
-          :key="avatar"
-          class="avatar-opt"
-          :class="{ selected: selectedAvatar === avatar }"
-          @click="selectedAvatar = avatar"
-        >
-          {{ avatar }}
-        </div>
       </div>
     </div>
 
@@ -114,12 +93,10 @@ const userStore = useUserStore()
 
 const aiName = ref(userStore.aiName)
 const userName = ref(userStore.name)
-const selectedAvatar = ref('🌸')
 const selectedTitle = ref(userStore.name)
 const gentleness = ref(80)
 const talkativeness = ref(50)
 
-const avatars = ['🌸', '🌷', '🌙', '⭐', '🦊', '🐰', '🐱', '🍀', '🌈', '+']
 const titleOptions = ['宝贝', userStore.name, '朋友', '同学', '小朋友', '知己']
 
 function onSave() {
@@ -177,48 +154,23 @@ function onSave() {
   border: none;
   cursor: pointer;
 }
+
+/* 预览卡片（纯文字版本，无头像） */
 .preview-card {
   margin: 8px 0 20px;
-  padding: 24px;
+  padding: 32px 24px;
   background: linear-gradient(135deg, #FFE7D1 0%, #FFD4C2 100%);
   border-radius: 24px;
   text-align: center;
   box-shadow: 0 8px 24px rgba(244, 169, 136, 0.15);
 }
-.preview-card .av {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #fff 0%, #FFE7D1 100%);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 44px;
-  box-shadow: 0 6px 16px rgba(74, 58, 46, 0.15);
-  margin-bottom: 12px;
-  position: relative;
-}
-.preview-card .av .change {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: #E88A6B;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 3px solid #FFE7D1;
-}
 .preview-card .name {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   color: #4A3A2E;
 }
 .preview-card .preview {
-  margin-top: 8px;
+  margin-top: 10px;
   padding: 10px 16px;
   background: rgba(255, 255, 255, 0.5);
   border-radius: 14px;
@@ -265,27 +217,6 @@ function onSave() {
 .field .arrow {
   color: #C4B5A6;
   flex-shrink: 0;
-}
-.avatar-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-  padding: 12px 16px;
-}
-.avatar-opt {
-  aspect-ratio: 1;
-  background: #FFF8F1;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  border: 2px solid transparent;
-  cursor: pointer;
-}
-.avatar-opt.selected {
-  border-color: #E88A6B;
-  background: #FFE7D1;
 }
 .title-options {
   display: flex;
