@@ -32,8 +32,7 @@
         </el-form-item>
 
         <el-form-item label="密码" prop="password">
-          <el-input v-model="ruleForm.password" type="password" placeholder="请输入密码" :maxlength="20"
-            autocomplete="current-password" show-password>
+          <el-input v-model="ruleForm.password" type="password" placeholder="请输入密码" autocomplete="current-password" show-password>
             <template #prefix>
               <span class="input-ic">🔒</span>
             </template>

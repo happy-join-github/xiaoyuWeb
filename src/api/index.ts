@@ -15,6 +15,7 @@ const service = axios.create({
 
 // 无需鉴权的公开接口白名单（注册、发送验证码等）
 const PUBLIC_URLS = new Set([
+  '/login',
   '/login/register',
 ])
 
