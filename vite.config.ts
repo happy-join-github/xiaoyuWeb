@@ -26,6 +26,7 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
         },
       },
+      allowedHosts:['*']
     },
 
     // 打包：base 走环境变量，便于部署到子路径
