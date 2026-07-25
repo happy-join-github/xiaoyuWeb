@@ -1,4 +1,6 @@
 <template>
+  <router-view v-if="isChildRoute" />
+  <template v-else>
   <div class="screen-bg"></div>
   <StatusBar />
   <NavBar title="治愈卡片" left="">
@@ -156,17 +158,21 @@
   </div>
 
   <TabBar activeKey="cards" />
+  </template>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import StatusBar from '../../components/StatusBar.vue'
 import NavBar from '../../components/NavBar.vue'
 import TabBar from '../../components/TabBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
 import { useUserStore } from '../../stores/user'
 
+const route = useRoute()
 const userStore = useUserStore()
+const isChildRoute = computed(() => route.path !== '/cards')
 
 const activeTab = ref('warm')
 
