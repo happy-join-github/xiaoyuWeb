@@ -153,6 +153,7 @@ import NavBar from '../../components/NavBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
 import TabBar from '../../components/TabBar.vue'
 import { useUserStore } from '../../stores/user'
+import router from '../../router/index.ts'
 
 const userStore = useUserStore()
 
@@ -165,7 +166,12 @@ const darkMode = ref(false)
 
 function onClearData() {}
 function onExport() {}
-function onLogout() {}
+
+function onLogout() {
+  userStore.logout()
+  router.push({ name: 'Login' })
+}
+
 function onUserAgreement() {}
 function onPrivacyPolicy() {}
 function onFeedback() {}

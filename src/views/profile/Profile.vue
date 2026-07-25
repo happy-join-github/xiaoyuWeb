@@ -9,157 +9,168 @@
     </template>
   </NavBar>
 
-  <div class="scroll-area no-scrollbar">
-    <!-- 顶部用户区 -->
-    <div class="user-hero fade-in">
-      <div class="avatar lg" style="width: 72px; height: 72px; font-size: 36px">🦊</div>
-      <div class="info">
-        <div class="name">
-          {{ userStore.name }}
-          <svg style="vertical-align: middle" width="16" height="16" viewBox="0 0 24 24" fill="#E88A6B">
-            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-          </svg>
+    <div class="scroll-area no-scrollbar">
+      <!-- 顶部用户区 -->
+      <div class="user-hero fade-in">
+        <div class="avatar lg" style="width: 72px; height: 72px; font-size: 36px">
+          {{ userStore.avatar }}
         </div>
-        <div class="meta">
-          <span>陪伴 14 天</span>
-          <span style="color: #C4B5A6">·</span>
-          <span>今天 9:32 在线</span>
+        <div class="info">
+          <div class="name">
+            {{ userStore.name }}
+            <svg style="vertical-align: middle" width="16" height="16" viewBox="0 0 24 24" fill="#E88A6B">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
+          </div>
+          <div class="meta">
+            <span>陪伴 {{ userStore.companionDays }} 天</span>
+            <span style="color: #C4B5A6">·</span>
+            <span>今天 9:32 在线</span>
+          </div>
+        </div>
+        <router-link class="edit-btn" to="/profile/edit">
+          <SvgIcon name="edit" :size="16" />
+        </router-link>
+      </div>
+
+      <!-- 数据面板 -->
+      <div class="data-panel fade-up">
+        <div class="row">
+          <div class="item">
+            <div class="num">{{ userStore.companionDays }}</div>
+            <div class="label">陪伴天数</div>
+          </div>
+          <div class="item">
+            <div class="num">{{ userStore.chatCount }}</div>
+            <div class="label">聊天轮次</div>
+          </div>
+          <div class="item">
+            <div class="num">{{ userStore.diaryCount }}</div>
+            <div class="label">日记录</div>
+          </div>
+          <div class="item">
+            <div class="num">{{ userStore.collectionCount }}</div>
+            <div class="label">收藏卡片</div>
+          </div>
         </div>
       </div>
-      <button class="edit-btn" @click="onEditProfile">
-        <SvgIcon name="edit" :size="16" />
-      </button>
-    </div>
 
-    <!-- 数据面板 -->
-    <div class="data-panel fade-up">
-      <div class="row">
-        <div class="item">
-          <div class="num">14</div>
-          <div class="label">陪伴天数</div>
+      <!-- AI 伙伴卡 -->
+      <router-link class="ai-card fade-up" to="/profile/ai-settings">
+        <div class="info">
+          <div class="name">{{ userStore.aiName }} · 你的伙伴</div>
+          <div class="desc">称呼你为「{{ userStore.name }}」· 温柔陪伴中</div>
         </div>
-        <div class="item">
-          <div class="num">86</div>
-          <div class="label">聊天轮次</div>
-        </div>
-        <div class="item">
-          <div class="num">14</div>
-          <div class="label">日记录</div>
-        </div>
-        <div class="item">
-          <div class="num">12</div>
-          <div class="label">收藏卡片</div>
-        </div>
+        <div class="right-btn">编辑 →</div>
+      </router-link>
+
+      <!-- 功能列表 -->
+      <div class="section fade-up">
+        <router-link class="list-item" to="/mood/calendar">
+          <div class="ic peach">
+            <SvgIcon name="calendar" :size="16" />
+          </div>
+          <div class="text">
+            <div class="t1">我的心情</div>
+            <div class="t2">查看日历 · 共 14 条记录</div>
+          </div>
+          <SvgIcon class="right" name="right" :size="18" />
+        </router-link>
+        <router-link class="list-item" to="/mood/report">
+          <div class="ic blue">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 3v18h18" />
+              <path d="M7 12l4-4 4 6 5-8" />
+            </svg>
+          </div>
+          <div class="text">
+            <div class="t1">情绪周报 <span class="badge">NEW</span></div>
+            <div class="t2">这一周的你 · 已生成</div>
+          </div>
+          <SvgIcon class="right" name="right" :size="18" />
+        </router-link>
+        <router-link class="list-item" to="/chat/history">
+          <div class="ic sage">
+            <SvgIcon name="chat" :size="16" />
+          </div>
+          <div class="text">
+            <div class="t1">聊天历史</div>
+            <div class="t2">86 条对话 · 7 天前</div>
+          </div>
+          <SvgIcon class="right" name="right" :size="18" />
+        </router-link>
+        <router-link class="list-item" to="/cards">
+          <div class="ic cream">
+            <SvgIcon name="cards" :size="16" />
+          </div>
+          <div class="text">
+            <div class="t1">我的收藏</div>
+            <div class="t2">12 张治愈卡片</div>
+          </div>
+          <SvgIcon class="right" name="right" :size="18" />
+        </router-link>
+      </div>
+
+      <!-- 设置面板 -->
+      <div class="section fade-up">
+        <router-link class="list-item" to="/profile/settings">
+          <div class="ic peach">
+            <SvgIcon name="bell" :size="16" />
+          </div>
+          <div class="text">
+            <div class="t1">通知设置</div>
+          </div>
+          <SvgIcon class="right" name="right" :size="18" />
+        </router-link>
+        <router-link class="list-item" to="/profile/settings">
+          <div class="ic blue">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </div>
+          <div class="text">
+            <div class="t1">关于{{ userStore.aiName }}</div>
+          </div>
+          <SvgIcon class="right" name="right" :size="18" />
+        </router-link>
+        <router-link class="list-item" to="/profile/settings">
+          <div class="ic sage">
+            <SvgIcon name="shield" :size="16" />
+          </div>
+          <div class="text">
+            <div class="t1">隐私与数据</div>
+          </div>
+          <SvgIcon class="right" name="right" :size="18" />
+        </router-link>
       </div>
     </div>
 
-    <!-- AI 伙伴卡 -->
-    <router-link class="ai-card fade-up" to="/profile/ai-settings">
-      <div class="info">
-        <div class="name">{{ userStore.aiName }} · 你的伙伴</div>
-        <div class="desc">称呼你为「{{ userStore.name }}」· 温柔陪伴中</div>
-      </div>
-      <div class="right-btn">编辑 →</div>
-    </router-link>
-
-    <!-- 功能列表 -->
-    <div class="section fade-up">
-      <router-link class="list-item" to="/mood/calendar">
-        <div class="ic peach">
-          <SvgIcon name="calendar" :size="16" />
-        </div>
-        <div class="text">
-          <div class="t1">我的心情</div>
-          <div class="t2">查看日历 · 共 14 条记录</div>
-        </div>
-        <SvgIcon class="right" name="right" :size="18" />
-      </router-link>
-      <router-link class="list-item" to="/mood/report">
-        <div class="ic blue">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 3v18h18" />
-            <path d="M7 12l4-4 4 6 5-8" />
-          </svg>
-        </div>
-        <div class="text">
-          <div class="t1">情绪周报 <span class="badge">NEW</span></div>
-          <div class="t2">这一周的你 · 已生成</div>
-        </div>
-        <SvgIcon class="right" name="right" :size="18" />
-      </router-link>
-      <router-link class="list-item" to="/chat/history">
-        <div class="ic sage">
-          <SvgIcon name="chat" :size="16" />
-        </div>
-        <div class="text">
-          <div class="t1">聊天历史</div>
-          <div class="t2">86 条对话 · 7 天前</div>
-        </div>
-        <SvgIcon class="right" name="right" :size="18" />
-      </router-link>
-      <router-link class="list-item" to="/cards">
-        <div class="ic cream">
-          <SvgIcon name="cards" :size="16" />
-        </div>
-        <div class="text">
-          <div class="t1">我的收藏</div>
-          <div class="t2">12 张治愈卡片</div>
-        </div>
-        <SvgIcon class="right" name="right" :size="18" />
-      </router-link>
-    </div>
-
-    <!-- 设置面板 -->
-    <div class="section fade-up">
-      <router-link class="list-item" to="/profile/settings">
-        <div class="ic peach">
-          <SvgIcon name="bell" :size="16" />
-        </div>
-        <div class="text">
-          <div class="t1">通知设置</div>
-        </div>
-        <SvgIcon class="right" name="right" :size="18" />
-      </router-link>
-      <router-link class="list-item" to="/profile/settings">
-        <div class="ic blue">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="8" x2="12" y2="12" />
-            <line x1="12" y1="16" x2="12.01" y2="16" />
-          </svg>
-        </div>
-        <div class="text">
-          <div class="t1">关于{{ userStore.aiName }}</div>
-        </div>
-        <SvgIcon class="right" name="right" :size="18" />
-      </router-link>
-      <router-link class="list-item" to="/profile/settings">
-        <div class="ic sage">
-          <SvgIcon name="shield" :size="16" />
-        </div>
-        <div class="text">
-          <div class="t1">隐私与数据</div>
-        </div>
-        <SvgIcon class="right" name="right" :size="18" />
-      </router-link>
-    </div>
-  </div>
-
-  <TabBar activeKey="me" />
+    <TabBar activeKey="me" />
 </template>
 
 <script setup lang="ts">
+import { onMounted } from 'vue'
 import StatusBar from '../../components/StatusBar.vue'
 import NavBar from '../../components/NavBar.vue'
 import TabBar from '../../components/TabBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
 import { useUserStore } from '../../stores/user'
+import service from "../../api/index.ts"
 
 const userStore = useUserStore()
 
-function onEditProfile() {
-  // TODO: implement edit profile
-}
+onMounted(async () => {
+  try {
+    const res: any = await service.get("/profile")
+    if (res?.code === 200) {
+      userStore.updateProfile(res.data)
+    }
+  } catch {
+    // 静默处理 — 401 等情况由拦截器处理
+  }
+})
 </script>
 
 <style scoped>
@@ -242,8 +253,8 @@ function onEditProfile() {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  border: none;
+  text-decoration: none;
+  flex-shrink: 0;
 }
 
 /* 数据面板 */
@@ -391,5 +402,12 @@ function onEditProfile() {
   padding: 2px 8px;
   border-radius: 999px;
   margin-right: 6px;
+}
+
+/* 手机号显示 */
+.phone {
+  font-size: 12px;
+  color: #9C8B7E;
+  margin-top: 2px;
 }
 </style>
