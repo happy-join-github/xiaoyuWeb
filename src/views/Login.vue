@@ -108,7 +108,8 @@ async function onSubmit() {
       password: ruleForm.password,
     })
     if (res?.code === 200) {
-      userStore.name = res.data?.name || ''
+      userStore.updateProfile(res.data)
+
       sessionStorage.setItem('userInfo', JSON.stringify(res.data))
       ElMessage.success('登录成功')
       router.replace('/chat')
