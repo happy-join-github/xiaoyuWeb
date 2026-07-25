@@ -1,5 +1,6 @@
 <template>
-  <div class="chat-room">
+  <router-view v-if="isChildRoute" />
+  <div v-else class="chat-room">
     <!-- 装饰背景层 -->
     <div class="bg-gradient"></div>
     <div class="deco-blob blob-1"></div>
@@ -97,13 +98,17 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import StatusBar from '../../components/StatusBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
 import TabBar from '../../components/TabBar.vue'
 import { mockChatMessages } from '../../api/mock'
 import { useUserStore } from '../../stores/user'
 
+const route = useRoute()
 const userStore = useUserStore()
+const isChildRoute = computed(() => route.path !== '/chat')
 
 const messages = mockChatMessages
 
