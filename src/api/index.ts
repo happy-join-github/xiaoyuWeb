@@ -19,10 +19,10 @@ const PUBLIC_URLS = new Set([
   '/register',
 ])
 
-// 请求拦截器：从 localStorage 读取 token 注入请求头；
+// 请求拦截器：从  sessionStorage 读取 token 注入请求头；
 // 缺失 token 且非公开接口时跳转登录并中断请求
 service.interceptors.request.use((config: any) => {
-  const userInfo = localStorage.getItem('userInfo')
+  const userInfo = sessionStorage.getItem('userInfo')
   
   // 公开接口直接放行
   if (config.url && PUBLIC_URLS.has(config.url)) {
