@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory, type RouteRecordRaw } from 'vue-router'
 
 const routes: RouteRecordRaw[] = [
+  // ========== 公共 / 认证 ==========
   {
     path: '/',
     redirect: '/welcome',
@@ -20,70 +21,88 @@ const routes: RouteRecordRaw[] = [
     name: 'Login',
     component: () => import('../views/Login.vue'),
   },
+  // ---- 树洞 ----
   {
-    path: '/chat',
-    name: 'ChatRoom',
-    component: () => import('../views/chat/ChatRoom.vue'),
-  },
-  {
-    path: '/treehole',
-    name: 'Treehole',
+    path: "/treehole",
+    name: "Treehole",
     component: () => import('../views/treehole/Treehole.vue'),
   },
-  {
-    path: '/cards',
-    name: 'Cards',
-    component: () => import('../views/cards/Cards.vue'),
-  },
-  {
-    path: '/cards/detail',
-    name: 'CardDetail',
-    component: () => import('../views/cards/CardDetail.vue'),
-  },
-  {
-    path: '/mood/checkin',
-    name: 'MoodCheckin',
-    component: () => import('../views/mood/MoodCheckin.vue'),
-  },
-  {
-    path: '/mood/calendar',
-    name: 'MoodCalendar',
-    component: () => import('../views/mood/MoodCalendar.vue'),
-  },
-  {
-    path: '/mood/detail',
-    name: 'MoodDetail',
-    component: () => import('../views/mood/MoodDetail.vue'),
-  },
-  {
-    path: '/mood/report',
-    name: 'WeeklyReport',
-    component: () => import('../views/mood/WeeklyReport.vue'),
-  },
-  {
-    path: '/chat/history',
-    name: 'ChatHistory',
-    component: () => import('../views/profile/ChatHistory.vue'),
-  },
-  {
-    path: '/profile',
-    name: 'Profile',
-    component: () => import('../views/profile/Profile.vue'),
-  },
-  {
-    path: '/profile/ai-settings',
-    name: 'AiSettings',
-    component: () => import('../views/profile/AiSettings.vue'),
-  },
-  {
-    path: '/profile/settings',
-    name: 'Settings',
-    component: () => import('../views/profile/Settings.vue'),
-  },
+  // ---- 情绪急救 ----
   {
     path: '/rescue',
     name: 'Rescue',
     component: () => import('../views/rescue/Rescue.vue'),
+  },
+  {
+    path: '/chat',
+    name: 'ChatRoom',
+    component: () => import('../views/chat/ChatRoom.vue'),
+    children: [
+      {
+        path: 'history',
+        name: 'ChatHistory',
+        component: () => import('../views/profile/ChatHistory.vue'),
+      },
+    ],
+  },
+
+  // ---- 治愈卡片 ----
+  {
+    path: '/cards',
+    name: 'Cards',
+    component: () => import('../views/cards/Cards.vue'),
+    children: [
+      {
+        path: 'detail',
+        name: 'CardDetail',
+        component: () => import('../views/cards/CardDetail.vue'),
+      },
+    ],
+  },
+
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: () => import('../views/profile/Profile.vue'),
+    children: [
+      {
+        path: 'edit',
+        name: 'EditProfile',
+        component: () => import('../views/profile/EditProfile.vue'),
+      },
+      {
+        path: 'ai-settings',
+        name: 'AiSettings',
+        component: () => import('../views/profile/AiSettings.vue'),
+      },
+      {
+        path: 'settings',
+        name: 'Settings',
+        component: () => import('../views/profile/Settings.vue'),
+      },
+    ],
+  },
+  // ---- 心情 ----
+  {
+    path: '/mood',
+    component: () => import('../views/mood/MoodCalendar.vue'),
+    children: [
+      {
+        path: 'checkin',
+        name: 'MoodCheckin',
+        component: () => import('../views/mood/MoodCheckin.vue'),
+      },
+      {
+        path: 'detail',
+        name: 'MoodDetail',
+        component: () => import('../views/mood/MoodDetail.vue'),
+      },
+      {
+        path: 'report',
+        name: 'WeeklyReport',
+        component: () => import('../views/mood/WeeklyReport.vue'),
+      },
+    ],
   },
 ]
 
