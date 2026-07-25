@@ -23,14 +23,17 @@ const PUBLIC_URLS = new Set([
 // 缺失 token 且非公开接口时跳转登录并中断请求
 service.interceptors.request.use((config: any) => {
   const userInfo = localStorage.getItem('userInfo')
-  const token = userInfo ? JSON.parse(userInfo).access_token : null
-
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+  
+  // 公开接口直接放行
+  if (config.url && PUBLIC_URLS.has(config.url)) {
     return config
   }
 
-  if (config.url && PUBLIC_URLS.has(config.url)) {
+  const token = userInfo ? JSON.parse(userInfo).access_token : null
+  
+  // 非公开接口，且有 token，注入请求头
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
     return config
   }
 
