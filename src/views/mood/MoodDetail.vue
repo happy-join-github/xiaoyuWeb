@@ -3,9 +3,9 @@
   <StatusBar />
 
   <div class="header">
-    <button class="back" @click="router.push('/mood/calendar')">
+    <router-link class="back" to="/mood">
       <SvgIcon name="back" :size="20" />
-    </button>
+    </router-link>
     <div class="actions">
       <button class="icon-btn" @click="onEdit">
         <SvgIcon name="edit" :size="18" />
@@ -77,14 +77,13 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import StatusBar from '../../components/StatusBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
 import { useUserStore } from '../../stores/user'
 
 const userStore = useUserStore()
 
-const router = useRouter()
+
 const showMenu = ref(false)
 
 function onEdit() {}

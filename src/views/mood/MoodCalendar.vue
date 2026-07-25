@@ -1,14 +1,16 @@
 <template>
+  <router-view v-if="isChildRoute" />
+  <template v-else>
   <div class="screen-bg"></div>
   <StatusBar />
 
   <NavBar title="我的心情" left="back">
     <template #right>
-      <button class="icon-btn" @click="router.push('/mood/report')">
+      <router-link to="/mood/report" class="icon-btn">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
         </svg>
-      </button>
+      </router-link>
     </template>
   </NavBar>
 
@@ -120,19 +122,21 @@
   </div>
 
   <TabBar activeKey="me" />
+  </template>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import StatusBar from '../../components/StatusBar.vue'
 import NavBar from '../../components/NavBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
 import TabBar from '../../components/TabBar.vue'
 import { useUserStore } from '../../stores/user'
 
-const router = useRouter()
+const route = useRoute()
 const userStore = useUserStore()
+const isChildRoute = computed(() => route.path !== '/mood')
 const selectedDay = ref<any>(null)
 
 const days = [

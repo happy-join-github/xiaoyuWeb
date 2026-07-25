@@ -4,9 +4,9 @@
 
   <div class="content">
     <div class="close-row">
-      <button class="close-btn" @click="router.push('/chat')">
+      <router-link to="/chat" class="close-btn">
         <SvgIcon name="close" :size="18" />
-      </button>
+      </router-link>
     </div>
 
     <div class="greeting fade-in">
@@ -48,7 +48,7 @@
     </div>
 
     <div class="actions">
-      <router-link to="/mood/calendar" class="btn btn-primary">保存今天的心情</router-link>
+      <router-link to="/mood" class="btn btn-primary">保存今天的心情</router-link>
       <div class="skip"><router-link to="/chat">下次再说</router-link></div>
     </div>
   </div>
@@ -56,11 +56,8 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import StatusBar from '../../components/StatusBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
-
-const router = useRouter()
 
 const selectedEmotion = ref('happy')
 const note = ref('今天的天空很蓝，楼下咖啡店换了新豆子，意外好喝 ☕')
