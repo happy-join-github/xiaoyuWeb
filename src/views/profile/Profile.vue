@@ -1,4 +1,6 @@
 <template>
+  <router-view v-if="isChildRoute" />
+  <template v-else>
   <div class="screen-bg"></div>
   <StatusBar />
   <NavBar title="我的" left="">
@@ -66,7 +68,7 @@
 
       <!-- 功能列表 -->
       <div class="section fade-up">
-        <router-link class="list-item" to="/mood/calendar">
+        <router-link class="list-item" to="/mood">
           <div class="ic peach">
             <SvgIcon name="calendar" :size="16" />
           </div>
@@ -148,10 +150,12 @@
     </div>
 
     <TabBar activeKey="me" />
+  </template>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import StatusBar from '../../components/StatusBar.vue'
 import NavBar from '../../components/NavBar.vue'
 import TabBar from '../../components/TabBar.vue'
@@ -159,7 +163,9 @@ import SvgIcon from '../../components/SvgIcon.vue'
 import { useUserStore } from '../../stores/user'
 import service from "../../api/index.ts"
 
+const route = useRoute()
 const userStore = useUserStore()
+const isChildRoute = computed(() => route.path !== '/profile')
 
 onMounted(async () => {
   try {
