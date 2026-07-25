@@ -16,7 +16,7 @@ const service = axios.create({
 // 无需鉴权的公开接口白名单（注册、发送验证码等）
 const PUBLIC_URLS = new Set([
   '/login',
-  '/login/register',
+  '/register',
 ])
 
 // 请求拦截器：从 localStorage 读取 token 注入请求头；
