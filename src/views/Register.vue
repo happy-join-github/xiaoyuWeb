@@ -226,7 +226,7 @@
         sessionStorage.setItem('userInfo', JSON.stringify(userinfo?.data))
         ElMessage.success("恭喜注册成功");
         // 注册成功，直接跳转首页
-        router.push('/login');
+        router.push('/chat');
       } else {
         // 业务错误（如 code: 500 验证码错误）仅提示，不跳转
         ElMessage.error(userinfo?.msg);
