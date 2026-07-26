@@ -4,11 +4,11 @@
 
   <div class="content no-scrollbar">
     <div class="nav">
-      <button class="back" @click="router.back()">
+      <el-button class="back" @click="router.back()">
         <SvgIcon name="back" :size="20" />
-      </button>
-      <div class="title">小愈的设置</div>
-      <button class="save" @click="onSave">保存</button>
+      </el-button>
+      <div class="title">{{ aiName }}的设置</div>
+      <el-button class="save" @click="onSave">保存</el-button>
     </div>
 
     <div class="preview-card fade-in">
@@ -19,71 +19,80 @@
     <div class="section fade-up">
       <div class="section-title">基础信息</div>
       <div class="field">
-        <span class="label">小愈的名字</span>
-        <input class="input" v-model="aiName">
-        <SvgIcon class="arrow" name="right" :size="14" />
+        <span class="label">ai的名字</span>
+        <el-input v-model="aiName" />
       </div>
+
       <div class="field">
-        <span class="label">你的昵称</span>
-        <input class="input" v-model="userName">
-        <SvgIcon class="arrow" name="right" :size="14" />
-      </div>
-      <div class="field">
-        <span class="label">小愈称呼你为</span>
+        <span class="label">{{ aiName }}称呼您为</span>
         <span class="input">{{ userName }}</span>
-        <SvgIcon class="arrow" name="right" :size="14" />
       </div>
     </div>
 
     <div class="section fade-up">
-      <div class="section-title">小愈的称呼偏好</div>
+      <div class="section-title">角色设定</div>
+      <div class="sub-title">性格标签</div>
       <div class="title-options">
         <div
-          v-for="title in titleOptions"
-          :key="title"
+          v-for="tag in characterTags"
+          :key="tag"
           class="title-opt"
-          :class="{ selected: selectedTitle === title }"
-          @click="selectedTitle = title"
+          :class="{ selected: selectedTags.includes(tag) }"
+          @click="toggleTag(tag)"
+        >{{ tag }}</div>
+      </div>
+      <div class="field" style="border-bottom: none; flex-direction: column; align-items: stretch; gap: 6px;">
+        <span class="label" style="flex: none;">角色简介</span>
+        <el-input
+          type="textarea"
+          v-model="characterBio"
+          :rows="3"
+          placeholder="描述你希望小愈扮演的角色，比如：一个总是耐心倾听、温柔鼓励我的知心朋友…"
+          :maxlength="200"
+          show-word-limit
+        />
+      </div>
+    </div>
+
+    <div class="section fade-up">
+      <div class="section-title">声线偏好</div>
+      <div class="title-options">
+        <div
+          v-for="voice in voiceOptions"
+          :key="voice"
+          class="title-opt"
+          :class="{ selected: selectedVoice === voice }"
+          @click="selectedVoice = voice"
         >
-          {{ title }}
+          {{ voice }}
         </div>
       </div>
     </div>
 
     <div class="section fade-up">
-      <div class="section-title">对话风格</div>
-      <div class="slider-row">
-        <div class="label">温柔程度</div>
-        <input type="range" class="range" min="0" max="100" v-model.number="gentleness">
-        <div class="ticks"><span>理性</span><span>适中</span><span>很温柔</span></div>
+      <div class="section-title">主动问候</div>
+      <div class="field">
+        <span class="label">早安问候时间</span>
+        <el-select v-model="morningGreeting" class="time-select" placeholder="选择时间">
+          <el-option v-for="t in timeSlots" :key="t" :label="t" :value="t" />
+        </el-select>
       </div>
-      <div class="slider-row" style="border-top: 1px solid #FAF1E5;">
-        <div class="label">话多 / 话少</div>
-        <input type="range" class="range" min="0" max="100" v-model.number="talkativeness">
-        <div class="ticks"><span>惜字如金</span><span>适中</span><span>很啰嗦</span></div>
+      <div class="field" style="border-bottom: none;">
+        <span class="label">晚安问候时间</span>
+        <el-select v-model="eveningGreeting" class="time-select" placeholder="选择时间">
+          <el-option v-for="t in timeSlots" :key="t" :label="t" :value="t" />
+        </el-select>
       </div>
     </div>
 
-    <div class="section fade-up">
-      <div class="field">
-        <span class="label">声线偏好</span>
-        <span class="input">温柔女声</span>
-        <SvgIcon class="arrow" name="right" :size="14" />
-      </div>
-      <div class="field">
-        <span class="label">对话记忆</span>
-        <span class="input" style="color: #E88A6B;">已开启</span>
-        <SvgIcon class="arrow" name="right" :size="14" />
-      </div>
-    </div>
-
-    <button class="btn btn-primary" style="margin-top: 8px; width: 100%;" @click="onSave">保存设置</button>
+    <el-button class="btn btn-primary" style="margin-top: 8px; width: 100%;" @click="onSave">保存设置</el-button>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElInput, ElButton, ElSelect, ElOption } from 'element-plus'
 import StatusBar from '../../components/StatusBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
 import { useUserStore } from '../../stores/user'
@@ -93,11 +102,28 @@ const userStore = useUserStore()
 
 const aiName = ref(userStore.aiName)
 const userName = ref(userStore.name)
-const selectedTitle = ref(userStore.name)
-const gentleness = ref(80)
-const talkativeness = ref(50)
 
-const titleOptions = ['宝贝', userStore.name, '朋友', '同学', '小朋友', '知己']
+const voiceOptions = ['温柔女声', '温暖男声', '可爱少女', '知性御姐', '阳光少年', '沉稳大叔']
+const selectedVoice = ref('温柔女声')
+
+const morningGreeting = ref('08:00')
+const eveningGreeting = ref('22:00')
+
+const timeSlots = Array.from({ length: 48 }, (_, i) => {
+  const h = String(Math.floor(i / 2)).padStart(2, '0')
+  const m = i % 2 === 0 ? '00' : '30'
+  return `${h}:${m}`
+})
+
+const characterTags = ['聆听者', '知心姐姐', '人生导师', '开心果', '守护者', '树洞']
+const selectedTags = ref<string[]>(['聆听者'])
+const characterBio = ref('')
+
+function toggleTag(tag: string) {
+  const idx = selectedTags.value.indexOf(tag)
+  if (idx >= 0) selectedTags.value.splice(idx, 1)
+  else selectedTags.value.push(tag)
+}
 
 function onSave() {
   const trimmed = aiName.value.trim()
@@ -129,30 +155,30 @@ function onSave() {
   align-items: center;
   justify-content: space-between;
 }
-.nav .back {
+.nav .back.el-button {
   width: 36px;
   height: 36px;
+  padding: 0;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.7);
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   color: #4A3A2E;
   border: none;
-  cursor: pointer;
+  font-size: inherit;
 }
 .nav .title {
   font-size: 17px;
   font-weight: 600;
 }
-.nav .save {
+.nav .save.el-button {
   color: #E88A6B;
   font-weight: 600;
   font-size: 14px;
   padding: 6px 12px;
   background: none;
   border: none;
-  cursor: pointer;
 }
 
 /* 预览卡片（纯文字版本，无头像） */
@@ -205,6 +231,7 @@ function onSave() {
   color: #4A3A2E;
   flex: 1;
 }
+/* Keep .field .input for the <span class="input"> elements */
 .field .input {
   border: none;
   outline: none;
@@ -217,6 +244,62 @@ function onSave() {
 .field .arrow {
   color: #C4B5A6;
   flex-shrink: 0;
+}
+/* el-input inside .field - render inline, transparent */
+.field :deep(.el-input) {
+  flex: none;
+  width: auto;
+  min-width: 100px;
+}
+.field :deep(.el-input__wrapper) {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+.field :deep(.el-input__inner) {
+  text-align: right;
+  color: #9C8B7E;
+}
+.time-select {
+  width: 110px;
+}
+.time-select :deep(.el-input__wrapper) {
+  background: #FFF8F1;
+  box-shadow: none;
+  border: 1.5px solid #FAF1E5;
+  border-radius: 10px;
+  padding: 2px 8px;
+}
+.time-select :deep(.el-input__inner) {
+  text-align: center;
+  color: #4A3A2E;
+  font-size: 14px;
+}
+.time-select :deep(.el-select__caret) {
+  color: #C4B5A6;
+  font-size: 12px;
+}
+.sub-title {
+  padding: 4px 16px 0;
+  font-size: 12px;
+  color: #9C8B7E;
+}
+.field :deep(.el-textarea__inner) {
+  background: #FFF8F1;
+  border: 1.5px solid #FAF1E5;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #4A3A2E;
+  resize: none;
+}
+.field :deep(.el-textarea__inner:focus) {
+  border-color: #E88A6B;
+}
+.field :deep(.el-input__count) {
+  font-size: 11px;
+  color: #9C8B7E;
+  background: transparent;
 }
 .title-options {
   display: flex;
@@ -238,40 +321,5 @@ function onSave() {
   color: #E88A6B;
   border-color: #E88A6B;
   font-weight: 600;
-}
-.slider-row {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.slider-row .label {
-  font-size: 14px;
-  color: #4A3A2E;
-}
-.slider-row .range {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 6px;
-  border-radius: 3px;
-  background: #FFE7D1;
-  outline: none;
-}
-.slider-row .range::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: #E88A6B;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(232, 138, 107, 0.4);
-}
-.slider-row .ticks {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  color: #9C8B7E;
 }
 </style>
