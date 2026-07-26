@@ -41,7 +41,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'history',
         name: 'ChatHistory',
-        component: () => import('../views/profile/ChatHistory.vue'),
+        component: () => import('../views/chat/ChatHistory.vue'),
       },
     ],
   },

@@ -6,41 +6,44 @@
 
   <div class="search-bar">
     <div class="search-input">
-      <SvgIcon name="search" :size="16" />
-      <input v-model="searchQuery" type="text" placeholder="搜索聊天内容…">
+      <el-input v-model="searchQuery" placeholder="搜索聊天内容…">
+        <template #prefix>
+          <SvgIcon name="search" :size="16" />
+        </template>
+      </el-input>
     </div>
   </div>
 
   <div class="scroll-area no-scrollbar">
     <div class="date-group">今天</div>
     <router-link class="conv-item fade-up" to="/chat">
-      <div class="av">🌸</div>
+      <div class="av">&#x1F338;</div>
       <div class="body">
         <div class="top"><span class="name">{{ userStore.aiName }}</span><span class="time">9:32</span></div>
-        <div class="preview">早安呀 ☀️ 睡得好吗？今天想聊点什么都可以哦~</div>
+        <div class="preview">早安呀 &#x2600;&#xFE0F; 睡得好吗？今天想聊点什么都可以哦~</div>
       </div>
     </router-link>
 
-    <div class="date-group">昨天 · 7 月 18 日</div>
+    <div class="date-group">昨天 &middot; 7 月 18 日</div>
     <router-link class="conv-item fade-up" to="/treehole">
-      <div class="av">🌙</div>
+      <div class="av">&#x1F319;</div>
       <div class="body">
         <div class="top"><span class="name">树洞倾诉</span><span class="time">23:15</span></div>
-        <div class="preview">嗯…听起来真的很沉重。累了就先这样待一会儿…</div>
+        <div class="preview">嗯&hellip;听起来真的很沉重。累了就先这样待一会儿&hellip;</div>
       </div>
-      <div class="tag tree">树洞</div>
+      <el-tag size="small" class="tag tree">树洞</el-tag>
     </router-link>
     <router-link class="conv-item fade-up" to="/chat">
-      <div class="av">🌸</div>
+      <div class="av">&#x1F338;</div>
       <div class="body">
         <div class="top"><span class="name">{{ userStore.aiName }}</span><span class="time">21:08</span></div>
-        <div class="preview">晚餐吃了吗？吃饱了才有力气对抗坏情绪哦 🥣</div>
+        <div class="preview">晚餐吃了吗？吃饱了才有力气对抗坏情绪哦 &#x1F963;</div>
       </div>
     </router-link>
 
-    <div class="date-group">7 月 17 日 · 周四</div>
+    <div class="date-group">7 月 17 日 &middot; 周四</div>
     <router-link class="conv-item fade-up" to="/chat">
-      <div class="av">🌸</div>
+      <div class="av">&#x1F338;</div>
       <div class="body">
         <div class="top"><span class="name">{{ userStore.aiName }}</span><span class="time">14:22</span></div>
         <div class="preview">项目 deadline 让你很焦虑，今天好点了吗？</div>
@@ -49,25 +52,25 @@
 
     <div class="date-group">本周早些时候</div>
     <router-link class="conv-item fade-up" to="/chat">
-      <div class="av">🌸</div>
+      <div class="av">&#x1F338;</div>
       <div class="body">
         <div class="top"><span class="name">{{ userStore.aiName }}</span><span class="time">7/15</span></div>
-        <div class="preview">运动完是不是舒服多了？以后累的时候…</div>
+        <div class="preview">运动完是不是舒服多了？以后累的时候&hellip;</div>
       </div>
-      <div class="tag">已转日记</div>
+      <el-tag size="small" class="tag">已转日记</el-tag>
     </router-link>
     <router-link class="conv-item fade-up" to="/chat">
-      <div class="av">🌸</div>
+      <div class="av">&#x1F338;</div>
       <div class="body">
         <div class="top"><span class="name">{{ userStore.aiName }}</span><span class="time">7/14</span></div>
-        <div class="preview">每个人的节奏都不一样，停下来也是一种前进…</div>
+        <div class="preview">每个人的节奏都不一样，停下来也是一种前进&hellip;</div>
       </div>
     </router-link>
     <router-link class="conv-item fade-up" to="/chat">
-      <div class="av">🌸</div>
+      <div class="av">&#x1F338;</div>
       <div class="body">
         <div class="top"><span class="name">{{ userStore.aiName }}</span><span class="time">7/12</span></div>
-        <div class="preview">想吃火锅吗？辣的和不辣的都好吃，看你今天…</div>
+        <div class="preview">想吃火锅吗？辣的和不辣的都好吃，看你今天&hellip;</div>
       </div>
     </router-link>
   </div>
@@ -75,6 +78,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { ElInput, ElTag } from 'element-plus'
 import StatusBar from '../../components/StatusBar.vue'
 import NavBar from '../../components/NavBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
@@ -102,21 +106,19 @@ const searchQuery = ref('')
 .search-input {
   background: #fff;
   border-radius: 999px;
-  padding: 10px 16px;
+  padding: 4px 12px;
+  box-shadow: var(--shadow-sm);
   display: flex;
   align-items: center;
-  gap: 8px;
-  box-shadow: var(--shadow-sm);
 }
-.search-input input {
-  flex: 1;
-  border: none;
-  outline: none;
+.search-input :deep(.el-input__wrapper) {
   background: transparent;
-  font: inherit;
+  box-shadow: none;
+}
+.search-input :deep(.el-input__inner) {
   color: #4A3A2E;
 }
-.search-input input::placeholder {
+.search-input :deep(.el-input__inner)::placeholder {
   color: #C4B5A6;
 }
 .date-group {
@@ -174,18 +176,25 @@ const searchQuery = ref('')
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.conv-item .tag {
+/* Tag positioning inside conv-item */
+.conv-item .tag.el-tag {
   position: absolute;
   top: 12px;
   right: 12px;
-  background: #FFE7D1;
-  color: #E88A6B;
+  border: none;
   font-size: 10px;
-  padding: 2px 8px;
-  border-radius: 999px;
+  padding: 0 8px;
+  height: auto;
+  line-height: 20px;
 }
-.conv-item .tag.tree {
-  background: #2B1F18;
-  color: #FFE9D6;
+.conv-item .tag.tree.el-tag {
+  --el-tag-bg-color: #2B1F18;
+  --el-tag-text-color: #FFE9D6;
+  --el-tag-border-color: #2B1F18;
+}
+.conv-item .tag:not(.tree).el-tag {
+  --el-tag-bg-color: #FFE7D1;
+  --el-tag-text-color: #E88A6B;
+  --el-tag-border-color: #FFE7D1;
 }
 </style>
