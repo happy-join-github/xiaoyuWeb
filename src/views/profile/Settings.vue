@@ -5,50 +5,14 @@
   <NavBar title="设置" left="back" />
 
   <div class="content no-scrollbar">
-    <div class="section-title" style="padding: 16px 16px 4px;">通知</div>
-    <div class="section">
-      <div class="setting-item">
-        <div class="ic peach">
-          <SvgIcon name="bell" :size="16" />
-        </div>
-        <span class="label">每日卡片推送</span>
-        <span class="switch" :class="{ on: dailyCardPush }" @click="dailyCardPush = !dailyCardPush"></span>
-      </div>
-      <div class="setting-item">
-        <div class="ic blue">
-          <SvgIcon name="moon" :size="16" />
-        </div>
-        <span class="label">晚安提醒</span>
-        <span class="switch" :class="{ on: goodnightReminder }" @click="goodnightReminder = !goodnightReminder"></span>
-      </div>
-      <div class="setting-item">
-        <div class="ic sage">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M3 3v18h18"/><path d="M7 12l4-4 4 6 5-8"/>
-          </svg>
-        </div>
-        <span class="label">情绪周报</span>
-        <span class="switch" :class="{ on: weeklyReport }" @click="weeklyReport = !weeklyReport"></span>
-      </div>
-      <div class="setting-item">
-        <div class="ic cream">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>
-          </svg>
-        </div>
-        <span class="label">打卡提醒</span>
-        <span class="switch" :class="{ on: checkinReminder }" @click="checkinReminder = !checkinReminder"></span>
-      </div>
-    </div>
-
-    <div class="section-title" style="padding: 14px 16px 4px;">隐私与数据</div>
+    <div class="section-title">隐私与数据</div>
     <div class="section">
       <div class="setting-item">
         <div class="ic blue">
           <SvgIcon name="shield" :size="16" />
         </div>
         <span class="label">匿名倾诉</span>
-        <span class="switch" :class="{ on: anonymousMode }" @click="anonymousMode = !anonymousMode"></span>
+        <el-switch v-model="anonymousMode" />
       </div>
       <div class="setting-item" @click="onClearData">
         <div class="ic sage">
@@ -66,18 +30,9 @@
         <span class="label">导出我的日记</span>
         <SvgIcon class="right-icon" name="right" :size="18" />
       </div>
-      <div class="setting-item" @click="onLogout">
-        <div class="ic peach">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-          </svg>
-        </div>
-        <span class="label">退出登录</span>
-        <SvgIcon class="right-icon" name="right" :size="18" />
-      </div>
     </div>
 
-    <div class="section-title" style="padding: 14px 16px 4px;">外观</div>
+    <div class="section-title">外观</div>
     <div class="section">
       <div class="setting-item">
         <div class="ic cream">
@@ -93,7 +48,7 @@
           <SvgIcon name="moon" :size="16" />
         </div>
         <span class="label">深色模式</span>
-        <span class="switch" :class="{ on: darkMode }" @click="darkMode = !darkMode"></span>
+        <el-switch v-model="darkMode" />
       </div>
       <div class="setting-item">
         <div class="ic sage">
@@ -104,7 +59,7 @@
       </div>
     </div>
 
-    <div class="section-title" style="padding: 14px 16px 4px;">关于</div>
+    <div class="section-title">关于</div>
     <div class="section">
       <div class="setting-item">
         <div class="ic peach">
@@ -140,41 +95,38 @@
       </div>
     </div>
 
-    <div class="version">{{ userStore.aiName }} v1.0.0 · Made with 🌸</div>
+    <div class="version">{{ userStore.aiName }} v1.0.0 &middot; Made with &#x1F338;</div>
   </div>
-
-  <TabBar activeKey="me" />
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { ElMessage, ElSwitch } from 'element-plus'
 import StatusBar from '../../components/StatusBar.vue'
 import NavBar from '../../components/NavBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
-import TabBar from '../../components/TabBar.vue'
 import { useUserStore } from '../../stores/user'
-import router from '../../router/index.ts'
 
 const userStore = useUserStore()
 
-const dailyCardPush = ref(true)
-const goodnightReminder = ref(true)
-const weeklyReport = ref(true)
-const checkinReminder = ref(false)
 const anonymousMode = ref(true)
 const darkMode = ref(false)
 
-function onClearData() {}
-function onExport() {}
-
-function onLogout() {
-  userStore.logout()
-  router.push({ name: 'Login' })
+function onClearData() {
+  ElMessage.info('此功能开发中，敬请期待')
 }
-
-function onUserAgreement() {}
-function onPrivacyPolicy() {}
-function onFeedback() {}
+function onExport() {
+  ElMessage.info('此功能开发中，敬请期待')
+}
+function onUserAgreement() {
+  ElMessage.info('用户协议 — 开发中')
+}
+function onPrivacyPolicy() {
+  ElMessage.info('隐私政策 — 开发中')
+}
+function onFeedback() {
+  ElMessage.info('意见反馈 — 开发中')
+}
 </script>
 
 <style scoped>
@@ -257,33 +209,9 @@ function onFeedback() {}
 .setting-item .right-icon {
   color: #C4B5A6;
 }
-.switch {
-  position: relative;
-  width: 44px;
-  height: 26px;
-  background: #E8D5C4;
-  border-radius: 13px;
-  transition: background 0.2s;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-.switch::after {
-  content: "";
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 20px;
-  height: 20px;
-  background: #fff;
-  border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
-}
-.switch.on {
-  background: #E88A6B;
-}
-.switch.on::after {
-  transform: translateX(18px);
+.setting-item .el-switch {
+  --el-switch-on-color: #E88A6B;
+  --el-switch-off-color: #E8D5C4;
 }
 .version {
   text-align: center;
