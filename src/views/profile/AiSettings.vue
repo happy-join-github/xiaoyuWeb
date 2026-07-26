@@ -34,7 +34,7 @@
       <div class="sub-title">性格标签</div>
       <div class="title-options">
         <div
-          v-for="tag in characterTags"
+          v-for="tag in characterTagOptions"
           :key="tag"
           class="title-opt"
           :class="{ selected: selectedTags.includes(tag) }"
@@ -104,10 +104,10 @@ const aiName = ref(userStore.aiName)
 const userName = ref(userStore.name)
 
 const voiceOptions = ['温柔女声', '温暖男声', '可爱少女', '知性御姐', '阳光少年', '沉稳大叔']
-const selectedVoice = ref('温柔女声')
+const selectedVoice = ref(userStore.voice)
 
-const morningGreeting = ref('08:00')
-const eveningGreeting = ref('22:00')
+const morningGreeting = ref(userStore.morningGreeting)
+const eveningGreeting = ref(userStore.eveningGreeting)
 
 const timeSlots = Array.from({ length: 48 }, (_, i) => {
   const h = String(Math.floor(i / 2)).padStart(2, '0')
@@ -115,9 +115,9 @@ const timeSlots = Array.from({ length: 48 }, (_, i) => {
   return `${h}:${m}`
 })
 
-const characterTags = ['聆听者', '知心姐姐', '人生导师', '开心果', '守护者', '树洞']
-const selectedTags = ref<string[]>(['聆听者'])
-const characterBio = ref('')
+const characterTagOptions = ['聆听者', '知心姐姐', '人生导师', '开心果', '守护者', '树洞']
+const selectedTags = ref<string[]>([...userStore.characterTags])
+const characterBio = ref(userStore.characterBio)
 
 function toggleTag(tag: string) {
   const idx = selectedTags.value.indexOf(tag)
@@ -126,9 +126,14 @@ function toggleTag(tag: string) {
 }
 
 function onSave() {
-  const trimmed = aiName.value.trim()
-  if (trimmed) userStore.aiName = trimmed
-  if (userName.value.trim()) userStore.name = userName.value.trim()
+  userStore.updateProfile({
+    aiName: aiName.value.trim() || userStore.aiName,
+    voice: selectedVoice.value,
+    characterTags: [...selectedTags.value],
+    characterBio: characterBio.value,
+    morningGreeting: morningGreeting.value,
+    eveningGreeting: eveningGreeting.value,
+  })
   router.push('/profile')
 }
 </script>

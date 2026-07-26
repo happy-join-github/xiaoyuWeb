@@ -17,8 +17,20 @@ export const useUserStore = defineStore('user', () => {
   // 收藏卡片数
   const collectionCount = ref(12)
 
+  // AI 设置
+  const voice = ref('温柔女声')
+  const characterTags = ref<string[]>(['聆听者'])
+  const characterBio = ref('')
+  const morningGreeting = ref('08:00')
+  const eveningGreeting = ref('22:00')
+
   /** 更新个人信息（登录后或编辑保存时调用） */
-  function updateProfile(data: { name?: string; aiName?: string; avatar?: string; phone?: string,companion_days?: number,chat_rounds?: number,diary_count?: number,collection_count?: number}) {
+  function updateProfile(data: {
+    name?: string; aiName?: string; avatar?: string; phone?: string;
+    companion_days?: number; chat_rounds?: number; diary_count?: number; collection_count?: number;
+    voice?: string; characterTags?: string[]; characterBio?: string;
+    morningGreeting?: string; eveningGreeting?: string;
+  }) {
     if (data.name !== undefined) name.value = data.name
     if (data.aiName !== undefined) aiName.value = data.aiName
     if (data.avatar !== undefined) avatar.value = data.avatar || '🦊'
@@ -28,6 +40,12 @@ export const useUserStore = defineStore('user', () => {
     if (data.chat_rounds !== undefined) chatCount.value = data.chat_rounds
     if (data.diary_count !== undefined) diaryCount.value = data.diary_count
     if (data.collection_count !== undefined) collectionCount.value = data.collection_count
+
+    if (data.voice !== undefined) voice.value = data.voice
+    if (data.characterTags !== undefined) characterTags.value = data.characterTags
+    if (data.characterBio !== undefined) characterBio.value = data.characterBio
+    if (data.morningGreeting !== undefined) morningGreeting.value = data.morningGreeting
+    if (data.eveningGreeting !== undefined) eveningGreeting.value = data.eveningGreeting
   }
 
   /** 退出登录：清空用户态并移除 localStorage 中的凭证 */
@@ -45,6 +63,11 @@ export const useUserStore = defineStore('user', () => {
       chatCount.value = 0
       diaryCount.value = 0
       collectionCount.value = 0
+      voice.value = '温柔女声'
+      characterTags.value = ['聆听者']
+      characterBio.value = ''
+      morningGreeting.value = '08:00'
+      eveningGreeting.value = '22:00'
       router.push('/login')
       ElMessage.success('退出成功')
     } catch {
@@ -52,5 +75,5 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  return { name, aiName, avatar, phone, companionDays, chatCount, diaryCount, collectionCount, updateProfile, logout }
+  return { name, aiName, avatar, phone, companionDays, chatCount, diaryCount, collectionCount, voice, characterTags, characterBio, morningGreeting, eveningGreeting, updateProfile, logout }
 })
