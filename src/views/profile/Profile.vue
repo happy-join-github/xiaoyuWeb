@@ -5,8 +5,10 @@
   <StatusBar />
   <NavBar title="我的" left="">
     <template #right>
-      <router-link to="/profile/settings" class="icon-btn">
-        <SvgIcon name="settings" :size="22" />
+      <router-link to="/profile/settings">
+        <el-button circle size="small" class="nav-icon-btn">
+          <SvgIcon name="settings" :size="22" />
+        </el-button>
       </router-link>
     </template>
   </NavBar>
@@ -14,24 +16,23 @@
     <div class="scroll-area no-scrollbar">
       <!-- 顶部用户区 -->
       <div class="user-hero fade-in">
-        <div class="avatar lg" style="width: 72px; height: 72px; font-size: 36px">
-          {{ userStore.avatar }}
-        </div>
+        <div class="avatar lg user-avatar">{{ userStore.avatar }}</div>
         <div class="info">
           <div class="name">
             {{ userStore.name }}
-            <svg style="vertical-align: middle" width="16" height="16" viewBox="0 0 24 24" fill="#E88A6B">
-              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-            </svg>
           </div>
           <div class="meta">
             <span>陪伴 {{ userStore.companionDays }} 天</span>
-            <span style="color: #C4B5A6">·</span>
+             <svg style="vertical-align: middle" width="16" height="16" viewBox="0 0 24 24" fill="#E88A6B">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+            </svg>
             <span>今天 9:32 在线</span>
           </div>
         </div>
-        <router-link class="edit-btn" to="/profile/edit">
-          <SvgIcon name="edit" :size="16" />
+        <router-link to="/profile/edit">
+          <el-button circle size="small">
+            <SvgIcon name="edit" :size="16" />
+          </el-button>
         </router-link>
       </div>
 
@@ -86,7 +87,7 @@
             </svg>
           </div>
           <div class="text">
-            <div class="t1">情绪周报 <span class="badge">NEW</span></div>
+            <div class="t1">情绪周报 <el-tag size="small" type="danger">NEW</el-tag></div>
             <div class="t2">这一周的你 · 已生成</div>
           </div>
           <SvgIcon class="right" name="right" :size="18" />
@@ -113,39 +114,50 @@
         </router-link>
       </div>
 
-      <!-- 设置面板 -->
+      <!-- ========== 设置区域 ========== -->
+
+      <!-- 通知设置（内联） -->
       <div class="section fade-up">
-        <router-link class="list-item" to="/profile/settings">
+        <div class="section-inner-title">通知</div>
+        <div class="setting-item">
+          <div class="ic peach"><SvgIcon name="bell" :size="16" /></div>
+          <span class="label">每日卡片推送</span>
+          <el-switch v-model="settings.dailyCardPush" />
+        </div>
+        <div class="setting-item">
+          <div class="ic blue"><SvgIcon name="moon" :size="16" /></div>
+          <span class="label">晚安提醒</span>
+          <el-switch v-model="settings.goodnightReminder" />
+        </div>
+        <div class="setting-item">
+          <div class="ic sage">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 12l4-4 4 6 5-8"/></svg>
+          </div>
+          <span class="label">情绪周报推送</span>
+          <el-switch v-model="settings.weeklyReport" />
+        </div>
+        <div class="setting-item">
+          <div class="ic cream">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          </div>
+          <span class="label">打卡提醒</span>
+          <el-switch v-model="settings.checkinReminder" />
+        </div>
+      </div>
+
+      <!-- 退出登录 -->
+      <div class="section fade-up">
+        <div class="list-item" @click="onLogout" style="cursor: pointer;">
           <div class="ic peach">
-            <SvgIcon name="bell" :size="16" />
-          </div>
-          <div class="text">
-            <div class="t1">通知设置</div>
-          </div>
-          <SvgIcon class="right" name="right" :size="18" />
-        </router-link>
-        <router-link class="list-item" to="/profile/settings">
-          <div class="ic blue">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
             </svg>
           </div>
           <div class="text">
-            <div class="t1">关于{{ userStore.aiName }}</div>
+            <div class="t1">退出登录</div>
           </div>
           <SvgIcon class="right" name="right" :size="18" />
-        </router-link>
-        <router-link class="list-item" to="/profile/settings">
-          <div class="ic sage">
-            <SvgIcon name="shield" :size="16" />
-          </div>
-          <div class="text">
-            <div class="t1">隐私与数据</div>
-          </div>
-          <SvgIcon class="right" name="right" :size="18" />
-        </router-link>
+        </div>
       </div>
     </div>
 
@@ -154,18 +166,33 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, onMounted, reactive } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import StatusBar from '../../components/StatusBar.vue'
 import NavBar from '../../components/NavBar.vue'
 import TabBar from '../../components/TabBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
+import { ElSwitch, ElTag, ElButton } from 'element-plus'
 import { useUserStore } from '../../stores/user'
 import service from "../../api/index.ts"
 
 const route = useRoute()
+const router = useRouter()
 const userStore = useUserStore()
 const isChildRoute = computed(() => route.path !== '/profile')
+
+/** 内联设置的状态 */
+const settings = reactive({
+  dailyCardPush: true,
+  goodnightReminder: true,
+  weeklyReport: true,
+  checkinReminder: false,
+})
+
+function onLogout() {
+  userStore.logout()
+  router.push({ name: 'Login' })
+}
 
 onMounted(async () => {
   try {
@@ -186,23 +213,30 @@ onMounted(async () => {
   background: linear-gradient(180deg, #FFEAD9 0%, #FFF8F1 60%);
 }
 
-/* icon-btn inside nav-bar slot needs explicit styling here */
-.icon-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-sub, #9C8B7E);
-}
-
 .scroll-area {
   position: relative;
   z-index: 1;
   flex: 1;
   overflow-y: auto;
   padding-bottom: 16px;
+}
+
+/* navbar 设置齿轮按钮 — 透明圆形 */
+.nav-icon-btn.el-button {
+  border: none;
+  background: transparent;
+  padding: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #9C8B7E;
+  font-size: inherit;
+}
+.nav-icon-btn.el-button:hover {
+  background: rgba(0, 0, 0, 0.04);
 }
 
 /* 顶部用户区 */
@@ -213,12 +247,14 @@ onMounted(async () => {
   gap: 16px;
 }
 
-.user-hero .avatar {
+.user-avatar {
+  width: 72px;
+  height: 72px;
+  font-size: 36px;
   box-shadow: 0 8px 24px rgba(244, 169, 136, 0.3);
   position: relative;
 }
-
-.user-hero .avatar::after {
+.user-avatar::after {
   content: '';
   position: absolute;
   right: 0;
@@ -229,6 +265,25 @@ onMounted(async () => {
   border: 3px solid #FFEAD9;
   border-radius: 50%;
   box-sizing: border-box;
+}
+
+/* 头像旁的编辑按钮 — 透明圆形 */
+.user-hero .el-button {
+  border: none;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #9C8B7E;
+  flex-shrink: 0;
+  font-size: inherit;
+}
+.user-hero .el-button:hover {
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .user-hero .info {
@@ -248,19 +303,6 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 6px;
-}
-
-.user-hero .edit-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.7);
-  color: #9C8B7E;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  flex-shrink: 0;
 }
 
 /* 数据面板 */
@@ -401,19 +443,70 @@ onMounted(async () => {
   flex-shrink: 0;
 }
 
-.list-item .badge {
-  background: #E88A6B;
-  color: #fff;
-  font-size: 10px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  margin-right: 6px;
-}
-
 /* 手机号显示 */
 .phone {
   font-size: 12px;
   color: #9C8B7E;
   margin-top: 2px;
+}
+
+/* ========== 内联设置样式 ========== */
+.section-inner-title {
+  padding: 14px 16px 4px;
+  font-size: 12px;
+  color: #9C8B7E;
+}
+
+.setting-item {
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #FAF1E5;
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+.setting-item .ic {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.setting-item .ic.peach {
+  background: #FFE7D1;
+  color: #E88A6B;
+}
+
+.setting-item .ic.blue {
+  background: #E5F1F8;
+  color: #6BA4C9;
+}
+
+.setting-item .ic.sage {
+  background: #E8F0E2;
+  color: #7BA970;
+}
+
+.setting-item .ic.cream {
+  background: #FFF4E8;
+  color: #D4A574;
+}
+
+.setting-item .label {
+  flex: 1;
+  font-size: 14px;
+  color: #4A3A2E;
+}
+
+.setting-item .right-text {
+  color: #9C8B7E;
+  font-size: 12px;
 }
 </style>
