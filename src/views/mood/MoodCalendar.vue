@@ -1,127 +1,173 @@
 <template>
   <router-view v-if="isChildRoute" />
   <template v-else>
-  <div class="screen-bg"></div>
-  <StatusBar />
+    <div class="screen-bg"></div>
+    <StatusBar />
 
-  <NavBar title="我的心情" left="back">
-    <template #right>
-      <router-link to="/mood/report" class="icon-btn">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-        </svg>
-      </router-link>
-    </template>
-  </NavBar>
+    <NavBar title="我的心情" left="back">
+      <template #right>
+        <router-link to="/mood/report" class="icon-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+        </router-link>
+      </template>
+    </NavBar>
 
-  <div class="scroll-area no-scrollbar">
-    <div class="month-stat fade-in">
-      <div class="text">
-        <h2>7 月 · 你的夏天</h2>
-        <p>好心情居多，像冰淇淋一样甜 🍦</p>
+    <div class="scroll-area no-scrollbar">
+      <!-- 空状态 -->
+      <div v-if="moodStore.monthCount === 0 && moodStore.records.length === 0" class="empty-state fade-in">
+        <div class="empty-icon">🌱</div>
+        <h2>开始记录你的心情吧</h2>
+        <p>每天 10 秒，把心情存进日记里</p>
+        <router-link to="/mood/checkin" class="btn btn-primary">记录今天的心情</router-link>
       </div>
-      <div class="data">
-        <div class="num">14</div>
-        <div class="label">打卡天数</div>
-      </div>
-    </div>
 
-    <div class="calendar fade-up">
-      <div class="cal-header">
-        <button class="nav-btn" @click="prevMonth">
-          <SvgIcon name="back" :size="14" />
-        </button>
-        <h3>2026 年 7 月</h3>
-        <button class="nav-btn" @click="nextMonth">
-          <SvgIcon name="right" :size="14" />
-        </button>
-      </div>
-      <div class="weekdays">
-        <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
-      </div>
-      <div class="days">
-        <div
-          v-for="(day, index) in days"
-          :key="index"
-          class="day"
-          :class="{
-            mute: day.mute,
-            today: day.today,
-            selected: day.selected
-          }"
-          @click="selectedDay = day"
-        >
-          {{ day.label }}
-          <div v-if="day.dot" class="dot" :class="'d-' + day.dot"></div>
+      <template v-else>
+        <!-- 月度统计 -->
+        <div class="month-stat fade-in">
+          <div class="text">
+            <h2>{{ calTitle }} · {{ seasonPhrase }}</h2>
+            <p>{{ moodStore.monthSummary.text }} {{ moodStore.monthSummary.emoji }}</p>
+          </div>
+          <div class="data">
+            <div class="num">{{ streakLabel }}</div>
+            <div class="label">连续打卡</div>
+          </div>
         </div>
-      </div>
-      <div class="legend">
-        <span>心情：</span>
-        <span class="row gap-4"><span class="dot d-1"></span>低落</span>
-        <span class="row gap-4"><span class="dot d-3"></span>一般</span>
-        <span class="row gap-4"><span class="dot d-5"></span>很好</span>
-      </div>
-    </div>
 
-    <div class="day-detail fade-up">
-      <div class="head">
-        <div class="date-info">
-          <div class="d1">7 月 19 日 · 周日</div>
-          <div class="d2">今天</div>
+        <!-- 日历 -->
+        <div class="calendar fade-up">
+          <div class="cal-header">
+            <button class="nav-btn" @click="moodStore.prevMonth()">
+              <SvgIcon name="back" :size="14" />
+            </button>
+            <h3>{{ calTitle }}</h3>
+            <button class="nav-btn" @click="moodStore.nextMonth()">
+              <SvgIcon name="right" :size="14" />
+            </button>
+          </div>
+          <div class="weekdays">
+            <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+          </div>
+          <div class="days">
+            <div
+              v-for="(day, index) in calDays"
+              :key="index"
+              class="day"
+              :class="{
+                mute: day.mute,
+                today: day.today,
+                selected: day.selected,
+                'has-record': !!day.mood
+              }"
+              @click="selectDay(day)"
+            >
+              {{ day.label }}
+              <div v-if="day.mood" class="dot" :style="{ background: moodConfig[day.mood as MoodType].color }"></div>
+            </div>
+          </div>
+          <div class="legend">
+            <span>今日心情</span>
+            <span class="row gap-4">
+              <span class="dot" :style="{ background: moodConfig.happy.color }"></span>
+              <span class="dot" :style="{ background: moodConfig.calm.color }"></span>
+              <span class="dot" :style="{ background: moodConfig.sad.color }"></span>
+              <span class="dot" :style="{ background: moodConfig.anxious.color }"></span>
+              <span class="dot" :style="{ background: moodConfig.irritable.color }"></span>
+              <span class="dot" :style="{ background: moodConfig.tearful.color }"></span>
+            </span>
+          </div>
         </div>
-        <div class="day-emoji">😊</div>
-      </div>
-      <div class="body">
-        <div class="quote">今天的天空很蓝，楼下咖啡店换了新豆子，意外好喝 ☕</div>
-        <router-link class="link" to="/mood/detail">查看完整日记 →</router-link>
-      </div>
+
+        <!-- 选中日期的详情 -->
+        <div class="day-detail fade-up" v-if="selectedDayInfo">
+          <div class="head">
+            <div class="date-info">
+              <div class="d1">{{ selectedDayInfo.dateLabel }}</div>
+              <div class="d2">{{ selectedDayInfo.relativeLabel }}</div>
+            </div>
+            <div v-if="selectedDayInfo.record" class="day-emoji">{{ moodConfig[selectedDayInfo.record.mood].emoji }}</div>
+            <div v-else class="day-emoji no-record">📝</div>
+          </div>
+          <div class="body">
+            <template v-if="selectedDayInfo.record">
+              <div class="mood-tag" :style="{ background: moodConfig[selectedDayInfo.record.mood].color + '22', color: moodConfig[selectedDayInfo.record.mood].color }">
+                {{ moodConfig[selectedDayInfo.record.mood].emoji }} {{ moodConfig[selectedDayInfo.record.mood].label }}
+              </div>
+              <div class="quote">{{ selectedDayInfo.record.note }}</div>
+              <div class="link-row">
+                <router-link class="link" :to="`/mood/detail?date=${selectedDayInfo.date}`">查看完整日记 →</router-link>
+                <router-link v-if="selectedDayInfo.isToday" class="link edit" to="/mood/checkin">编辑</router-link>
+              </div>
+            </template>
+            <template v-else>
+              <div class="no-record-hint">{{ selectedDayInfo.isToday ? '今天还没有记录' : '这一天没有记录' }}</div>
+              <router-link v-if="selectedDayInfo.isToday" class="link accent" to="/mood/checkin">记一笔今天的心情 →</router-link>
+            </template>
+          </div>
+        </div>
+
+        <!-- 本月全部记录 -->
+        <div class="all-records fade-up">
+          <div class="section-head" @click="showAllRecords = !showAllRecords">
+            <h3>本月全部记录</h3>
+            <span class="toggle">{{ showAllRecords ? '收起' : '展开' }}（{{ monthRecords.length }} 条）</span>
+          </div>
+          <template v-if="showAllRecords">
+            <div v-if="monthRecords.length === 0" class="empty-list">这个月还没有心情记录</div>
+            <div
+              v-for="rec in monthRecords"
+              :key="rec.date"
+              class="record-row"
+              @click="$router.push(`/mood/detail?date=${rec.date}`)"
+            >
+              <div class="record-emoji" :style="{ background: moodConfig[rec.mood].color + '18' }">{{ moodConfig[rec.mood].emoji }}</div>
+              <div class="record-body">
+                <div class="record-date">{{ formatDateDisplay(rec.date) }}</div>
+                <div class="record-note">{{ rec.note }}</div>
+              </div>
+              <SvgIcon name="right" :size="14" />
+            </div>
+          </template>
+        </div>
+
+        <!-- 快捷入口 -->
+        <div class="entries">
+          <div class="entry-grid fade-up">
+            <router-link class="entry peach" to="/mood/report">
+              <div class="ic-box">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 3v18h18"/><path d="M7 12l4-4 4 6 5-8"/>
+                </svg>
+              </div>
+              <div>
+                <div class="t1">情绪周报</div>
+                <div class="t2">这一周的你</div>
+              </div>
+            </router-link>
+            <router-link class="entry blue" to="/cards">
+              <div class="ic-box">
+                <SvgIcon name="cards" :size="20" />
+              </div>
+              <div>
+                <div class="t1">治愈卡片</div>
+                <div class="t2">{{ userStore.collectionCount }} 张收藏</div>
+              </div>
+            </router-link>
+          </div>
+        </div>
+      </template>
     </div>
 
-    <div class="entries">
-      <div class="entry-grid fade-up">
-        <router-link class="entry peach" to="/mood/report">
-          <div class="ic-box">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 3v18h18"/><path d="M7 12l4-4 4 6 5-8"/>
-            </svg>
-          </div>
-          <div>
-            <div class="t1">情绪周报</div>
-            <div class="t2">这一周的你</div>
-          </div>
-        </router-link>
-        <router-link class="entry blue" to="/cards">
-          <div class="ic-box">
-            <SvgIcon name="cards" :size="20" />
-          </div>
-          <div>
-            <div class="t1">我的收藏</div>
-            <div class="t2">12 张治愈卡片</div>
-          </div>
-        </router-link>
-        <router-link class="entry sage" to="/profile/ai-settings">
-          <div class="ic-box">
-            <SvgIcon name="settings" :size="20" />
-          </div>
-          <div>
-            <div class="t1">{{ userStore.aiName }}设置</div>
-            <div class="t2">昵称 / 头像 / 称呼</div>
-          </div>
-        </router-link>
-        <router-link class="entry cream" to="/profile/settings">
-          <div class="ic-box">
-            <SvgIcon name="bell" :size="20" />
-          </div>
-          <div>
-            <div class="t1">通知设置</div>
-            <div class="t2">晚安提醒等</div>
-          </div>
-        </router-link>
-      </div>
-    </div>
-  </div>
+    <!-- 浮动打卡按钮 -->
+    <router-link to="/mood/checkin" class="fab-checkin">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+    </router-link>
 
-  <TabBar activeKey="me" />
+    <TabBar activeKey="me" />
   </template>
 </template>
 
@@ -133,51 +179,131 @@ import NavBar from '../../components/NavBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
 import TabBar from '../../components/TabBar.vue'
 import { useUserStore } from '../../stores/user'
+import { useMoodStore, MOOD_CONFIG, type MoodType } from '../../stores/mood'
 
 const route = useRoute()
+const moodStore = useMoodStore()
 const userStore = useUserStore()
+const moodConfig = MOOD_CONFIG
+
 const isChildRoute = computed(() => route.path !== '/mood')
-const selectedDay = ref<any>(null)
+const showAllRecords = ref(false)
+const selectedDate = ref(moodStore.formatDate(new Date()))
 
-const days = [
-  { label: '28', mute: true, dot: '4' },
-  { label: '29', mute: true, dot: '3' },
-  { label: '30', mute: true, dot: '2' },
-  { label: '1', dot: '5' },
-  { label: '2', dot: '4' },
-  { label: '3', dot: '5' },
-  { label: '4', dot: '3' },
-  { label: '5', dot: '2' },
-  { label: '6', dot: '4' },
-  { label: '7', dot: '5' },
-  { label: '8', dot: '4' },
-  { label: '9', dot: '3' },
-  { label: '10', dot: '5' },
-  { label: '11', dot: '5' },
-  { label: '12', dot: '4' },
-  { label: '13', dot: '2' },
-  { label: '14', dot: '3' },
-  { label: '15', dot: '4' },
-  { label: '16', dot: '5' },
-  { label: '17', dot: '5' },
-  { label: '18', dot: '4' },
-  { label: '19', today: true, selected: true },
-  { label: '20' },
-  { label: '21' },
-  { label: '22' },
-  { label: '23' },
-  { label: '24' },
-  { label: '25' },
-  { label: '26' },
-  { label: '27' },
-  { label: '28' },
-  { label: '29' },
-  { label: '30' },
-  { label: '31' },
-]
+const SEASONS: Record<number, string> = {
+  1: '冬日暖阳', 2: '早春微风', 3: '春暖花开',
+  4: '初夏时光', 5: '夏日悠长', 6: '盛夏',
+  7: '你的夏天', 8: '夏末', 9: '初秋',
+  10: '金秋', 11: '深秋', 12: '初冬',
+}
 
-function prevMonth() {}
-function nextMonth() {}
+const seasonPhrase = computed(() => {
+  return SEASONS[moodStore.currentMonth] || ''
+})
+
+const calTitle = computed(() => {
+  return `${moodStore.currentYear} 年 ${moodStore.currentMonth} 月`
+})
+
+const streakLabel = computed(() => {
+  const s = moodStore.streakDays
+  return s > 0 ? `${s} 天` : '--'
+})
+
+/** 当月所有记录 */
+const monthRecords = computed(() =>
+  moodStore.getRecordsByMonth(moodStore.currentYear, moodStore.currentMonth)
+)
+
+/** 生成本月日历网格 */
+interface CalDay {
+  label: string
+  date?: string
+  mute: boolean
+  today: boolean
+  selected: boolean
+  mood?: string | null
+}
+
+const calDays = computed<CalDay[]>(() => {
+  const y = moodStore.currentYear
+  const m = moodStore.currentMonth
+  const firstDow = new Date(y, m - 1, 1).getDay()
+  const totalDays = new Date(y, m, 0).getDate()
+  const prevTotal = new Date(y, m - 1, 0).getDate()
+
+  const days: CalDay[] = []
+
+  // 上月补充
+  for (let i = firstDow - 1; i >= 0; i--) {
+    days.push({ label: String(prevTotal - i), mute: true, today: false, selected: false })
+  }
+
+  // 本月
+  for (let i = 1; i <= totalDays; i++) {
+    const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(i).padStart(2, '0')}`
+    const record = moodStore.getRecordByDate(dateStr)
+    const isT = dateStr === moodStore.formatDate(new Date())
+    days.push({
+      label: String(i),
+      date: dateStr,
+      mute: false,
+      today: isT,
+      selected: dateStr === selectedDate.value,
+      mood: record?.mood || null,
+    })
+  }
+
+  // 下月补充至 6 行
+  const remaining = 42 - days.length
+  for (let i = 1; i <= remaining; i++) {
+    days.push({ label: String(i), mute: true, today: false, selected: false })
+  }
+
+  return days
+})
+
+/** 选中日期的详情信息 */
+const selectedDayInfo = computed(() => {
+  if (!selectedDate.value) return null
+  const record = moodStore.getRecordByDate(selectedDate.value)
+  const dt = new Date(selectedDate.value)
+  const month = dt.getMonth() + 1
+  const day = dt.getDate()
+  const dowNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+  const dow = dowNames[dt.getDay()]
+  const dateLabel = `${month} 月 ${day} 日 · ${dow}`
+
+  let relativeLabel = ''
+  if (moodStore.isToday(selectedDate.value)) {
+    relativeLabel = '今天'
+  } else {
+    const yesterday = new Date()
+    yesterday.setDate(yesterday.getDate() - 1)
+    if (selectedDate.value === moodStore.formatDate(yesterday)) {
+      relativeLabel = '昨天'
+    }
+  }
+
+  return {
+    date: selectedDate.value,
+    dateLabel,
+    relativeLabel,
+    record,
+    isToday: moodStore.isToday(selectedDate.value),
+  }
+})
+
+function formatDateDisplay(dateStr: string) {
+  const dt = new Date(dateStr)
+  const dowNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+  return `${dt.getMonth() + 1}/${dt.getDate()} ${dowNames[dt.getDay()]}`
+}
+
+function selectDay(day: CalDay) {
+  if (day.mute || !day.date) return
+  selectedDate.value = day.date
+}
 </script>
 
 <style scoped>
@@ -190,6 +316,31 @@ function nextMonth() {}
   position: relative;
   z-index: 1;
 }
+
+/* 空状态 */
+.empty-state {
+  margin: 60px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 8px;
+}
+.empty-state h2 {
+  font-size: 20px;
+  color: var(--text-main);
+}
+.empty-state p {
+  font-size: 14px;
+  color: var(--text-sub);
+  margin-bottom: 8px;
+}
+
+/* 月度统计 */
 .month-stat {
   margin: 8px 16px 0;
   padding: 16px 20px;
@@ -221,6 +372,8 @@ function nextMonth() {}
   font-size: 11px;
   color: #6B5A4D;
 }
+
+/* 日历 */
 .calendar {
   margin: 16px;
   background: #fff;
@@ -251,6 +404,9 @@ function nextMonth() {}
   border: none;
   cursor: pointer;
 }
+.cal-header .nav-btn:active {
+  background: #FFE7D1;
+}
 .weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -275,37 +431,49 @@ function nextMonth() {}
   color: #4A3A2E;
   position: relative;
   cursor: pointer;
+  transition: background 0.15s;
+}
+.day:active {
+  background: #FFF8F1;
 }
 .day.mute {
   color: #C4B5A6;
 }
 .day.today {
-  background: #FFE7D1;
   font-weight: 700;
   color: #E88A6B;
+}
+.day.today::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #E88A6B;
+}
+.day.today.has-record::after {
+  display: none;
+}
+.day.selected {
+  background: #F4A988;
+  color: #fff;
+  font-weight: 600;
+}
+.day.selected .dot {
+  display: none;
 }
 .day .dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   margin-top: 2px;
-}
-.day .dot.d-5 { background: #7BC97B; }
-.day .dot.d-4 { background: #B6DB94; }
-.day .dot.d-3 { background: #FFD68A; }
-.day .dot.d-2 { background: #FFB085; }
-.day .dot.d-1 { background: #E88A6B; }
-.day.selected {
-  background: #F4A988;
-  color: #fff;
-}
-.day.selected .dot {
-  display: none;
+  flex-shrink: 0;
 }
 .legend {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   margin-top: 14px;
   padding: 0 4px;
   font-size: 11px;
@@ -317,6 +485,8 @@ function nextMonth() {}
   height: 8px;
   border-radius: 50%;
 }
+
+/* 日期详情 */
 .day-detail {
   margin: 0 16px 16px;
   background: #fff;
@@ -330,7 +500,7 @@ function nextMonth() {}
   justify-content: space-between;
 }
 .day-detail .date-info .d1 {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #4A3A2E;
 }
@@ -342,8 +512,22 @@ function nextMonth() {}
 .day-detail .day-emoji {
   font-size: 36px;
 }
+.day-detail .day-emoji.no-record {
+  font-size: 28px;
+  opacity: 0.5;
+}
 .day-detail .body {
-  margin-top: 16px;
+  margin-top: 14px;
+}
+.day-detail .mood-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 10px;
 }
 .day-detail .body .quote {
   padding: 14px 16px;
@@ -366,9 +550,109 @@ function nextMonth() {}
 .day-detail .body .link {
   color: #E88A6B;
   font-size: 12px;
-  margin-top: 10px;
   display: block;
+  font-weight: 500;
 }
+.day-detail .body .link-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+.day-detail .body .link-row .link {
+  margin-top: 0;
+}
+.day-detail .body .link-row .link.edit {
+  color: #4A3A2E;
+  font-weight: 400;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: #FFF8F1;
+}
+.day-detail .body .link.accent {
+  color: #E88A6B;
+  font-weight: 600;
+}
+.day-detail .no-record-hint {
+  padding: 14px 16px;
+  background: #FFF8F1;
+  border-radius: 14px;
+  font-size: 14px;
+  color: #C4B5A6;
+  text-align: center;
+}
+
+/* 全部记录 */
+.all-records {
+  margin: 0 16px 16px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+}
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+.section-head h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #4A3A2E;
+}
+.section-head .toggle {
+  font-size: 12px;
+  color: #9C8B7E;
+}
+.empty-list {
+  text-align: center;
+  padding: 20px 0;
+  font-size: 13px;
+  color: #C4B5A6;
+}
+.record-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid #F1E5D7;
+  cursor: pointer;
+}
+.record-row:last-child {
+  border-bottom: none;
+}
+.record-row:active {
+  opacity: 0.7;
+}
+.record-emoji {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.record-body {
+  flex: 1;
+  min-width: 0;
+}
+.record-date {
+  font-size: 12px;
+  color: #9C8B7E;
+}
+.record-note {
+  font-size: 14px;
+  color: #4A3A2E;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+/* 快捷入口 */
 .entries {
   padding: 0 16px 16px;
 }
@@ -413,12 +697,30 @@ function nextMonth() {}
   background: linear-gradient(135deg, #CDE3F2 0%, #E5F1F8 100%);
   color: #6BA4C9;
 }
-.entry.sage .ic-box {
-  background: linear-gradient(135deg, #D8E4D2 0%, #E8F0E2 100%);
-  color: #7BA970;
+
+/* 浮动打卡按钮 */
+.fab-checkin {
+  position: absolute;
+  right: 16px;
+  bottom: calc(var(--tabbar-h) + 16px);
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-lg);
+  z-index: 10;
+  animation: pulse 2.5s ease-in-out infinite;
+  transition: transform 0.2s;
 }
-.entry.cream .ic-box {
-  background: linear-gradient(135deg, #FFE7D1 0%, #FFF4E8 100%);
-  color: #E88A6B;
+.fab-checkin:active {
+  transform: scale(0.94);
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
 }
 </style>

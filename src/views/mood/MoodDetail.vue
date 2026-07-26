@@ -6,90 +6,207 @@
     <router-link class="back" to="/mood">
       <SvgIcon name="back" :size="20" />
     </router-link>
+    <div class="title">{{ dateTitle }}</div>
     <div class="actions">
-      <button class="icon-btn" @click="onEdit">
+      <router-link v-if="isToday" to="/mood/checkin" class="icon-btn">
         <SvgIcon name="edit" :size="18" />
-      </button>
+      </router-link>
       <button class="icon-btn" @click="onShare">
         <SvgIcon name="share" :size="18" />
       </button>
-      <button class="icon-btn" @click="showMenu = true">
-        <SvgIcon name="more" :size="18" />
-      </button>
     </div>
   </div>
 
-  <div class="content no-scrollbar">
-    <div class="date-card fade-in">
-      <div class="emoji-bg">😊</div>
-      <div class="date"><b>7 月 19 日</b> · 周日</div>
-      <div class="mood">😊 开心 · 5/5</div>
-    </div>
+  <!-- 未找到记录 -->
+  <div v-if="!record" class="empty-state">
+    <div class="empty-icon">🔍</div>
+    <p>没有找到这一天的记录</p>
+    <router-link to="/mood" class="btn btn-text">返回心情日历</router-link>
+  </div>
 
-    <div class="quote-section fade-up">
-      <div class="text">今天的天空很蓝，楼下咖啡店换了新豆子，意外好喝 ☕</div>
-      <div class="sign">— 小柚子 写于 9:32</div>
-    </div>
+  <template v-else>
+    <div class="content no-scrollbar">
+      <!-- 日期卡片 -->
+      <div class="date-card fade-in">
+        <div class="emoji-bg">{{ config.emoji }}</div>
+        <div class="date"><b>{{ dateDisplay }}</b></div>
+        <div class="mood" :style="{ background: config.color + '22', color: config.color }">
+          {{ config.emoji }} {{ config.label }} · {{ config.score }}/5
+        </div>
+      </div>
 
-    <div class="section fade-up">
-      <div class="label">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9C8B7E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>
-        </svg>
-        今日关键词
+      <!-- 日记正文 -->
+      <div class="quote-section fade-up">
+        <div class="text">{{ record.note }}</div>
+        <div class="sign">— {{ userStore.name }} 记于 {{ timeLabel }}</div>
       </div>
-      <div class="keywords">
-        <div class="kw"><b>#好天气</b></div>
-        <div class="kw">☕ <b>咖啡</b></div>
-        <div class="kw">📚 读书</div>
-        <div class="kw">🌷 散步</div>
-      </div>
-    </div>
 
-    <div class="section fade-up">
-      <div class="label">
-        <SvgIcon name="chat" :size="14" />
-        关联对话
+      <!-- 关键词（根据内容自动提取） -->
+      <div class="section fade-up" v-if="keywords.length > 0">
+        <div class="label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9C8B7E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>
+          </svg>
+          今日关键词
+        </div>
+        <div class="keywords">
+          <div class="kw" v-for="kw in keywords" :key="kw"><b>{{ kw }}</b></div>
+        </div>
       </div>
-      <div class="ai-card">
-        <div class="av">🌸</div>
-        <div class="body">
-          <div class="name">{{ userStore.aiName }} · 早安问候</div>
-          <div class="text">"早安呀 ☀️ 睡得好吗？今天想聊点什么都可以哦~"</div>
+
+      <!-- 关联对话 -->
+      <div class="section fade-up" v-if="aiMessage">
+        <div class="label">
+          <SvgIcon name="chat" :size="14" />
+          来自 {{ userStore.aiName }} 的问候
+        </div>
+        <div class="ai-card">
+          <div class="av">{{ aiAvatar }}</div>
+          <div class="body">
+            <div class="name">{{ userStore.aiName }} · {{ aiMessage.title }}</div>
+            <div class="text">{{ aiMessage.text }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 操作按钮 -->
+      <div class="section action-section fade-up">
+        <div class="action-row">
+          <router-link class="btn btn-ghost" to="/mood">
+            <SvgIcon name="back" :size="16" />
+            返回日历
+          </router-link>
+          <button class="btn btn-ghost" @click="onShare">
+            <SvgIcon name="share" :size="16" />
+            分享
+          </button>
         </div>
       </div>
     </div>
-
-    <div class="section action-section fade-up">
-      <div class="action-row">
-        <button class="btn btn-ghost" @click="onExport">
-          <SvgIcon name="download" :size="16" />
-          导出
-        </button>
-        <button class="btn btn-ghost" @click="onFavorite">
-          <SvgIcon name="heart" :size="16" />
-          收藏
-        </button>
-      </div>
-    </div>
-  </div>
+  </template>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import StatusBar from '../../components/StatusBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
 import { useUserStore } from '../../stores/user'
+import { useMoodStore, MOOD_CONFIG } from '../../stores/mood'
 
+const route = useRoute()
 const userStore = useUserStore()
+const moodStore = useMoodStore()
 
+const dateParam = computed(() => (route.query.date as string) || '')
+const record = computed(() => moodStore.getRecordByDate(dateParam.value))
+const config = computed(() => {
+  if (!record.value) return { emoji: '', label: '', score: 0, color: '' }
+  return MOOD_CONFIG[record.value.mood]
+})
 
-const showMenu = ref(false)
+const DATE_FORMAT = new Intl.DateTimeFormat('zh-CN', {
+  month: 'long',
+  day: 'numeric',
+  weekday: 'long',
+})
 
-function onEdit() {}
-function onShare() {}
-function onExport() {}
-function onFavorite() {}
+const dateDisplay = computed(() => {
+  if (!dateParam.value) return ''
+  const d = new Date(dateParam.value)
+  return DATE_FORMAT.format(d)
+})
+
+const dateTitle = computed(() => {
+  if (!dateParam.value) return '日记详情'
+  const d = new Date(dateParam.value)
+  return `${d.getMonth() + 1}月${d.getDate()}日`
+})
+
+const isToday = computed(() => moodStore.isToday(dateParam.value))
+
+const timeLabel = computed(() => {
+  const hour = new Date().getHours()
+  if (hour < 12) return '上午'
+  if (hour < 14) return '中午'
+  if (hour < 18) return '下午'
+  return '晚上'
+})
+
+/** 从日记文本中提取关键词 */
+const keywords = computed(() => {
+  if (!record.value) return []
+  const note = record.value.note
+  const found: string[] = []
+  const patterns: { word: string; tag: string }[] = [
+    { word: '天气', tag: '天气' },
+    { word: '天空', tag: '天空' },
+    { word: '咖啡', tag: '咖啡' },
+    { word: '朋友', tag: '朋友' },
+    { word: '吃饭', tag: '美食' },
+    { word: '散步', tag: '散步' },
+    { word: '运动', tag: '运动' },
+    { word: '读书', tag: '读书' },
+    { word: '书', tag: '读书' },
+    { word: '工作', tag: '工作' },
+    { word: '累', tag: '疲惫' },
+    { word: '焦虑', tag: '焦虑' },
+    { word: '开心', tag: '开心' },
+    { word: '放松', tag: '放松' },
+    { word: '花', tag: '花' },
+    { word: '猫', tag: '猫' },
+    { word: '狗', tag: '宠物' },
+    { word: '家', tag: '家' },
+    { word: '睡觉', tag: '休息' },
+    { word: '梦', tag: '梦' },
+    { word: '音乐', tag: '音乐' },
+  ]
+  for (const p of patterns) {
+    if (note.includes(p.word)) {
+      if (!found.includes(p.tag)) found.push(p.tag)
+    }
+  }
+  return found.slice(0, 5)
+})
+
+/** 根据心情类型生成关联 AI 问候 */
+const aiMessage = computed(() => {
+  if (!record.value) return null
+  const mood = record.value.mood
+  const msgMap: Record<string, { title: string; text: string }> = {
+    happy: {
+      title: '暖心陪伴',
+      text: '开心的时候，世界都是闪闪发光的 ✨ 记住这种感觉，不开心的时候翻出来看看~',
+    },
+    calm: {
+      title: '暖心陪伴',
+      text: '平静的日子也是一种幸福 🌿 在忙碌的生活里能找到内心的安宁，真的很了不起。',
+    },
+    sad: {
+      title: '温柔拥抱',
+      text: '低落的时候不需要马上好起来，慢慢来，我会一直在这里陪着你 💛',
+    },
+    anxious: {
+      title: '放松时刻',
+      text: '焦虑的时候试试深呼吸——吸气 4 秒，屏住 4 秒，呼气 6 秒 🌬️ 我在这里陪你。',
+    },
+    irritable: {
+      title: '冷静空间',
+      text: '烦躁的时候，给自己一个「暂停键」⏸️ 喝杯水，看看窗外，我在呢。',
+    },
+    tearful: {
+      title: '温暖守候',
+      text: '想哭就哭吧，眼泪不是软弱，是心里装太多需要释放 🫂 哭完了，我陪你重新出发。',
+    },
+  }
+  return msgMap[mood] || null
+})
+
+const aiAvatar = computed(() => userStore.avatar || '🌸')
+
+function onShare() {
+  // share placeholder
+}
 </script>
 
 <style scoped>
@@ -98,6 +215,24 @@ function onFavorite() {}
   inset: 0;
   background: linear-gradient(180deg, #FFEFDF 0%, #FFE0CB 100%);
 }
+
+/* 空状态 */
+.empty-state {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 80px 24px;
+}
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+.empty-state p {
+  font-size: 15px;
+  color: #9C8B7E;
+  margin-bottom: 12px;
+}
+
 .header {
   padding: 4px 20px 8px;
   display: flex;
@@ -117,6 +252,11 @@ function onFavorite() {}
   color: #4A3A2E;
   border: none;
   cursor: pointer;
+}
+.header .title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #4A3A2E;
 }
 .header .actions {
   display: flex;
@@ -187,8 +327,6 @@ function onFavorite() {}
   gap: 4px;
   margin-top: 6px;
   padding: 4px 10px;
-  background: #FFE7D1;
-  color: #E88A6B;
   border-radius: 999px;
   font-size: 12px;
   font-weight: 600;
@@ -308,5 +446,6 @@ function onFavorite() {}
   background: #fff;
   box-shadow: var(--shadow-sm);
   color: #4A3A2E;
+  text-decoration: none;
 }
 </style>
