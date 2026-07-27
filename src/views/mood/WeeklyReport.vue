@@ -88,20 +88,21 @@
     </div>
 
     <div class="action-row">
-      <button class="btn btn-ghost" @click="onShare">
+      <el-button round @click="onShare">
         <SvgIcon name="share" :size="16" />
         分享周报
-      </button>
-      <button class="btn btn-ghost" @click="onFavorite">
+      </el-button>
+      <el-button round @click="onFavorite">
         <SvgIcon name="heart" :size="16" />
         收藏
-      </button>
+      </el-button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { ElButton } from 'element-plus'
 import StatusBar from '../../components/StatusBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
 import { useUserStore } from '../../stores/user'
@@ -117,6 +118,7 @@ function onFavorite() {}
 .screen-bg {
   position: absolute;
   inset: 0;
+  pointer-events: none;
   background: linear-gradient(180deg, #FFEFDF 0%, #FFD4C2 50%, #CDE3F2 100%);
 }
 .content {
@@ -332,20 +334,7 @@ function onFavorite() {}
   gap: 10px;
   margin-top: 8px;
 }
-.action-row .btn {
+.action-row .el-button {
   flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 14px 24px;
-  border-radius: var(--radius-pill);
-  font-size: 15px;
-  font-weight: 600;
-  background: #fff;
-  box-shadow: var(--shadow-sm);
-  border: none;
-  cursor: pointer;
-  color: #4A3A2E;
 }
 </style>

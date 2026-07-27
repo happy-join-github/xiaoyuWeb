@@ -7,9 +7,7 @@
     <NavBar title="我的心情" left="back">
       <template #right>
         <router-link to="/mood/report" class="icon-btn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-          </svg>
+          <el-icon :size="18"><Delete /></el-icon>
         </router-link>
       </template>
     </NavBar>
@@ -20,7 +18,7 @@
         <div class="empty-icon">🌱</div>
         <h2>开始记录你的心情吧</h2>
         <p>每天 10 秒，把心情存进日记里</p>
-        <router-link to="/mood/checkin" class="btn btn-primary">记录今天的心情</router-link>
+        <el-button type="warning" round @click="$router.push('/mood/checkin')">记录今天的心情</el-button>
       </div>
 
       <template v-else>
@@ -162,9 +160,7 @@
 
     <!-- 浮动打卡按钮 -->
     <router-link to="/mood/checkin" class="fab-checkin">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-      </svg>
+      <el-button type="warning" :icon="Plus" circle size="large" />
     </router-link>
 
     <TabBar activeKey="me" />
@@ -174,6 +170,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { ElButton, ElIcon, ElEmpty } from 'element-plus'
+import { Plus, Delete } from '@element-plus/icons-vue'
 import StatusBar from '../../components/StatusBar.vue'
 import NavBar from '../../components/NavBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
@@ -310,6 +308,7 @@ function selectDay(day: CalDay) {
 .screen-bg {
   position: absolute;
   inset: 0;
+  pointer-events: none;
   background: linear-gradient(180deg, #FFF8F1 0%, #FFEFDF 100%);
 }
 .scroll-area {

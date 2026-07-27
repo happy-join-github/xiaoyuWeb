@@ -32,12 +32,14 @@
 
         <div class="note-box fade-up">
           <label>今天想说的一句小话（选填）</label>
-          <textarea
+          <el-input
             v-model="note"
-            placeholder="比如：今天的天空很蓝…"
+            type="textarea"
+            :rows="3"
             maxlength="50"
-          ></textarea>
-          <div class="count">{{ note.length }}/50</div>
+            show-word-limit
+            placeholder="比如：今天的天空很蓝…"
+          />
         </div>
 
         <div class="reward fade-up">
@@ -52,13 +54,14 @@
         </div>
 
         <div class="actions">
-          <button
-            class="btn btn-primary"
+          <el-button
+            type="warning"
+            round
             :disabled="!selectedEmotion"
             @click="handleSave"
           >
             {{ !selectedEmotion ? '请选择心情' : isEdit ? '更新今天的心情' : '保存今天的心情' }}
-          </button>
+          </el-button>
           <div class="skip"><router-link to="/mood">下次再说</router-link></div>
         </div>
       </div>
@@ -82,7 +85,9 @@
           </svg>
           已连续打卡 {{ streakDays }} 天
         </div>
-        <router-link to="/mood" class="btn btn-primary back-btn">返回心情日历</router-link>
+        <router-link to="/mood">
+          <el-button type="warning" round class="back-btn">返回心情日历</el-button>
+        </router-link>
       </div>
     </div>
   </div>
@@ -91,6 +96,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElButton, ElInput } from 'element-plus'
 import StatusBar from '../../components/StatusBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
 import { useMoodStore, MOOD_CONFIG, type MoodType } from '../../stores/mood'
@@ -178,6 +184,7 @@ onBeforeUnmount(() => {
 .screen-bg {
   position: absolute;
   inset: 0;
+  pointer-events: none;
   background: linear-gradient(180deg, #FFEFDF 0%, #FFE0CB 100%);
 }
 
@@ -273,24 +280,6 @@ onBeforeUnmount(() => {
   color: #9C8B7E;
   margin-bottom: 8px;
 }
-.note-box textarea {
-  width: 100%;
-  border: none;
-  outline: none;
-  resize: none;
-  min-height: 60px;
-  font: inherit;
-  color: #4A3A2E;
-}
-.note-box textarea::placeholder {
-  color: #C4B5A6;
-}
-.note-box .count {
-  text-align: right;
-  font-size: 11px;
-  color: #C4B5A6;
-  margin-top: 4px;
-}
 .reward {
   margin-top: 10px;
   padding: 10px 14px;
@@ -327,14 +316,8 @@ onBeforeUnmount(() => {
   margin-top: auto;
   padding-top: 20px;
 }
-.actions .btn-primary {
+.actions .el-button {
   width: 100%;
-}
-.actions .btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  background: linear-gradient(135deg, #D4C5B8 0%, #C4B5A6 100%);
-  box-shadow: none;
 }
 .skip {
   text-align: center;

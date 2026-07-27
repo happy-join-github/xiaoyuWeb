@@ -19,9 +19,8 @@
 
   <!-- 未找到记录 -->
   <div v-if="!record" class="empty-state">
-    <div class="empty-icon">🔍</div>
-    <p>没有找到这一天的记录</p>
-    <router-link to="/mood" class="btn btn-text">返回心情日历</router-link>
+    <el-empty description="没有找到这一天的记录" />
+    <el-button round @click="$router.push('/mood')">返回心情日历</el-button>
   </div>
 
   <template v-else>
@@ -72,14 +71,14 @@
       <!-- 操作按钮 -->
       <div class="section action-section fade-up">
         <div class="action-row">
-          <router-link class="btn btn-ghost" to="/mood">
+          <el-button round @click="$router.push('/mood')">
             <SvgIcon name="back" :size="16" />
             返回日历
-          </router-link>
-          <button class="btn btn-ghost" @click="onShare">
+          </el-button>
+          <el-button round @click="onShare">
             <SvgIcon name="share" :size="16" />
             分享
-          </button>
+          </el-button>
         </div>
       </div>
     </div>
@@ -89,6 +88,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { ElButton, ElEmpty } from 'element-plus'
 import StatusBar from '../../components/StatusBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
 import { useUserStore } from '../../stores/user'
@@ -213,6 +213,7 @@ function onShare() {
 .screen-bg {
   position: absolute;
   inset: 0;
+  pointer-events: none;
   background: linear-gradient(180deg, #FFEFDF 0%, #FFE0CB 100%);
 }
 
@@ -221,16 +222,11 @@ function onShare() {
   position: relative;
   z-index: 1;
   text-align: center;
-  padding: 80px 24px;
-}
-.empty-icon {
-  font-size: 48px;
-  margin-bottom: 12px;
-}
-.empty-state p {
-  font-size: 15px;
-  color: #9C8B7E;
-  margin-bottom: 12px;
+  padding: 60px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
 .header {
@@ -429,23 +425,7 @@ function onShare() {
   gap: 10px;
   margin-top: 20px;
 }
-.action-row .btn {
+.action-row .el-button {
   flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 14px 24px;
-  border-radius: var(--radius-pill);
-  font-size: 15px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-}
-.action-row .btn-ghost {
-  background: #fff;
-  box-shadow: var(--shadow-sm);
-  color: #4A3A2E;
-  text-decoration: none;
 }
 </style>
