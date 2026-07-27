@@ -32,7 +32,7 @@ function classifyMood(text: string): string[] {
 }
 
 /** 根据情绪标签生成回复 */
-function replyByMood(mood: string, userName: string): string {
+function replyByMood(mood: string): string {
   const replies: Record<string, string[]> = {
     tired: [
       '听起来真的累坏了。<br>累了就先歇一歇，不用勉强自己 💛',
@@ -150,7 +150,7 @@ export function getAiReply(userText: string, history: Message[]): string {
   if (moods.length > 0) {
     // 如果有多个情绪，随机选一个最突出的
     const primaryMood = moods[0]
-    return replyByMood(primaryMood, '') || getGeneralReply()
+    return replyByMood(primaryMood) || getGeneralReply()
   }
 
   // 3. 深度对话（用户已经聊了 2 轮以上，消息较长）

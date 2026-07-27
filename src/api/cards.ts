@@ -4,6 +4,8 @@
  */
 import { mockCards, mockUserCards, mockCommunityCards, mockTopics, type CardItem, type TopicItem } from './mock'
 
+export type { CardItem, TopicItem }
+
 // 模拟网络延迟
 function delay(ms = 200): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
