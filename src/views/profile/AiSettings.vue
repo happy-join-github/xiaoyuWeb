@@ -90,12 +90,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElInput, ElButton, ElSelect, ElOption } from 'element-plus'
+import { ElInput, ElButton, ElSelect, ElOption, ElMessage } from 'element-plus'
 import StatusBar from '../../components/StatusBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
 import { useUserStore } from '../../stores/user'
+import { updateAiSettings } from '../../api/profile'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -119,22 +120,64 @@ const characterTagOptions = ['聆听者', '知心姐姐', '人生导师', '开�
 const selectedTags = ref<string[]>([...userStore.characterTags])
 const characterBio = ref(userStore.characterBio)
 
+const saving = ref(false)
+
 function toggleTag(tag: string) {
   const idx = selectedTags.value.indexOf(tag)
   if (idx >= 0) selectedTags.value.splice(idx, 1)
   else selectedTags.value.push(tag)
 }
 
-function onSave() {
-  userStore.updateProfile({
-    aiName: aiName.value.trim() || userStore.aiName,
-    voice: selectedVoice.value,
-    characterTags: [...selectedTags.value],
-    characterBio: characterBio.value,
-    morningGreeting: morningGreeting.value,
-    eveningGreeting: eveningGreeting.value,
-  })
-  router.push('/profile')
+/** 进入页面：拉取后端的 AI 设置覆盖本地默认值 */
+onMounted(async () => {
+  const data = await userStore.loadAiSettings()
+  if (data) {
+    aiName.value = userStore.aiName
+    selectedVoice.value = userStore.voice
+    morningGreeting.value = userStore.morningGreeting
+    eveningGreeting.value = userStore.eveningGreeting
+    selectedTags.value = [...userStore.characterTags]
+    characterBio.value = userStore.characterBio
+  }
+})
+
+async function onSave() {
+  if (saving.value) return
+  const trimmedAi = aiName.value.trim()
+  if (!trimmedAi) {
+    ElMessage.warning('请填写 AI 的名字')
+    return
+  }
+  saving.value = true
+  try {
+    const data = await updateAiSettings({
+      aiName: trimmedAi,
+      voice: selectedVoice.value,
+      characterTags: [...selectedTags.value],
+      characterBio: characterBio.value,
+      morningGreeting: morningGreeting.value,
+      eveningGreeting: eveningGreeting.value,
+    })
+    // 用后端返回值刷新 store（接口失败时 data 为 null，本地兜底）
+    if (data) {
+      userStore.applyProfileData(data)
+    } else {
+      userStore.updateProfile({
+        aiName: trimmedAi,
+        voice: selectedVoice.value,
+        characterTags: [...selectedTags.value],
+        characterBio: characterBio.value,
+        morningGreeting: morningGreeting.value,
+        eveningGreeting: eveningGreeting.value,
+      })
+    }
+    ElMessage.success('保存成功')
+    router.push('/profile')
+  } catch {
+    ElMessage.error('保存失败，请稍后重试')
+  } finally {
+    saving.value = false
+  }
 }
 </script>
 

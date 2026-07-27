@@ -106,12 +106,13 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElInput, ElButton } from 'element-plus'
 import StatusBar from '../../components/StatusBar.vue'
 import NavBar from '../../components/NavBar.vue'
 import { useUserStore } from '../../stores/user'
+import { updateProfile as updateProfileApi } from '../../api/profile'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -128,20 +129,38 @@ const editForm = reactive({
   collectionCount: userStore.collectionCount,
 })
 
-function saveProfile() {
+const saving = ref(false)
+
+async function saveProfile() {
   const trimmedName = editForm.name.trim()
   if (!trimmedName) {
     ElMessage.warning('昵称不能为空')
     return
   }
-  // 用户图标
-  userStore.updateProfile({
-    name: trimmedName,
-    // avatar: editForm.avatar,
-  })
-
-  ElMessage.success('个人信息已更新')
-  router.back()
+  if (saving.value) return
+  saving.value = true
+  try {
+    // 后端只接受 nickname / avatar 两个字段
+    const res = await updateProfileApi({
+      nickname: trimmedName,
+      avatar: editForm.avatar,
+    })
+    if (res?.profile) {
+      userStore.applyProfileData(res.profile)
+    } else {
+      // 兜底：本地更新
+      userStore.updateProfile({
+        name: trimmedName,
+        avatar: editForm.avatar,
+      })
+    }
+    ElMessage.success('个人信息已更新')
+    router.back()
+  } catch {
+    ElMessage.error('保存失败，请稍后重试')
+  } finally {
+    saving.value = false
+  }
 }
 </script>
 

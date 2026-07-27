@@ -12,7 +12,7 @@
           <SvgIcon name="shield" :size="16" />
         </div>
         <span class="label">匿名倾诉</span>
-        <el-switch v-model="anonymousMode" />
+        <el-switch v-model="settings.anonymousMode" @change="onAnonymousChange" />
       </div>
       <div class="setting-item" @click="onClearData">
         <div class="ic sage">
@@ -34,21 +34,41 @@
 
     <div class="section-title">外观</div>
     <div class="section">
-      <div class="setting-item">
+      <div class="setting-item theme-row" @click="openThemePicker = !openThemePicker">
         <div class="ic cream">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
           </svg>
         </div>
         <span class="label">主题</span>
-        <span class="right-text">温柔奶油</span>
+        <span class="right-text" :style="{ color: currentTheme?.color }">
+          {{ currentTheme?.icon || '' }} {{ currentTheme?.name || '默认' }}
+        </span>
       </div>
+      <transition name="slide">
+        <div v-if="openThemePicker" class="theme-picker">
+          <div
+            v-for="t in userStore.availableThemes"
+            :key="t.key"
+            class="theme-card"
+            :class="{ active: settings.themeKey === t.key }"
+            :style="{ borderColor: settings.themeKey === t.key ? t.color : 'transparent' }"
+            @click.stop="onSelectTheme(t.key)"
+          >
+            <div class="theme-icon" :style="{ background: t.color }">{{ t.icon }}</div>
+            <div class="theme-info">
+              <div class="theme-name">{{ t.name }}</div>
+              <div class="theme-desc">{{ t.desc }}</div>
+            </div>
+          </div>
+        </div>
+      </transition>
       <div class="setting-item">
         <div class="ic blue">
           <SvgIcon name="moon" :size="16" />
         </div>
         <span class="label">深色模式</span>
-        <el-switch v-model="darkMode" />
+        <el-switch v-model="settings.darkMode" @change="onDarkModeChange" />
       </div>
       <div class="setting-item">
         <div class="ic sage">
@@ -100,7 +120,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { ElMessage, ElSwitch } from 'element-plus'
 import StatusBar from '../../components/StatusBar.vue'
 import NavBar from '../../components/NavBar.vue'
@@ -109,8 +129,58 @@ import { useUserStore } from '../../stores/user'
 
 const userStore = useUserStore()
 
-const anonymousMode = ref(true)
-const darkMode = ref(false)
+/** 本地表单（与 store 双向同步） */
+const settings = ref({ ...userStore.settings })
+const openThemePicker = ref(false)
+
+/** 当前主题元数据 */
+const currentTheme = computed(() =>
+  userStore.availableThemes.find((t) => t.key === settings.value.themeKey),
+)
+
+/** store 同步到本地 */
+watch(
+  () => userStore.settings,
+  (val) => {
+    settings.value = { ...val }
+  },
+  { deep: true },
+)
+
+/** 进入页面：拉取后端应用设置 */
+onMounted(async () => {
+  const data = await userStore.loadAppSettings()
+  if (data) {
+    settings.value = { ...userStore.settings }
+  }
+})
+
+async function persist(payload: Record<string, any>, successText = '已保存') {
+  const res = await userStore.saveAppSettings(payload)
+  if (res) {
+    ElMessage.success(successText)
+  } else {
+    ElMessage.error('保存失败，请稍后重试')
+  }
+}
+
+function onAnonymousChange() {
+  persist({ anonymousMode: settings.value.anonymousMode })
+}
+
+function onDarkModeChange() {
+  persist({ darkMode: settings.value.darkMode })
+}
+
+async function onSelectTheme(key: string) {
+  if (settings.value.themeKey === key) {
+    openThemePicker.value = false
+    return
+  }
+  settings.value.themeKey = key
+  await persist({ themeKey: key }, '主题已切换')
+  openThemePicker.value = false
+}
 
 function onClearData() {
   ElMessage.info('此功能开发中，敬请期待')
@@ -219,5 +289,75 @@ function onFeedback() {
   font-size: 11px;
   margin: 16px 0 0;
   padding-bottom: 16px;
+}
+
+/* 主题选择器 */
+.theme-row {
+  cursor: pointer;
+}
+.theme-picker {
+  padding: 0 16px 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  background: #FFFBF6;
+  border-top: 1px solid #FAF1E5;
+}
+.theme-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1.5px solid transparent;
+  border-radius: 14px;
+  transition: all 0.2s;
+}
+.theme-card.active {
+  background: #FFF8F1;
+  box-shadow: 0 2px 8px rgba(232, 138, 107, 0.15);
+}
+.theme-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #fff;
+  flex-shrink: 0;
+}
+.theme-info {
+  flex: 1;
+  min-width: 0;
+}
+.theme-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #4A3A2E;
+}
+.theme-desc {
+  font-size: 10px;
+  color: #9C8B7E;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.slide-enter-active,
+.slide-leave-active {
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+.slide-enter-from,
+.slide-leave-to {
+  max-height: 0;
+  opacity: 0;
+}
+.slide-enter-to,
+.slide-leave-from {
+  max-height: 400px;
+  opacity: 1;
 }
 </style>

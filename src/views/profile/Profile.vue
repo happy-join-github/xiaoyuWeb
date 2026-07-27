@@ -122,26 +122,26 @@
         <div class="setting-item">
           <div class="ic peach"><SvgIcon name="bell" :size="16" /></div>
           <span class="label">每日卡片推送</span>
-          <el-switch v-model="settings.dailyCardPush" />
+          <el-switch v-model="userStore.settings.dailyCardPush" @change="onNotifChange('dailyCardPush')" />
         </div>
         <div class="setting-item">
           <div class="ic blue"><SvgIcon name="moon" :size="16" /></div>
           <span class="label">晚安提醒</span>
-          <el-switch v-model="settings.goodnightReminder" />
+          <el-switch v-model="userStore.settings.goodnightReminder" @change="onNotifChange('goodnightReminder')" />
         </div>
         <div class="setting-item">
           <div class="ic sage">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 12l4-4 4 6 5-8"/></svg>
           </div>
           <span class="label">情绪周报推送</span>
-          <el-switch v-model="settings.weeklyReport" />
+          <el-switch v-model="userStore.settings.weeklyReport" @change="onNotifChange('weeklyReport')" />
         </div>
         <div class="setting-item">
           <div class="ic cream">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
           </div>
           <span class="label">打卡提醒</span>
-          <el-switch v-model="settings.checkinReminder" />
+          <el-switch v-model="userStore.settings.checkinReminder" @change="onNotifChange('checkinReminder')" />
         </div>
       </div>
 
@@ -166,43 +166,43 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, reactive } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { ElMessage, ElSwitch, ElTag, ElButton } from 'element-plus'
 import StatusBar from '../../components/StatusBar.vue'
 import NavBar from '../../components/NavBar.vue'
 import TabBar from '../../components/TabBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
-import { ElSwitch, ElTag, ElButton } from 'element-plus'
 import { useUserStore } from '../../stores/user'
-import service from "../../api/index.ts"
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 const isChildRoute = computed(() => route.path !== '/profile')
 
-/** 内联设置的状态 */
-const settings = reactive({
-  dailyCardPush: true,
-  goodnightReminder: true,
-  weeklyReport: true,
-  checkinReminder: false,
-})
-
 function onLogout() {
   userStore.logout()
   router.push({ name: 'Login' })
 }
 
-onMounted(async () => {
-  try {
-    const res: any = await service.get("/profile")
-    if (res?.code === 200) {
-      userStore.updateProfile(res.data)
-    }
-  } catch {
-    // 静默处理 — 401 等情况由拦截器处理
+/** 通知类开关：v-model 已写入 store，这里读最新值并 PUT /api/profile/settings */
+async function onNotifChange(
+  key: 'dailyCardPush' | 'goodnightReminder' | 'weeklyReport' | 'checkinReminder',
+) {
+  const val = userStore.settings[key]
+  const res = await userStore.saveAppSettings({ [key]: val })
+  if (!res) {
+    ElMessage.error('通知设置保存失败')
   }
+}
+
+onMounted(async () => {
+  // 三个接口并行拉取，互不依赖
+  await Promise.all([
+    userStore.loadProfile(),
+    userStore.loadStats(),
+    userStore.loadAppSettings(),
+  ])
 })
 </script>
 
