@@ -18,7 +18,7 @@ export default defineConfig(({ mode }) => {
 
     // 开发服务器：把 /api 代理到后端，避免浏览器跨域
     server: {
-      host: true,
+      host: "127.0.0.1",
       port: 5173,
       proxy: {
         '/api': {
@@ -26,7 +26,7 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
         },
       },
-      allowedHosts:['*']
+      allowedHosts: true
     },
 
     // 打包：base 走环境变量，便于部署到子路径
@@ -34,6 +34,8 @@ export default defineConfig(({ mode }) => {
     build: {
       outDir: 'dist',
       sourcemap: mode !== 'production',
+      // chunk 体积告警阈值 1024 KB（默认 500），避免大包告警
+      chunkSizeWarningLimit: 1024,
       // 产物按类型分目录：js/、css/、assets/
       rollupOptions: {
         output: {
