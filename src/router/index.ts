@@ -53,7 +53,17 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/cards/Cards.vue'),
     children: [
       {
-        path: 'detail',
+        path: 'create',
+        name: 'CardCreate',
+        component: () => import('../views/cards/CardCreate.vue'),
+      },
+      {
+        path: 'topic/:topicId',
+        name: 'TopicDetail',
+        component: () => import('../views/cards/TopicDetail.vue'),
+      },
+      {
+        path: ':id',
         name: 'CardDetail',
         component: () => import('../views/cards/CardDetail.vue'),
       },
