@@ -112,11 +112,36 @@ const isEdit = ref(false)
 const streakDays = ref(0)
 let autoTimer: ReturnType<typeof setTimeout> | null = null
 
-/** 加载今天已有记录（编辑模式） */
+/** 加载今天已有记录（编辑模式）；支持从树洞携带草稿 */
 onMounted(() => {
   const today = moodStore.formatDate(new Date())
   const existing = moodStore.getRecordByDate(today)
-  if (existing) {
+
+  // 优先读取树洞传来的草稿
+  const draft = sessionStorage.getItem('treehole_diary_draft')
+  if (draft) {
+    try {
+      const parsed = JSON.parse(draft)
+      if (parsed.emotion && parsed.emotion !== 'undefined') {
+        selectedEmotion.value = parsed.emotion as MoodType
+      }
+      if (parsed.summary) {
+        note.value = parsed.summary.slice(0, 50)
+      }
+      sessionStorage.removeItem('treehole_diary_draft')
+    } catch { /* ignore parse error */ }
+    // 还可能有树洞情绪标签
+    const emotionRecord = sessionStorage.getItem('treehole_emotion')
+    if (emotionRecord && !selectedEmotion.value) {
+      try {
+        const emap = JSON.parse(emotionRecord)
+        const todayEmotion = emap[today]
+        if (todayEmotion && ['happy','calm','sad','anxious','irritable','tearful'].includes(todayEmotion)) {
+          selectedEmotion.value = todayEmotion as MoodType
+        }
+      } catch { /* ignore */ }
+    }
+  } else if (existing) {
     selectedEmotion.value = existing.mood
     note.value = existing.note
     isEdit.value = true
