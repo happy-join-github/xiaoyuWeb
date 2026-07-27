@@ -1,8 +1,12 @@
 # 小愈 — 合并版 SQL 与 API 审查报告
 
-> 审查日期：2026-07-27
-> 审查范围：schema-merged.sql（748 行）、api-merged.md（717 行）
+> 审查日期：2026-07-27 · 翻新日期：2026-07-27
+> 审查范围：schema-merged.sql（749 行）、api-merged.md（~1860 行）
 > 审查方法：逐表/逐接口对照原始文档和前端源码交叉验证
+>
+> ⚠️ 本报告翻新记录：初版发现的问题大部分已在文档中修复。
+> 以下标注「已修复」的问题代表文档已更正，不再需要处理；
+> 标注「待修复」的问题代表文档中仍未改正，需继续修改。
 
 ---
 
@@ -12,21 +16,23 @@
 
 合并后的 SQL 在结构上完整，18 张表覆盖了全部业务模块，依赖顺序正确，索引策略合理。原始文档中 treehole 种子数据的 `'tired'` bug 已被正确修复为 `'sad'`。以下按严重程度列出发现的问题。
 
-### 1.2 严重问题
+### 1.2 已修复的严重问题
 
 #### S1 — `topics.card_count` 冗余计数字段无触发器维护
 
-`topics` 表（第 439 行）定义了 `card_count` 字段作为"包含卡片数（冗余）"，但没有任何 INSERT/UPDATE/DELETE 触发器来维护它。当通过 `topic_cards` 表增删关联时，`topics.card_count` 不会自动更新，必然出现数据不一致。
+**状态：已修复 ✅**
 
-**影响**：主题列表接口 E12 返回的 `cardCount` 与实际不符。
+初版 `topics` 表定义了 `card_count` 作为"包含卡片数（冗余）"，但缺少触发器维护。文档翻新时选择了更合理的方案：**移除了 `topics.card_count` 字段**（因为单表只有几条到十几条记录，实时 COUNT 成本低），并在 SQL 注释中明确说明。
 
-**修复建议**：在 `topic_cards` 表上增加 AFTER INSERT / AFTER DELETE 触发器自动维护 `topics.card_count`，或在合并 SQL 中明确标注此字段由应用层维护（而不只是标"冗余"）。
+当前 `topics` 表简洁、无冗余计数，前端 `TopicItem.cardCount` 由服务端实时聚合。这是比加触发器更干净的方案。
 
 #### S2 — `treehole_diary_drafts.emotion` 类型与同模块其他表不一致
 
-`treehole_emotion_tags.emotion`（第 551 行）使用 ENUM 约束，但 `treehole_diary_drafts.emotion`（第 583 行）使用 `VARCHAR(20)` 自由文本。两张表存储的是同一业务概念（情绪标签），类型应当一致。
+**状态：已修复 ✅**
 
-**修复建议**：将 `treehole_diary_drafts.emotion` 也改为 ENUM 类型，或至少在 COMMENT 中说明为何此处不约束。
+`treehole_emotion_tags.emotion` 使用 ENUM('happy','calm','sad','anxious','irritable','tearful') 约束，但 `treehole_diary_drafts.emotion` 原为 `VARCHAR(20)` 自由文本。两张表存储同一业务概念（情绪标签），类型应当一致。
+
+当前 `treehole_diary_drafts.emotion` 已改为相同的 ENUM 类型（`DEFAULT NULL`，保留选填语义），保持全库情绪字段类型统一。
 
 ### 1.3 中等问题
 
@@ -79,6 +85,8 @@
 - ✅ `user_settings` 表新增了通知开关四个字段（第 109-112 行）
 - ✅ `mood_config` 表新增 `created_at` 字段
 - ✅ 补充了完整的种子数据（用户、心情、卡片、主题、会话、消息）
+- ✅ `topics.card_count` 已移除（冗余计数器清理原则，改为实时 COUNT）
+- ✅ `treehole_diary_drafts.emotion` 已从 VARCHAR(20) 改为 ENUM，与全库情绪字段类型统一
 
 ---
 
@@ -86,73 +94,60 @@
 
 ### 2.1 总体评价
 
-API 文档的模块覆盖和端点定义基本完整，附录中的 TypeScript 模型和集成交接清单很有价值。但存在一处致命的数据对接问题、一个硬数字错误，以及收藏集 API 的完整缺失。
+API 文档的模块覆盖和端点定义完整，47 个接口覆盖了全部业务模块，附录中的 TypeScript 模型和集成交接清单很有价值。初版发现的三个严重问题（F1 响应扁平化、收藏集 CRUD 缺失、接口总数错误）已在翻新中全部修复。
 
-### 2.2 严重问题
+### 2.2 已修复的严重问题
 
-#### S1 — F1 接口响应格式与 `updateProfile()` 函数完全不匹配（致命）
+#### S1 — F1 接口响应格式与 `updateProfile()` 函数不匹配
 
-**这是后端按此文档实现后将导致 Profile 页面全部数据无法正确渲染的致命问题。**
+**状态：已修复 ✅**
 
-**API 文档定义的响应格式**（F1，第 1262-1288 行）：
+初版 API 文档定义 F1 返回嵌套结构 `{ user: {...}, profile: {...} }`，但 Profile.vue 的 `userStore.updateProfile()` 期望扁平对象，且存在字段命名不统一问题。
+
+文档翻新时已将 F1 响应改为扁平 camelCase 结构：
+
 ```json
 {
   "data": {
-    "user": { "nickname": "小柚子", "avatar": "🦊", ... },
-    "profile": { "aiName": "小愈", "voice": "温柔女声", ... }
+    "name": "小柚子",
+    "aiName": "小愈",
+    "avatar": "🦊",
+    "phone": "13800138000",
+    "companionDays": 14,
+    "chatRounds": 86,
+    "diaryCount": 14,
+    "collectionCount": 12,
+    ...
   }
 }
 ```
 
-**Profile.vue 实际调用**（第 197-206 行）：
-```typescript
-const res = await service.get("/profile")
-userStore.updateProfile(res.data)  // res.data = { user: {...}, profile: {...} }
-```
+字段名全部统一 camelCase，与 store 函数参数完全匹配。API 文档第 1441 行明确标注：
 
-**`updateProfile()` 函数签名**（user.ts 第 28-49 行）：
-```typescript
-function updateProfile(data: {
-  name?: string;           // 期望 data.name（非 data.user.nickname）
-  aiName?: string;         // 期望 data.aiName（非 data.profile.aiName）
-  companion_days?: number; // snake_case（非 data.profile.companionDays）
-  chat_rounds?: number;    // snake_case（非 data.profile.chatRounds）
-  diary_count?: number;    // snake_case
-  collection_count?: number;
-  // ...
-})
-```
+> **前端对接**：`userStore.updateProfile(res.data)` — 响应字段与函数参数完全一一对应，无需转换。
 
-三重不匹配：
-1. **结构层级不匹配**：API 返回嵌套 `{ user, profile }`，store 期望扁平对象
-2. **字段名不匹配**：`nickname`（API）vs `name`（store）；`chatRounds`（API）vs `chat_rounds`（store 参数）vs `chatCount`（store 属性）
-3. **命名风格混乱**：`updateProfile` 的参数列表中同时混用 camelCase（`aiName`, `morningGreeting`）和 snake_case（`companion_days`, `chat_rounds`, `diary_count`, `collection_count`）
+#### S2 — 收藏集 CRUD API 完全缺失
 
-**修复建议**：
-- **选项 A（推荐）**：API 返回扁平结构，使用 snake_case 字段名，与 `updateProfile` 参数一致
-- **选项 B**：在 Profile.vue 中做一层解包转换 `updateProfile({ ...res.data.user, ...res.data.profile })`，但字段名映射仍需处理
-- **选项 C**：统一全部字段为 camelCase，同时修改 store 的 `updateProfile` 函数
+**状态：已修复 ✅**
 
-需同步修正 API 文档第 1300-1316 行的"字段映射"表，使其与实际函数签名一致。
+初版 API 文档缺少收藏集 CRUD 端点。文档翻新时已补充六个端点（E16-E21）：
 
-#### S2 — 收藏集（user_collections）的 CRUD API 完全缺失
+| 编号 | 方法 | 路径 | 说明 |
+|------|------|------|------|
+| E16 | GET | /api/cards/collections/list | 获取收藏集列表 |
+| E17 | POST | /api/cards/collections | 创建收藏集 |
+| E18 | PUT | /api/cards/collections/:id | 更新收藏集名称 |
+| E19 | DELETE | /api/cards/collections/:id | 删除收藏集 |
+| E20 | POST | /api/cards/collections/:collectionId/cards | 添加卡片到收藏集 |
+| E21 | DELETE | /api/cards/collections/:collectionId/cards/:cardId | 从收藏集移除卡片 |
 
-SQL 中定义了 `user_collections` 和 `collection_cards` 两张表（第 475-508 行），前端 cards store 实现了完整的收藏集管理（`createCollection` / `deleteCollection` / `addCardToCollection` / `removeCardFromCollection` / `getCollectionsByCard`，cards.ts 第 227-261 行），但合并版 API 文档中完全没有对应端点。当前 `E9-E11` 三个接口只覆盖了 `user_favorites`（简单收藏/取消）。
-
-**缺失的端点**：
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| GET | /api/cards/collections/list | 获取用户的所有收藏集 |
-| POST | /api/cards/collections | 创建收藏集 |
-| PUT | /api/cards/collections/:id | 重命名收藏集 |
-| DELETE | /api/cards/collections/:id | 删除收藏集 |
-| POST | /api/cards/collections/:id/cards | 添加卡片到收藏集 |
-| DELETE | /api/cards/collections/:id/cards/:cardId | 从收藏集移除卡片 |
-| GET | /api/cards/collections/:id/cards | 获取收藏集内的卡片列表 |
+前端 cards store 中已有的功能（`createCollection` / `deleteCollection` / `addCardToCollection` / `removeCardFromCollection` / `getCollectionsByCard`）现已全部有对应的 API 端点描述。
 
 #### S3 — 接口总数标注错误
 
-标题第 5 行写"接口总数：34 个"，但实际定义的端点为 **41 个**：
+**状态：已修正 ✅**
+
+初版标题写"接口总数：34 个"，但实际应为 41 个（加上补充的 6 个收藏集端点后为 47 个）。当前文档标题已更正为 47 个：
 
 | 模块 | 端点数 |
 |------|--------|
@@ -160,9 +155,9 @@ SQL 中定义了 `user_collections` 和 `collection_cards` 两张表（第 475-5
 | B 聊天 | 7 |
 | C 树洞 | 3 |
 | D 心情 | 6 |
-| E 卡片 | 15 |
+| E 卡片 | 21（含 E16-E21 收藏集） |
 | F 用户 | 7 |
-| **合计** | **41** |
+| **合计** | **47** |
 
 ### 2.3 中等问题
 
@@ -204,9 +199,9 @@ F5 响应中的 `availableThemes` 数组（第 1426-1432 行）是 5 套预设�
 
 | SQL 字段 | API 字段 | 是否一致 | 备注 |
 |----------|---------|---------|------|
-| users.nickname | (F1) user.nickname / (F2) nickname | ⚠️ | API 内部一致但与 store 的 `name` 不一致 |
-| user_profiles.chat_rounds | chatRounds | ✅ | snake↔camel 正常转换 |
-| user_profiles.morning_greeting_time | morningGreeting | ⚠️ | SQL 列名含 `_time` 后缀，API 不含 |
+| users.nickname | (F1) name / (F2) nickname | ⚠️ | F1 已改为扁平结构，直接映射 store 的 `name`；F2 用 `nickname` 系不同场景，无冲突 |
+| user_profiles.ai_name | aiName | ✅ | snake↔camel 正常转换 |
+| user_profiles.morning_greeting_time | morningGreeting | ⚠️ | SQL 列名含 `_time` 后缀，API 不含，后端序列化时映射即可 |
 | cards.date_label | date | ⚠️ | 字段名不同，需后端映射 |
 | cards.likes_count | likes | ⚠️ | 字段名不同，需后端映射 |
 | mood_records.record_date | recordDate | ✅ | snake↔camel |
@@ -221,23 +216,27 @@ F5 响应中的 `availableThemes` 数组（第 1426-1432 行）是 5 套预设�
 
 ---
 
-## 四、修复优先级
+## 四、问题状态总览
 
-| 优先级 | 编号 | 问题 | 影响 |
+| 优先级 | 编号 | 问题 | 状态 |
 |--------|------|------|------|
-| **P0** | API-S1 | F1 响应格式与 store 不匹配 | Profile 页面数据无法渲染 |
-| **P0** | API-S3 | 接口总数 34→41 | 文档硬错误 |
-| **P1** | API-S2 | 收藏集 CRUD API 缺失 | 收藏集功能无法对接后端 |
-| **P1** | SQL-S1 | topics.card_count 无触发器 | 数据不一致风险 |
-| **P2** | SQL-S2 | treehole_diary_drafts.emotion 类型不一致 | 数据约束缺口 |
-| **P2** | API-M1 | 通知设置未对接 | 功能不完整（前端+后端均需改） |
-| **P2** | SQL-M1 | TINYINT 默认值字符串 | 代码规范问题 |
-| **P3** | 其余 L 级问题 | 文档注释完善 | 无功能影响 |
+| P0 | API-S1 | F1 响应格式与 store 不匹配 | ✅ 已修复（扁平 camelCase） |
+| P0 | API-S3 | 接口总数 34→47 | ✅ 已更正 |
+| P1 | API-S2 | 收藏集 CRUD API 缺失 | ✅ 已补充 E16-E21 |
+| P1 | SQL-S1 | topics.card_count 无触发器 | ✅ 已移除冗余字段 |
+| P2 | SQL-S2 | treehole_diary_drafts.emotion 类型不一致 | ✅ 已改为 ENUM |
+| P2 | API-M1 | 通知设置未对接 | 🔄 待前端接入（后端 F5/F6 已就绪） |
+| P2 | SQL-M1 | TINYINT 默认值字符串 | 📝 低优先级规范问题 |
+| P3 | 其余 L 级问题 | 文档注释完善 | 📝 无功能影响 |
 
 ---
 
 ## 五、总结
 
-**SQL 方面**：结构完整、索引设计合理，主要问题是 `topics.card_count` 缺少维护机制，以及一些代码规范细节。
+**SQL 方面**：结构完整、索引设计合理。初版发现的 `topics.card_count` 问题（移除冗余字段）和 `treehole_diary_drafts.emotion` 类型不一致（改为 ENUM）均已在翻新中修复。当前设计原则清晰：仅保留有明确性能必要的冗余计数器（`chat_sessions.message_count` 应用层维护、`cards.likes_count` 触发器维护）。
 
-**API 方面**：覆盖全面，但 **F1 接口的响应格式与实际 store 函数签名存在致命不匹配**，这是后端按此文档实现后必定出现的问题，必须优先修复。此外收藏集 CRUD 的完全缺失也是一个显著的功能缺口。
+**API 方面**：覆盖全面，47 个接口覆盖 6 个业务模块，F1 响应已扁平化为 camelCase 与 store 直接匹配，收藏集 CRUD 的 6 个端点（E16-E21）已补充。附录中的 TypeScript 数据模型、接口速查表、前后端对接检查清单完整可用。
+
+**未解决问题**：
+- 通知开关（`dailyCardPush` / `goodnightReminder` / `weeklyReport` / `checkinReminder`）当前为前端本地状态，Profile.vue 待接入 F5/F6 接口 — 后端 API 和 SQL 表已就绪
+- `MoodRecord` 接口在 mock.ts（great/good/okay/bad/awful）与 store（happy/calm/sad/anxious/irritable/tearful）之间的不统一 — 后端实现以 API 文档为准，mock 数据后续统一

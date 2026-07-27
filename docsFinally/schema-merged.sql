@@ -573,7 +573,8 @@ CREATE TABLE `treehole_diary_drafts` (
   `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT  COMMENT '草稿ID',
   `user_id`         BIGINT UNSIGNED NOT NULL                  COMMENT '用户ID（关联 users.id）',
   `session_id`      BIGINT UNSIGNED NOT NULL                  COMMENT '来源树洞会话ID（关联 chat_sessions.id）',
-  `emotion`         VARCHAR(20)     DEFAULT NULL              COMMENT '选填的情绪标签',
+  `emotion`         ENUM('happy','calm','sad','anxious','irritable','tearful')
+                      DEFAULT NULL              COMMENT '情绪标签（与 mood_records.mood 枚举一致，选填）',
   `summary`         VARCHAR(500)    DEFAULT NULL              COMMENT '对话摘要文字',
   `status`          ENUM('pending', 'saved', 'expired')
                       NOT NULL DEFAULT 'pending'
