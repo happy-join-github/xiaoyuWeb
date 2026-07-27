@@ -27,7 +27,7 @@ export const useUserStore = defineStore('user', () => {
   /** 更新个人信息（登录后或编辑保存时调用） */
   function updateProfile(data: {
     name?: string; aiName?: string; avatar?: string; phone?: string;
-    companion_days?: number; chat_rounds?: number; diary_count?: number; collection_count?: number;
+    companionDays?: number; chatRounds?: number; diaryCount?: number; collectionCount?: number;
     voice?: string; characterTags?: string[]; characterBio?: string;
     morningGreeting?: string; eveningGreeting?: string;
   }) {
@@ -36,10 +36,10 @@ export const useUserStore = defineStore('user', () => {
     if (data.avatar !== undefined) avatar.value = data.avatar || '🦊'
     if (data.phone !== undefined) phone.value = data.phone
   
-    if (data.companion_days !== undefined) companionDays.value = data.companion_days
-    if (data.chat_rounds !== undefined) chatCount.value = data.chat_rounds
-    if (data.diary_count !== undefined) diaryCount.value = data.diary_count
-    if (data.collection_count !== undefined) collectionCount.value = data.collection_count
+    if (data.companionDays !== undefined) companionDays.value = data.companionDays
+    if (data.chatRounds !== undefined) chatCount.value = data.chatRounds
+    if (data.diaryCount !== undefined) diaryCount.value = data.diaryCount
+    if (data.collectionCount !== undefined) collectionCount.value = data.collectionCount
 
     if (data.voice !== undefined) voice.value = data.voice
     if (data.characterTags !== undefined) characterTags.value = data.characterTags
@@ -51,7 +51,6 @@ export const useUserStore = defineStore('user', () => {
   /** 退出登录：清空用户态并移除 localStorage 中的凭证 */
   function logout() {
     try {
-      sessionStorage.removeItem('userInfo')
       sessionStorage.removeItem('userInfo')
       localStorage.removeItem('theme')
       // 重置 store 数据到默认值
