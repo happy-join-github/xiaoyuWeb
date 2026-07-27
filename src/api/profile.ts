@@ -17,7 +17,7 @@ export interface UserProfileData {
   diaryCount: number
   collectionCount: number
   voice: string
-  characterTags: string[]
+  characterTags: string[] | string
   characterBio: string | null
   morningGreeting: string
   eveningGreeting: string
@@ -27,7 +27,7 @@ export interface UserProfileData {
 export interface AiSettings {
   aiName: string
   voice: string
-  characterTags: string[]
+  characterTags: string[] | string
   characterBio: string | null
   morningGreeting: string
   eveningGreeting: string

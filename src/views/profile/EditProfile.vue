@@ -61,7 +61,7 @@
         </div>
         <div class="summary-item">
           <span class="summary-label">角色</span>
-          <span class="summary-value">{{ userStore.characterTags.slice(0, 3).join(' · ') || '未设置' }}</span>
+          <span class="summary-value">{{ characterTagText || '未设置' }}</span>
         </div>
         <div class="summary-item">
           <span class="summary-label">问候</span>
@@ -106,7 +106,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElInput, ElButton } from 'element-plus'
 import StatusBar from '../../components/StatusBar.vue'
@@ -118,6 +118,32 @@ const router = useRouter()
 const userStore = useUserStore()
 
 const avatarList = ['🦊', '🐱', '🐶', '🐰', '🐼', '🐸', '🦋', '🌸', '🌻', '⭐']
+
+/** 兜底：把后端可能返回的字符串/null 安全转成数组（兼容 JSON 字符串 / 逗号分隔） */
+const characterTagText = computed(() => {
+  const raw = userStore.characterTags as unknown
+  let arr: string[] = []
+  if (Array.isArray(raw)) {
+    arr = raw
+  } else if (typeof raw === 'string') {
+    const trimmed = raw.trim()
+    if (!trimmed || trimmed === '[]') {
+      arr = []
+    } else if (trimmed.startsWith('[')) {
+      // JSON 字符串，如 '["a","b"]'
+      try {
+        const parsed = JSON.parse(trimmed)
+        arr = Array.isArray(parsed) ? parsed.filter((v) => typeof v === 'string') : []
+      } catch {
+        arr = []
+      }
+    } else {
+      // 逗号 / 顿号 / 空白 分隔
+      arr = trimmed.split(/[,，、\s]+/).filter(Boolean)
+    }
+  }
+  return arr.slice(0, 3).join(' · ')
+})
 
 const editForm = reactive({
   name: userStore.name,

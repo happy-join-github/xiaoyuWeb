@@ -71,7 +71,7 @@ export const useUserStore = defineStore('user', () => {
     if (data.diaryCount !== undefined) diaryCount.value = data.diaryCount
     if (data.collectionCount !== undefined) collectionCount.value = data.collectionCount
     if (data.voice !== undefined) voice.value = data.voice
-    if (data.characterTags !== undefined) characterTags.value = data.characterTags
+    if (data.characterTags !== undefined) characterTags.value = normalizeTags(data.characterTags)
     if (data.characterBio !== undefined) characterBio.value = data.characterBio || ''
     if (data.morningGreeting !== undefined) morningGreeting.value = data.morningGreeting
     if (data.eveningGreeting !== undefined) eveningGreeting.value = data.eveningGreeting
@@ -81,10 +81,35 @@ export const useUserStore = defineStore('user', () => {
   function applyAiSettings(data: Partial<AiSettings>) {
     if (data.aiName !== undefined) aiName.value = data.aiName
     if (data.voice !== undefined) voice.value = data.voice
-    if (data.characterTags !== undefined) characterTags.value = data.characterTags
+    if (data.characterTags !== undefined) characterTags.value = normalizeTags(data.characterTags)
     if (data.characterBio !== undefined) characterBio.value = data.characterBio || ''
     if (data.morningGreeting !== undefined) morningGreeting.value = data.morningGreeting
     if (data.eveningGreeting !== undefined) eveningGreeting.value = data.eveningGreeting
+  }
+
+  /**
+   * 归一化角色标签：兼容数组 / JSON 字符串（如 "[]" 或 '["a","b"]'）/ 逗号分隔字符串
+   */
+  function normalizeTags(raw: unknown): string[] {
+    if (Array.isArray(raw)) {
+      return raw.filter((v): v is string => typeof v === 'string' && v.length > 0)
+    }
+    if (typeof raw === 'string') {
+      const trimmed = raw.trim()
+      if (!trimmed || trimmed === '[]') return []
+      if (trimmed.startsWith('[')) {
+        try {
+          const parsed = JSON.parse(trimmed)
+          if (Array.isArray(parsed)) {
+            return parsed.filter((v): v is string => typeof v === 'string' && v.length > 0)
+          }
+        } catch {
+          /* fall through to split */
+        }
+      }
+      return trimmed.split(/[,，、\s]+/).filter(Boolean)
+    }
+    return []
   }
 
   /** 根据接口数据填充应用设置 */
