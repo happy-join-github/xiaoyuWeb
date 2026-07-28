@@ -25,17 +25,13 @@
       <el-form ref="formRef" class="form fade-up" :model="ruleForm" :rules="rules" label-position="top">
         <el-form-item label="选择头像">
           <div class="avatar-picker">
-            <div v-for="(src, i) in defaultAvatars" :key="i" class="avatar-option"
-              :class="{ active: ruleForm.avatar === src }" @click="onPickDefault(src)">
-              <img :src="src" :alt="`默认头像${i + 1}`" />
-            </div>
-            <label class="avatar-option avatar-upload"
-              :class="{ active: ruleForm.avatar && !defaultAvatars.includes(ruleForm.avatar) }">
-              <input type="file" accept="image/*" hidden @change="onAvatarUpload" />
-              <img v-if="ruleForm.avatar && !defaultAvatars.includes(ruleForm.avatar)" :src="ruleForm.avatar"
-                alt="上传头像" />
-              <span v-else class="upload-plus" aria-hidden="true">+</span>
-            </label>
+            <span
+              v-for="e in avatarList"
+              :key="e"
+              class="avatar-option"
+              :class="{ active: ruleForm.avatar === e }"
+              @click="ruleForm.avatar = e"
+            >{{ e }}</span>
           </div>
         </el-form-item>
 
@@ -115,9 +111,6 @@ import { ArrowLeft } from '@element-plus/icons-vue'
 import service from '../api/index.ts'
 import { useRouter } from 'vue-router'
 import StatusBar from '../components/StatusBar.vue'
-// 默认头像资源
-import defaultAvatar1 from '../assets/img19.webp'
-import defaultAvatar2 from '../assets/img669.webp'
 import { useUserStore } from '../stores/user.ts'
 
 const router = useRouter()
@@ -125,6 +118,8 @@ const userStore = useUserStore()
 
 // AI 伙伴的默认名字
 const DEFAULT_AI_NAME = '小愈'
+
+const avatarList = ['🦊', '🐱', '🐶', '🐰', '🐼', '🐸', '🦋', '🌸', '🌻', '⭐']
 
 interface RuleForm {
   name: string
@@ -139,37 +134,10 @@ const ruleForm = reactive<RuleForm>({
   aiName: DEFAULT_AI_NAME,
   password: '',
   phone: '',
-  avatar: defaultAvatar1,
+  avatar: avatarList[0],
 })
 const agreed = ref(false)
 const confirmPassword = ref('')
-
-// 头像：两张默认 + 一张用户上传
-const defaultAvatars = [defaultAvatar1, defaultAvatar2]
-
-function onPickDefault(src: string) {
-  ruleForm.avatar = src
-}
-
-function onAvatarUpload(e: Event) {
-  const file = (e.target as HTMLInputElement).files?.[0]
-  if (!file) return
-  if (!file.type.startsWith('image/')) {
-    ElMessage.error('请选择图片文件')
-    return
-  }
-  if (file.size > 2 * 1024 * 1024) {
-    ElMessage.error('图片大小不能超过 2MB')
-    return
-  }
-  const reader = new FileReader()
-  reader.onload = () => {
-    ruleForm.avatar = reader.result as string
-  }
-  reader.readAsDataURL(file)
-    // 清空 input，便于再次选择同一文件
-    ; (e.target as HTMLInputElement).value = ''
-}
 
 const rules = reactive<FormRules<RuleForm>>({
   name: [
@@ -414,57 +382,36 @@ async function onSubmit() {
 /* 头像选择器 */
 .avatar-picker {
   display: flex;
-  gap: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
   align-items: center;
 }
 
 .avatar-option {
-  width: 56px;
-  height: 56px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  overflow: hidden;
-  border: 2.5px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
   background: rgba(255, 255, 255, 0.75);
+  border: 2.5px solid transparent;
   cursor: pointer;
   flex-shrink: 0;
   transition: border-color 0.2s, transform 0.2s;
-  position: relative;
-}
-
-.avatar-option img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
 }
 
 .avatar-option.active {
   border-color: #E88A6B;
+  background: #fff;
   box-shadow: 0 0 0 3px rgba(232, 138, 107, 0.18);
+  transform: scale(1.1);
 }
 
 .avatar-option:not(.active):hover {
   transform: translateY(-1px);
-}
-
-.avatar-upload {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #C4B5A6;
-  font-size: 26px;
-  font-weight: 300;
-  line-height: 1;
-  background: rgba(255, 255, 255, 0.55);
-  border-style: dashed;
-}
-
-.avatar-upload.active {
-  background: #fff;
-}
-
-.upload-plus {
-  user-select: none;
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .optional {
