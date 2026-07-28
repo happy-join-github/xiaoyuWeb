@@ -214,7 +214,7 @@ function onShare() {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(180deg, #FFEFDF 0%, #FFE0CB 100%);
+  background: linear-gradient(180deg, var(--cream-2) 0%, var(--line) 100%);
 }
 
 /* 空状态 */
@@ -245,14 +245,14 @@ function onShare() {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #4A3A2E;
+  color: var(--text-main);
   border: none;
   cursor: pointer;
 }
 .header .title {
   font-size: 16px;
   font-weight: 600;
-  color: #4A3A2E;
+  color: var(--text-main);
 }
 .header .actions {
   display: flex;
@@ -266,7 +266,7 @@ function onShare() {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9C8B7E;
+  color: var(--text-sub);
   border: none;
   cursor: pointer;
 }
@@ -283,7 +283,7 @@ function onShare() {
 .date-card {
   margin: 12px 20px 16px;
   padding: 24px;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 24px;
   box-shadow: var(--shadow-md);
   position: relative;
@@ -296,7 +296,7 @@ function onShare() {
   right: -40px;
   width: 160px;
   height: 160px;
-  background: linear-gradient(135deg, #FFE7D1 0%, #FFD4C2 100%);
+  background: linear-gradient(135deg, var(--apricot) 0%, var(--peach) 100%);
   border-radius: 50%;
   opacity: 0.4;
 }
@@ -309,12 +309,12 @@ function onShare() {
 }
 .date-card .date {
   font-size: 13px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   position: relative;
   z-index: 1;
 }
 .date-card .date b {
-  color: #4A3A2E;
+  color: var(--text-main);
   font-weight: 600;
 }
 .date-card .mood {
@@ -332,7 +332,7 @@ function onShare() {
 .quote-section {
   margin: 0 20px 16px;
   padding: 18px 20px;
-  background: linear-gradient(135deg, #FFF8F1 0%, #FFE7D1 100%);
+  background: linear-gradient(135deg, var(--cream) 0%, var(--apricot) 100%);
   border-radius: 18px;
   position: relative;
 }
@@ -342,18 +342,18 @@ function onShare() {
   top: -4px;
   left: 16px;
   font-size: 60px;
-  color: #F4A988;
+  color: var(--accent);
   line-height: 1;
 }
 .quote-section .text {
   font-size: 16px;
   line-height: 1.7;
-  color: #4A3A2E;
+  color: var(--text-main);
   font-weight: 500;
 }
 .quote-section .sign {
   font-size: 12px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   margin-top: 12px;
   text-align: right;
 }
@@ -362,7 +362,7 @@ function onShare() {
 }
 .section .label {
   font-size: 12px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   margin-bottom: 10px;
   display: flex;
   align-items: center;
@@ -375,17 +375,17 @@ function onShare() {
 }
 .kw {
   padding: 6px 12px;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 999px;
   font-size: 12px;
-  color: #4A3A2E;
+  color: var(--text-main);
   box-shadow: var(--shadow-sm);
 }
 .kw b {
-  color: #E88A6B;
+  color: var(--accent-deep);
 }
 .ai-card {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 18px;
   padding: 16px;
   box-shadow: var(--shadow-sm);
@@ -397,7 +397,7 @@ function onShare() {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #FFD4C2 0%, #FFE7D1 100%);
+  background: linear-gradient(135deg, var(--peach) 0%, var(--apricot) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -409,11 +409,11 @@ function onShare() {
 }
 .ai-card .body .name {
   font-size: 12px;
-  color: #9C8B7E;
+  color: var(--text-sub);
 }
 .ai-card .body .text {
   font-size: 14px;
-  color: #4A3A2E;
+  color: var(--text-main);
   line-height: 1.7;
   margin-top: 4px;
 }

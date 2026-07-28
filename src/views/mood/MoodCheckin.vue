@@ -210,7 +210,7 @@ onBeforeUnmount(() => {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(180deg, #FFEFDF 0%, #FFE0CB 100%);
+  background: linear-gradient(180deg, var(--cream-2) 0%, var(--line) 100%);
 }
 
 /* 内容区 */
@@ -239,20 +239,20 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9C8B7E;
+  color: var(--text-sub);
 }
 .greeting {
   margin-top: 8px;
 }
 .greeting h1 {
   font-size: 24px;
-  color: #4A3A2E;
+  color: var(--text-main);
   font-weight: 700;
   line-height: 1.3;
   white-space: pre-line;
 }
 .greeting p {
-  color: #9C8B7E;
+  color: var(--text-sub);
   margin-top: 6px;
   font-size: 13px;
 }
@@ -265,50 +265,50 @@ onBeforeUnmount(() => {
 .emotion-card {
   aspect-ratio: 1;
   max-height: 90px;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 14px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 2px;
-  box-shadow: 0 2px 8px rgba(244, 169, 136, 0.08);
+  box-shadow: var(--shadow-sm);
   border: 2px solid transparent;
   transition: all 0.2s;
   cursor: pointer;
 }
 .emotion-card.selected {
-  border-color: #F4A988;
-  background: linear-gradient(135deg, #FFF 0%, #FFE7D1 100%);
+  border-color: var(--accent);
+  background: linear-gradient(135deg, var(--card-bg) 0%, var(--apricot) 100%);
 }
 .emotion-card .emoji {
   font-size: 26px;
 }
 .emotion-card .name {
   font-size: 11px;
-  color: #4A3A2E;
+  color: var(--text-main);
 }
 .emotion-card.selected .name {
-  color: #E88A6B;
+  color: var(--accent-deep);
   font-weight: 600;
 }
 .note-box {
   margin-top: 16px;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 14px;
   padding: 12px 16px;
-  box-shadow: 0 2px 8px rgba(244, 169, 136, 0.08);
+  box-shadow: var(--shadow-sm);
 }
 .note-box label {
   display: block;
   font-size: 12px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   margin-bottom: 8px;
 }
 .reward {
   margin-top: 10px;
   padding: 10px 14px;
-  background: linear-gradient(135deg, #FFF4E8 0%, #FFE7D1 100%);
+  background: linear-gradient(135deg, var(--cream) 0%, var(--apricot) 100%);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -318,8 +318,8 @@ onBeforeUnmount(() => {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #fff;
-  color: #E88A6B;
+  background: var(--card-bg);
+  color: var(--accent-deep);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -329,12 +329,12 @@ onBeforeUnmount(() => {
 }
 .reward .text .t1 {
   font-size: 13px;
-  color: #4A3A2E;
+  color: var(--text-main);
   font-weight: 600;
 }
 .reward .text .t2 {
   font-size: 11px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   margin-top: 2px;
 }
 .actions {
@@ -349,7 +349,7 @@ onBeforeUnmount(() => {
   margin-top: 12px;
 }
 .skip a {
-  color: #9C8B7E;
+  color: var(--text-sub);
   font-size: 13px;
 }
 
@@ -361,7 +361,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 248, 241, 0.95);
+  background: var(--tabbar-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
@@ -391,26 +391,26 @@ onBeforeUnmount(() => {
 }
 .success-card h2 {
   font-size: 20px;
-  color: #4A3A2E;
+  color: var(--text-main);
 }
 .saved-mood {
   font-size: 18px;
-  color: #E88A6B;
+  color: var(--accent-deep);
   font-weight: 600;
 }
 .saved-note {
   font-size: 14px;
-  color: #9C8B7E;
+  color: var(--text-sub);
 }
 .streak-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 6px 14px;
-  background: linear-gradient(135deg, #FFE7D1, #FFD4C2);
+  background: linear-gradient(135deg, var(--apricot), var(--peach));
   border-radius: 999px;
   font-size: 13px;
-  color: #E88A6B;
+  color: var(--accent-deep);
   font-weight: 600;
   margin-top: 4px;
 }

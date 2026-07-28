@@ -185,7 +185,7 @@ async function onSave() {
 .screen-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, #FFF8F1 0%, #FFEAD9 100%);
+  background: linear-gradient(180deg, var(--cream) 0%, var(--cream-2) 100%);
 }
 .content {
   position: relative;
@@ -212,7 +212,7 @@ async function onSave() {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #4A3A2E;
+  color: var(--text-main);
   border: none;
   font-size: inherit;
 }
@@ -221,7 +221,7 @@ async function onSave() {
   font-weight: 600;
 }
 .nav .save.el-button {
-  color: #E88A6B;
+  color: var(--accent-deep);
   font-weight: 600;
   font-size: 14px;
   padding: 6px 12px;
@@ -233,15 +233,15 @@ async function onSave() {
 .preview-card {
   margin: 8px 0 20px;
   padding: 32px 24px;
-  background: linear-gradient(135deg, #FFE7D1 0%, #FFD4C2 100%);
+  background: linear-gradient(135deg, var(--apricot) 0%, var(--peach) 100%);
   border-radius: 24px;
   text-align: center;
-  box-shadow: 0 8px 24px rgba(244, 169, 136, 0.15);
+  box-shadow: var(--shadow-md);
 }
 .preview-card .name {
   font-size: 24px;
   font-weight: 700;
-  color: #4A3A2E;
+  color: var(--text-main);
 }
 .preview-card .preview {
   margin-top: 10px;
@@ -250,10 +250,10 @@ async function onSave() {
   border-radius: 14px;
   display: inline-block;
   font-size: 13px;
-  color: #4A3A2E;
+  color: var(--text-main);
 }
 .section {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 18px;
   padding: 6px 0;
   margin-bottom: 14px;
@@ -262,21 +262,21 @@ async function onSave() {
 .section-title {
   padding: 12px 16px 4px;
   font-size: 12px;
-  color: #9C8B7E;
+  color: var(--text-sub);
 }
 .field {
   padding: 14px 16px;
   display: flex;
   align-items: center;
   gap: 12px;
-  border-bottom: 1px solid #FAF1E5;
+  border-bottom: 1px solid var(--line);
 }
 .field:last-child {
   border-bottom: none;
 }
 .field .label {
   font-size: 14px;
-  color: #4A3A2E;
+  color: var(--text-main);
   flex: 1;
 }
 /* Keep .field .input for the <span class="input"> elements */
@@ -286,11 +286,11 @@ async function onSave() {
   background: transparent;
   text-align: right;
   font: inherit;
-  color: #9C8B7E;
+  color: var(--text-sub);
   min-width: 100px;
 }
 .field .arrow {
-  color: #C4B5A6;
+  color: var(--text-mute);
   flex-shrink: 0;
 }
 /* el-input inside .field - render inline, transparent */
@@ -306,47 +306,47 @@ async function onSave() {
 }
 .field :deep(.el-input__inner) {
   text-align: right;
-  color: #9C8B7E;
+  color: var(--text-sub);
 }
 .time-select {
   width: 110px;
 }
 .time-select :deep(.el-input__wrapper) {
-  background: #FFF8F1;
+  background: var(--cream);
   box-shadow: none;
-  border: 1.5px solid #FAF1E5;
+  border: 1.5px solid var(--line);
   border-radius: 10px;
   padding: 2px 8px;
 }
 .time-select :deep(.el-input__inner) {
   text-align: center;
-  color: #4A3A2E;
+  color: var(--text-main);
   font-size: 14px;
 }
 .time-select :deep(.el-select__caret) {
-  color: #C4B5A6;
+  color: var(--text-mute);
   font-size: 12px;
 }
 .sub-title {
   padding: 4px 16px 0;
   font-size: 12px;
-  color: #9C8B7E;
+  color: var(--text-sub);
 }
 .field :deep(.el-textarea__inner) {
-  background: #FFF8F1;
-  border: 1.5px solid #FAF1E5;
+  background: var(--cream);
+  border: 1.5px solid var(--line);
   border-radius: 12px;
   padding: 10px 12px;
   font-size: 13px;
-  color: #4A3A2E;
+  color: var(--text-main);
   resize: none;
 }
 .field :deep(.el-textarea__inner:focus) {
-  border-color: #E88A6B;
+  border-color: var(--accent-deep);
 }
 .field :deep(.el-input__count) {
   font-size: 11px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   background: transparent;
 }
 .title-options {
@@ -358,16 +358,16 @@ async function onSave() {
 .title-opt {
   padding: 8px 14px;
   border-radius: 999px;
-  background: #FFF8F1;
-  color: #4A3A2E;
+  background: var(--cream);
+  color: var(--text-main);
   font-size: 13px;
   border: 1.5px solid transparent;
   cursor: pointer;
 }
 .title-opt.selected {
-  background: #FFE7D1;
-  color: #E88A6B;
-  border-color: #E88A6B;
+  background: var(--apricot);
+  color: var(--accent-deep);
+  border-color: var(--accent-deep);
   font-weight: 600;
 }
 </style>

@@ -119,7 +119,7 @@ function onFavorite() {}
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(180deg, #FFEFDF 0%, #FFD4C2 50%, #CDE3F2 100%);
+  background: linear-gradient(180deg, var(--cream-2) 0%, var(--peach) 50%, var(--blue-mist) 100%);
 }
 .content {
   position: relative;
@@ -145,7 +145,7 @@ function onFavorite() {}
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #4A3A2E;
+  color: var(--text-main);
   border: none;
   cursor: pointer;
 }
@@ -157,14 +157,14 @@ function onFavorite() {}
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9C8B7E;
+  color: var(--text-sub);
   border: none;
   cursor: pointer;
 }
 .hero {
   margin: 8px 0 16px;
   padding: 24px 20px;
-  background: linear-gradient(135deg, #FFE7D1 0%, #FFD4C2 100%);
+  background: linear-gradient(135deg, var(--apricot) 0%, var(--peach) 100%);
   border-radius: 24px;
   text-align: center;
   position: relative;
@@ -177,25 +177,25 @@ function onFavorite() {}
   right: -30px;
   width: 140px;
   height: 140px;
-  background: radial-gradient(circle, #fff 0%, transparent 70%);
+  background: radial-gradient(circle, var(--card-bg) 0%, transparent 70%);
   opacity: 0.3;
 }
 .hero .week {
   font-size: 12px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   letter-spacing: 1px;
 }
 .hero h1 {
   font-size: 24px;
-  color: #4A3A2E;
+  color: var(--text-main);
   margin: 6px 0 4px;
 }
 .hero p {
   font-size: 13px;
-  color: #6B5A4D;
+  color: var(--text-main);
 }
 .section-card {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 20px;
   padding: 20px;
   margin-bottom: 14px;
@@ -210,11 +210,11 @@ function onFavorite() {}
 .section-card .head h3 {
   font-size: 15px;
   font-weight: 600;
-  color: #4A3A2E;
+  color: var(--text-main);
 }
 .section-card .head .sub {
   font-size: 11px;
-  color: #9C8B7E;
+  color: var(--text-sub);
 }
 .chart {
   height: 140px;
@@ -229,10 +229,10 @@ function onFavorite() {}
   justify-content: space-between;
   padding: 8px 6px 0;
   font-size: 11px;
-  color: #9C8B7E;
+  color: var(--text-sub);
 }
 .chart-labels .active {
-  color: #E88A6B;
+  color: var(--accent-deep);
   font-weight: 600;
 }
 .kw-cloud {
@@ -242,18 +242,18 @@ function onFavorite() {}
 }
 .kw {
   padding: 6px 14px;
-  background: #FFF8F1;
+  background: var(--cream);
   border-radius: 999px;
   font-size: 13px;
-  color: #4A3A2E;
+  color: var(--text-main);
 }
 .kw.hot {
-  background: #FFD4C2;
-  color: #E88A6B;
+  background: var(--peach);
+  color: var(--accent-deep);
   font-weight: 600;
 }
 .weekly-letter {
-  background: linear-gradient(135deg, #FFF8F1 0%, #FFE7D1 100%);
+  background: linear-gradient(135deg, var(--cream) 0%, var(--apricot) 100%);
   border-radius: 18px;
   padding: 18px 20px;
   margin-bottom: 14px;
@@ -265,19 +265,19 @@ function onFavorite() {}
   top: -4px;
   left: 18px;
   font-size: 60px;
-  color: #F4A988;
+  color: var(--accent);
   line-height: 1;
 }
 .weekly-letter .text {
   font-size: 14px;
   line-height: 1.85;
-  color: #4A3A2E;
+  color: var(--text-main);
 }
 .weekly-letter .sign {
   margin-top: 12px;
   text-align: right;
   font-size: 12px;
-  color: #9C8B7E;
+  color: var(--text-sub);
 }
 .stats {
   display: grid;
@@ -287,24 +287,24 @@ function onFavorite() {}
 .stat {
   text-align: center;
   padding: 14px 8px;
-  background: #FFF8F1;
+  background: var(--cream);
   border-radius: 14px;
 }
 .stat .num {
   font-size: 20px;
   font-weight: 700;
-  color: #E88A6B;
+  color: var(--accent-deep);
 }
 .stat .label {
   font-size: 11px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   margin-top: 2px;
 }
 .suggest {
   display: flex;
   gap: 10px;
   align-items: center;
-  background: #FFF4E8;
+  background: var(--accent-soft);
   padding: 14px 16px;
   border-radius: 14px;
   margin-bottom: 14px;
@@ -313,7 +313,7 @@ function onFavorite() {}
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #F4A988 0%, #E88A6B 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -323,11 +323,11 @@ function onFavorite() {}
 .suggest .text {
   flex: 1;
   font-size: 13px;
-  color: #4A3A2E;
+  color: var(--text-main);
   line-height: 1.5;
 }
 .suggest .text b {
-  color: #E88A6B;
+  color: var(--accent-deep);
 }
 .action-row {
   display: flex;

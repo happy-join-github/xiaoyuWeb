@@ -309,7 +309,7 @@ function selectDay(day: CalDay) {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: linear-gradient(180deg, #FFF8F1 0%, #FFEFDF 100%);
+  background: linear-gradient(180deg, var(--cream) 0%, var(--cream-2) 100%);
 }
 .scroll-area {
   position: relative;
@@ -343,9 +343,9 @@ function selectDay(day: CalDay) {
 .month-stat {
   margin: 8px 16px 0;
   padding: 16px 20px;
-  background: linear-gradient(135deg, #FFE7D1 0%, #FFD4C2 100%);
+  background: linear-gradient(135deg, var(--apricot) 0%, var(--peach) 100%);
   border-radius: 20px;
-  color: #4A3A2E;
+  color: var(--text-main);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -356,7 +356,7 @@ function selectDay(day: CalDay) {
 }
 .month-stat .text p {
   font-size: 12px;
-  color: #6B5A4D;
+  color: var(--text-main);
   margin-top: 4px;
 }
 .month-stat .data {
@@ -365,17 +365,17 @@ function selectDay(day: CalDay) {
 .month-stat .data .num {
   font-size: 22px;
   font-weight: 700;
-  color: #E88A6B;
+  color: var(--accent-deep);
 }
 .month-stat .data .label {
   font-size: 11px;
-  color: #6B5A4D;
+  color: var(--text-main);
 }
 
 /* 日历 */
 .calendar {
   margin: 16px;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 20px;
   padding: 18px 14px;
   box-shadow: var(--shadow-sm);
@@ -395,8 +395,8 @@ function selectDay(day: CalDay) {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #FFF8F1;
-  color: #9C8B7E;
+  background: var(--cream);
+  color: var(--text-sub);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -404,14 +404,14 @@ function selectDay(day: CalDay) {
   cursor: pointer;
 }
 .cal-header .nav-btn:active {
-  background: #FFE7D1;
+  background: var(--apricot);
 }
 .weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   text-align: center;
   font-size: 11px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   padding: 6px 0;
 }
 .days {
@@ -427,20 +427,20 @@ function selectDay(day: CalDay) {
   justify-content: center;
   border-radius: 12px;
   font-size: 13px;
-  color: #4A3A2E;
+  color: var(--text-main);
   position: relative;
   cursor: pointer;
   transition: background 0.15s;
 }
 .day:active {
-  background: #FFF8F1;
+  background: var(--cream);
 }
 .day.mute {
-  color: #C4B5A6;
+  color: var(--text-mute);
 }
 .day.today {
   font-weight: 700;
-  color: #E88A6B;
+  color: var(--accent-deep);
 }
 .day.today::after {
   content: '';
@@ -449,13 +449,13 @@ function selectDay(day: CalDay) {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #E88A6B;
+  background: var(--accent-deep);
 }
 .day.today.has-record::after {
   display: none;
 }
 .day.selected {
-  background: #F4A988;
+  background: var(--accent);
   color: #fff;
   font-weight: 600;
 }
@@ -476,7 +476,7 @@ function selectDay(day: CalDay) {
   margin-top: 14px;
   padding: 0 4px;
   font-size: 11px;
-  color: #9C8B7E;
+  color: var(--text-sub);
 }
 .legend .dot {
   display: inline-block;
@@ -488,7 +488,7 @@ function selectDay(day: CalDay) {
 /* 日期详情 */
 .day-detail {
   margin: 0 16px 16px;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 20px;
   padding: 18px;
   box-shadow: var(--shadow-sm);
@@ -501,11 +501,11 @@ function selectDay(day: CalDay) {
 .day-detail .date-info .d1 {
   font-size: 16px;
   font-weight: 600;
-  color: #4A3A2E;
+  color: var(--text-main);
 }
 .day-detail .date-info .d2 {
   font-size: 12px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   margin-top: 2px;
 }
 .day-detail .day-emoji {
@@ -530,10 +530,10 @@ function selectDay(day: CalDay) {
 }
 .day-detail .body .quote {
   padding: 14px 16px;
-  background: #FFF8F1;
+  background: var(--cream);
   border-radius: 14px;
   font-size: 14px;
-  color: #4A3A2E;
+  color: var(--text-main);
   line-height: 1.7;
   position: relative;
 }
@@ -542,12 +542,12 @@ function selectDay(day: CalDay) {
   position: absolute;
   top: -8px;
   left: 12px;
-  color: #F4A988;
+  color: var(--accent);
   font-size: 40px;
   line-height: 1;
 }
 .day-detail .body .link {
-  color: #E88A6B;
+  color: var(--accent-deep);
   font-size: 12px;
   display: block;
   font-weight: 500;
@@ -562,29 +562,29 @@ function selectDay(day: CalDay) {
   margin-top: 0;
 }
 .day-detail .body .link-row .link.edit {
-  color: #4A3A2E;
+  color: var(--text-main);
   font-weight: 400;
   padding: 4px 12px;
   border-radius: 999px;
-  background: #FFF8F1;
+  background: var(--cream);
 }
 .day-detail .body .link.accent {
-  color: #E88A6B;
+  color: var(--accent-deep);
   font-weight: 600;
 }
 .day-detail .no-record-hint {
   padding: 14px 16px;
-  background: #FFF8F1;
+  background: var(--cream);
   border-radius: 14px;
   font-size: 14px;
-  color: #C4B5A6;
+  color: var(--text-mute);
   text-align: center;
 }
 
 /* 全部记录 */
 .all-records {
   margin: 0 16px 16px;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 20px;
   padding: 18px;
   box-shadow: var(--shadow-sm);
@@ -598,24 +598,24 @@ function selectDay(day: CalDay) {
 .section-head h3 {
   font-size: 15px;
   font-weight: 600;
-  color: #4A3A2E;
+  color: var(--text-main);
 }
 .section-head .toggle {
   font-size: 12px;
-  color: #9C8B7E;
+  color: var(--text-sub);
 }
 .empty-list {
   text-align: center;
   padding: 20px 0;
   font-size: 13px;
-  color: #C4B5A6;
+  color: var(--text-mute);
 }
 .record-row {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 12px 0;
-  border-bottom: 1px solid #F1E5D7;
+  border-bottom: 1px solid var(--line);
   cursor: pointer;
 }
 .record-row:last-child {
@@ -640,11 +640,11 @@ function selectDay(day: CalDay) {
 }
 .record-date {
   font-size: 12px;
-  color: #9C8B7E;
+  color: var(--text-sub);
 }
 .record-note {
   font-size: 14px;
-  color: #4A3A2E;
+  color: var(--text-main);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -661,7 +661,7 @@ function selectDay(day: CalDay) {
   gap: 12px;
 }
 .entry {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 18px;
   padding: 16px;
   box-shadow: var(--shadow-sm);
@@ -682,18 +682,18 @@ function selectDay(day: CalDay) {
 .entry .t1 {
   font-size: 14px;
   font-weight: 600;
-  color: #4A3A2E;
+  color: var(--text-main);
 }
 .entry .t2 {
   font-size: 11px;
-  color: #9C8B7E;
+  color: var(--text-sub);
 }
 .entry.peach .ic-box {
-  background: linear-gradient(135deg, #FFD4C2 0%, #FFE7D1 100%);
-  color: #E88A6B;
+  background: linear-gradient(135deg, var(--peach) 0%, var(--apricot) 100%);
+  color: var(--accent-deep);
 }
 .entry.blue .ic-box {
-  background: linear-gradient(135deg, #CDE3F2 0%, #E5F1F8 100%);
+  background: linear-gradient(135deg, var(--blue-mist) 0%, var(--blue-soft) 100%);
   color: #6BA4C9;
 }
 

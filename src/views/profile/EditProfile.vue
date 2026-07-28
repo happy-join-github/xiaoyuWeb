@@ -199,7 +199,7 @@ async function saveProfile() {
 .screen-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, #FFEAD9 0%, #FFF8F1 60%);
+  background: linear-gradient(180deg, var(--cream-2) 0%, var(--cream) 60%);
 }
 
 .scroll-area {
@@ -213,17 +213,17 @@ async function saveProfile() {
 /* 卡片 */
 .card {
   margin: 0 16px 16px;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 20px;
   padding: 20px;
-  box-shadow: 0 2px 12px rgba(232, 138, 107, 0.10);
-  border: 1.5px solid #FFE0CB;
+  box-shadow: var(--shadow-sm);
+  border: 1.5px solid var(--line);
 }
 
 .card-title {
   font-size: 14px;
   font-weight: 600;
-  color: #4A3A2E;
+  color: var(--text-main);
   margin-bottom: 16px;
 }
 
@@ -235,7 +235,7 @@ async function saveProfile() {
 
 .field label {
   font-size: 12px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   display: block;
   margin-bottom: 6px;
 }
@@ -246,52 +246,52 @@ async function saveProfile() {
 }
 
 .field :deep(.el-input__wrapper) {
-  border: 1.5px solid #FFE0CB;
+  border: 1.5px solid var(--line);
   border-radius: 12px;
-  background: #FFFBF8;
+  background: var(--cream);
   box-shadow: none;
   transition: border-color 0.2s;
   padding: 0 14px;
 }
 
 .field :deep(.el-input__wrapper:hover) {
-  border-color: #FFE0CB;
+  border-color: var(--line);
   box-shadow: none;
 }
 
 .field :deep(.el-input__wrapper.is-focus) {
-  border-color: #E88A6B;
-  background: #fff;
+  border-color: var(--accent-deep);
+  background: var(--card-bg);
   box-shadow: none;
 }
 
 .field :deep(.el-input__inner) {
-  color: #4A3A2E;
+  color: var(--text-main);
   height: 40px;
 }
 
 /* 禁用状态 */
 .field :deep(.el-input__wrapper.is-disabled) {
-  background: #FFFBF8;
-  border-color: #FFE0CB;
+  background: var(--cream);
+  border-color: var(--line);
 }
 
 .field :deep(.el-input.is-disabled .el-input__inner) {
-  color: #4A3A2E;
-  -webkit-text-fill-color: #4A3A2E;
+  color: var(--text-main);
+  -webkit-text-fill-color: var(--text-main);
 }
 
 .field .hint {
   display: block;
   font-size: 11px;
-  color: #C4B5A6;
+  color: var(--text-mute);
   margin-top: 4px;
 }
 
 /* 只读字段 */
 .field.readonly {
   padding: 10px 0;
-  border-bottom: 1px solid #FAF1E5;
+  border-bottom: 1px solid var(--line);
 }
 
 .field.readonly:last-child {
@@ -300,7 +300,7 @@ async function saveProfile() {
 
 .readonly-value {
   font-size: 15px;
-  color: #4A3A2E;
+  color: var(--text-main);
   font-weight: 500;
 }
 
@@ -321,8 +321,8 @@ async function saveProfile() {
   align-items: center;
   justify-content: center;
   font-size: 36px;
-  background: #FFF8F1;
-  box-shadow: 0 8px 24px rgba(244, 169, 136, 0.25);
+  background: var(--cream);
+  box-shadow: var(--shadow-md);
 }
 
 .avatar-picker {
@@ -339,7 +339,7 @@ async function saveProfile() {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: #FFF8F1;
+  background: var(--cream);
   border: 2px solid transparent;
   cursor: pointer;
   font-size: 20px;
@@ -347,12 +347,12 @@ async function saveProfile() {
 }
 
 .avatar-option:hover {
-  background: #FFEAD9;
+  background: var(--cream-2);
 }
 
 .avatar-option.active {
-  border-color: #E88A6B;
-  background: #FFEAD9;
+  border-color: var(--accent-deep);
+  background: var(--cream-2);
   transform: scale(1.1);
 }
 
@@ -377,15 +377,15 @@ async function saveProfile() {
   border: none;
   font-size: 16px;
   font-weight: 600;
-  background: linear-gradient(135deg, #E88A6B, #E07A5A);
+  background: linear-gradient(135deg, var(--accent-deep), var(--accent));
   color: #fff;
-  box-shadow: 0 4px 16px rgba(232, 138, 107, 0.35);
+  box-shadow: var(--shadow-lg);
   transition: opacity 0.2s;
   padding: 22px 0;
 }
 
 .save-btn:hover {
-  background: linear-gradient(135deg, #E88A6B, #E07A5A);
+  background: linear-gradient(135deg, var(--accent-deep), var(--accent));
   opacity: 0.9;
 }
 
@@ -408,18 +408,18 @@ async function saveProfile() {
   align-items: center;
   justify-content: center;
   font-size: 26px;
-  background: #FFF8F1;
-  box-shadow: 0 4px 14px rgba(244, 169, 136, 0.2);
+  background: var(--cream);
+  box-shadow: var(--shadow-sm);
 }
 .companion-label {
   font-size: 12px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   margin-bottom: 4px;
 }
 .companion-name {
   font-size: 17px;
   font-weight: 600;
-  color: #4A3A2E;
+  color: var(--text-main);
 }
 .companion-summary {
   display: flex;
@@ -433,23 +433,23 @@ async function saveProfile() {
 }
 .summary-label {
   font-size: 11px;
-  color: #C4B5A6;
+  color: var(--text-mute);
 }
 .summary-value {
   font-size: 13px;
-  color: #4A3A2E;
+  color: var(--text-main);
   font-weight: 500;
 }
 .companion-divider {
   height: 1px;
-  background: #FAF1E5;
+  background: var(--line);
   margin-bottom: 14px;
 }
 .companion-link {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  color: #E88A6B;
+  color: var(--accent-deep);
   font-size: 13px;
   font-weight: 500;
   text-decoration: none;
