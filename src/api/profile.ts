@@ -68,12 +68,12 @@ export function getProfile(): Promise<UserProfileData> {
   return service.get('/profile').then((res: any) => res.data)
 }
 
-/** F2. 编辑个人资料（昵称 / 头像） */
+/** F2. 编辑个人资料（昵称 / 头像），后端仅返回 name、avatar、phone */
 export function updateProfile(payload: {
-  nickname?: string
+  name?: string
   avatar?: string
-}): Promise<{ user: any; profile: UserProfileData }> {
-  return service.put('/profile', payload).then((res: any) => res.data)
+}): Promise<Pick<UserProfileData, 'name' | 'avatar' | 'phone'>> {
+  return service.post('/profile', payload).then((res: any) => res.data)
 }
 
 /** F3. 获取 AI 设置 */
@@ -83,7 +83,7 @@ export function getAiSettings(): Promise<AiSettings> {
 
 /** F4. 更新 AI 设置 */
 export function updateAiSettings(payload: AiSettings): Promise<UserProfileData> {
-  return service.put('/profile/ai-settings', payload).then((res: any) => res.data)
+  return service.post('/profile/ai-settings', payload).then((res: any) => res.data)
 }
 
 /** F5. 获取应用设置 + 可用主题 */
@@ -98,7 +98,7 @@ export function getAppSettings(): Promise<{
 export function updateAppSettings(
   payload: Partial<UserSettings>,
 ): Promise<UserSettings> {
-  return service.put('/profile/settings', payload).then((res: any) => res.data)
+  return service.post('/profile/settings', payload).then((res: any) => res.data)
 }
 
 /** F7. 获取数据面板 */

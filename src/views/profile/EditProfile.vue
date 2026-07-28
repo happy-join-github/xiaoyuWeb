@@ -178,20 +178,13 @@ async function saveProfile() {
   if (saving.value) return
   saving.value = true
   try {
-    // 后端只接受 nickname / avatar 两个字段
+    // 后端只接受 name / avatar 两个字段，仅返回 name、avatar、phone
     const res = await updateProfileApi({
-      nickname: trimmedName,
+      name: trimmedName,
       avatar: editForm.avatar,
     })
-    if (res?.profile) {
-      userStore.applyProfileData(res.profile)
-    } else {
-      // 兜底：本地更新
-      userStore.updateProfile({
-        name: trimmedName,
-        avatar: editForm.avatar,
-      })
-    }
+    // 直接用后端返回的数据更新 store
+    userStore.updateProfile(res)
     ElMessage.success('个人信息已更新')
     router.back()
   } catch {
