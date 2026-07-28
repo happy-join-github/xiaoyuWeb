@@ -119,7 +119,7 @@ function onSearch() {
 .screen-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, #FFF8F1 0%, #FFEFDF 100%);
+  background: linear-gradient(180deg, var(--cream) 0%, var(--cream-2) 100%);
 }
 .scroll-area {
   position: relative;
@@ -131,7 +131,7 @@ function onSearch() {
   z-index: 2;
 }
 .search-input {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 999px;
   padding: 4px 12px;
   box-shadow: var(--shadow-sm);
@@ -143,19 +143,19 @@ function onSearch() {
   box-shadow: none;
 }
 .search-input :deep(.el-input__inner) {
-  color: #4A3A2E;
+  color: var(--text-main);
 }
 .search-input :deep(.el-input__inner)::placeholder {
-  color: #C4B5A6;
+  color: var(--text-mute);
 }
 .date-group {
   padding: 12px 16px 4px;
   font-size: 11px;
-  color: #9C8B7E;
+  color: var(--text-sub);
 }
 .conv-item {
   margin: 0 12px 10px;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 16px;
   padding: 14px 16px;
   box-shadow: var(--shadow-sm);
@@ -170,7 +170,7 @@ function onSearch() {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #FFD4C2 0%, #FFE7D1 100%);
+  background: linear-gradient(135deg, var(--peach) 0%, var(--apricot) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -189,15 +189,15 @@ function onSearch() {
 .conv-item .body .name {
   font-size: 14px;
   font-weight: 600;
-  color: #4A3A2E;
+  color: var(--text-main);
 }
 .conv-item .body .time {
   font-size: 11px;
-  color: #9C8B7E;
+  color: var(--text-sub);
 }
 .conv-item .body .preview {
   font-size: 12px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   margin-top: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -220,9 +220,9 @@ function onSearch() {
   --el-tag-border-color: #2B1F18;
 }
 .conv-item .tag:not(.tree).el-tag {
-  --el-tag-bg-color: #FFE7D1;
-  --el-tag-text-color: #E88A6B;
-  --el-tag-border-color: #FFE7D1;
+  --el-tag-bg-color: var(--apricot);
+  --el-tag-text-color: var(--accent-deep);
+  --el-tag-border-color: var(--apricot);
 }
 
 /* 树洞头像暗色背景 */
@@ -248,7 +248,7 @@ function onSearch() {
 }
 .empty-text {
   font-size: 14px;
-  color: #C4B5A6;
+  color: var(--text-mute);
   line-height: 1.6;
 }
 </style>

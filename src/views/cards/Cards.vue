@@ -271,14 +271,14 @@ onUnmounted(() => {
 <style scoped>
 .screen-bg {
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, #FFF8F1 0%, #FFEAD9 100%);
+  background: linear-gradient(180deg, var(--cream) 0%, var(--cream-2) 100%);
   pointer-events: none;
 }
 .icon-btn {
   width: 36px; height: 36px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  color: var(--text-sub, #9C8B7E);
+  color: var(--text-sub);
 }
 
 /* ====== Search Bar ====== */
@@ -289,14 +289,14 @@ onUnmounted(() => {
   --el-input-border-radius: 999px;
 }
 .search-input-el :deep(.el-input__wrapper) {
-  background: #fff;
-  box-shadow: 0 2px 8px rgba(156, 139, 126, 0.1);
+  background: var(--card-bg);
+  box-shadow: var(--shadow-sm);
 }
 .search-input-el :deep(.el-input__inner) {
   font-size: 13px;
 }
 .search-input-el :deep(.el-input__inner::placeholder) {
-  color: #C4B5A6;
+  color: var(--text-mute);
 }
 
 .scroll-area {
@@ -316,7 +316,7 @@ onUnmounted(() => {
 }
 .card-tabs :deep(.el-tabs__item) {
   font-size: 13px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   padding: 0 12px;
   height: 36px;
   line-height: 36px;
@@ -324,12 +324,12 @@ onUnmounted(() => {
   transition: all 0.2s;
 }
 .card-tabs :deep(.el-tabs__item:hover) {
-  color: #E88A6B;
+  color: var(--accent-deep);
 }
 .card-tabs :deep(.el-tabs__item.is-active) {
   color: #fff;
-  background: linear-gradient(135deg, #F4A988 0%, #E88A6B 100%);
-  box-shadow: 0 4px 12px rgba(244, 169, 136, 0.3);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+  box-shadow: var(--shadow-md);
   border-radius: 999px;
   font-weight: 500;
 }
@@ -371,7 +371,7 @@ onUnmounted(() => {
 }
 .empty-desc {
   font-size: 13px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   margin-bottom: 4px;
   line-height: 1.5;
 }
@@ -379,7 +379,7 @@ onUnmounted(() => {
 .empty-filter {
   text-align: center;
   padding: 32px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   font-size: 13px;
 }
 
@@ -388,26 +388,26 @@ onUnmounted(() => {
   display: block;
   margin: 8px 16px 0;
   padding: 28px 24px;
-  background: linear-gradient(135deg, #FFE7D1 0%, #FFD4C2 100%);
+  background: linear-gradient(135deg, var(--apricot) 0%, var(--peach) 100%);
   border-radius: 24px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8px 24px rgba(244, 169, 136, 0.15);
+  box-shadow: var(--shadow-md);
   text-decoration: none;
 }
-.hero .date { font-size: 12px; color: #9C8B7E; letter-spacing: 1px; }
+.hero .date { font-size: 12px; color: var(--text-sub); letter-spacing: 1px; }
 .hero h2 {
   font-size: 22px; line-height: 1.5;
-  color: #4A3A2E; margin: 12px 0 16px; font-weight: 600;
+  color: var(--text-main); margin: 12px 0 16px; font-weight: 600;
 }
-.hero .signature { font-size: 12px; color: #9C8B7E; display: flex; align-items: center; gap: 6px; }
+.hero .signature { font-size: 12px; color: var(--text-sub); display: flex; align-items: center; gap: 6px; }
 .hero .deco {
   position: absolute; top: -30px; right: -20px;
   font-size: 120px; opacity: 0.15; transform: rotate(15deg);
 }
 .avatar-sm {
   display: inline-flex; width: 18px; height: 18px;
-  background: #fff; border-radius: 50%;
+  background: var(--card-bg); border-radius: 50%;
   align-items: center; justify-content: center;
 }
 
@@ -416,10 +416,10 @@ onUnmounted(() => {
   padding: 20px 16px 8px;
 }
 .card-section h3 {
-  font-size: 14px; color: #9C8B7E; font-weight: 500;
+  font-size: 14px; color: var(--text-sub); font-weight: 500;
   margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
 }
-.card-section h3 .more-link { font-size: 12px; color: #E88A6B; }
+.card-section h3 .more-link { font-size: 12px; color: var(--accent-deep); }
 .card-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -464,8 +464,8 @@ onUnmounted(() => {
 .fab .el-button {
   width: 56px; height: 56px;
   font-size: 24px;
-  box-shadow: 0 6px 20px rgba(232, 138, 107, 0.4);
-  --el-button-bg-color: linear-gradient(135deg, #F4A988, #E88A6B);
+  box-shadow: var(--shadow-lg);
+  --el-button-bg-color: linear-gradient(135deg, var(--accent), var(--accent-deep));
   --el-button-border-color: transparent;
 }
 
@@ -481,10 +481,10 @@ onUnmounted(() => {
   justify-content: center;
   gap: 8px;
   font-size: 12px;
-  color: #9C8B7E;
+  color: var(--text-sub);
 }
 .scroll-hint {
   font-size: 12px;
-  color: #C4B5A6;
+  color: var(--text-mute);
 }
 </style>

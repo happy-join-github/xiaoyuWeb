@@ -198,7 +198,7 @@ function onDelete() {
 <style scoped>
 .screen-bg {
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, #FFF8F1 0%, #FFEAD9 100%);
+  background: linear-gradient(180deg, var(--cream) 0%, var(--cream-2) 100%);
 }
 .scroll-area {
   position: relative; z-index: 1;
@@ -213,7 +213,7 @@ function onDelete() {
 .section h3 {
   font-size: 14px;
   font-weight: 600;
-  color: #4A3A2E;
+  color: var(--text-main);
   margin-bottom: 12px;
 }
 
@@ -231,7 +231,7 @@ function onDelete() {
   transition: all 0.2s;
 }
 .template-item.active {
-  border-color: #E88A6B;
+  border-color: var(--accent-deep);
   box-shadow: 0 0 0 2px rgba(232, 138, 107, 0.2);
 }
 .preview {
@@ -241,12 +241,12 @@ function onDelete() {
   align-items: center;
   justify-content: center;
 }
-.preview.warm { background: linear-gradient(135deg, #FFE7D1, #FFF4E8); }
-.preview.calm { background: linear-gradient(135deg, #CDE3F2, #E5F1F8); }
+.preview.warm { background: linear-gradient(135deg, var(--apricot), var(--cream)); }
+.preview.calm { background: linear-gradient(135deg, var(--blue-mist), var(--blue-soft)); }
 .preview.dream { background: linear-gradient(135deg, #E8D8F0, #F0E6F8); }
 .preview-text {
   font-size: 13px;
-  color: #4A3A2E;
+  color: var(--text-main);
   font-weight: 500;
 }
 
@@ -258,19 +258,19 @@ function onDelete() {
   padding: 16px;
   font-size: 14px;
   line-height: 1.7;
-  color: #4A3A2E;
+  color: var(--text-main);
   font-family: inherit;
   border: none;
   box-shadow: none;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 16px;
 }
 .text-input-el :deep(.el-textarea__inner:focus) {
-  outline: 2px solid #F4A988;
+  outline: 2px solid var(--accent);
 }
 .text-input-el :deep(.el-input__count) {
   font-size: 11px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   line-height: 1;
   bottom: 8px;
   right: 12px;
@@ -288,7 +288,7 @@ function onDelete() {
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 16px;
   border: 2px solid transparent;
   transition: all 0.2s;
@@ -306,8 +306,8 @@ function onDelete() {
   padding: 0;
 }
 .privacy-option-card.is-checked {
-  border-color: #E88A6B;
-  background: #fff;
+  border-color: var(--accent-deep);
+  background: var(--card-bg);
 }
 .privacy-text {
   display: flex;
@@ -316,11 +316,11 @@ function onDelete() {
 .privacy-text .label {
   font-size: 13px;
   font-weight: 500;
-  color: #4A3A2E;
+  color: var(--text-main);
 }
 .privacy-text .desc {
   font-size: 11px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   margin-top: 2px;
 }
 
@@ -331,8 +331,8 @@ function onDelete() {
   min-height: 140px;
   box-shadow: var(--shadow-sm);
 }
-.preview-card.warm { background: linear-gradient(135deg, #FFE7D1, #FFF4E8); }
-.preview-card.calm { background: linear-gradient(135deg, #CDE3F2, #E5F1F8); }
+.preview-card.warm { background: linear-gradient(135deg, var(--apricot), var(--cream)); }
+.preview-card.calm { background: linear-gradient(135deg, var(--blue-mist), var(--blue-soft)); }
 .preview-card.dream { background: linear-gradient(135deg, #E8D8F0, #F0E6F8); }
 
 .preview-header {
@@ -340,28 +340,28 @@ function onDelete() {
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #6B5A4D;
+  color: var(--text-main);
 }
 .pv-avatar {
   width: 22px; height: 22px;
   border-radius: 50%;
-  background: #F4A988;
+  background: var(--accent);
   color: #fff;
   display: flex; align-items: center; justify-content: center;
   font-size: 11px;
 }
 .pv-name { font-weight: 500; }
-.pv-date { color: #9C8B7E; margin-left: auto; }
+.pv-date { color: var(--text-sub); margin-left: auto; }
 .preview-body {
   font-size: 16px;
   line-height: 1.8;
-  color: #4A3A2E;
+  color: var(--text-main);
   font-weight: 500;
   margin-top: 16px;
   white-space: pre-wrap;
 }
 .preview-body.placeholder {
-  color: #C4B5A6;
+  color: var(--text-mute);
   font-weight: 400;
 }
 
@@ -373,7 +373,7 @@ function onDelete() {
   font-size: 15px;
   font-weight: 600;
   border-radius: 16px;
-  --el-button-bg-color: linear-gradient(135deg, #F4A988, #E88A6B);
+  --el-button-bg-color: linear-gradient(135deg, var(--accent), var(--accent-deep));
   --el-button-border-color: transparent;
 }
 .save-btn.is-disabled {
@@ -388,8 +388,8 @@ function onDelete() {
   border-radius: 16px;
   font-size: 14px;
   font-weight: 500;
-  border: 2px solid #E88A6B;
-  color: #E88A6B;
-  background: #fff;
+  border: 2px solid var(--accent-deep);
+  color: var(--accent-deep);
+  background: var(--card-bg);
 }
 </style>

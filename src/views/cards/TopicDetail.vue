@@ -80,7 +80,7 @@ onMounted(async () => {
 <style scoped>
 .screen-bg {
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, #FFF8F1 0%, #FFEAD9 100%);
+  background: linear-gradient(180deg, var(--cream) 0%, var(--cream-2) 100%);
 }
 .scroll-area {
   position: relative; z-index: 1;
@@ -118,7 +118,7 @@ onMounted(async () => {
 /* ====== Card Grid ====== */
 .card-section { padding: 0 0 8px; }
 .card-section h3 {
-  font-size: 14px; color: #9C8B7E; font-weight: 500;
+  font-size: 14px; color: var(--text-sub); font-weight: 500;
   margin-bottom: 12px;
 }
 .card-grid {

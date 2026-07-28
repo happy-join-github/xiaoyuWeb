@@ -363,13 +363,13 @@ function formatDate(dateStr: string): string {
 <style scoped>
 .screen-bg {
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, #FFD4C2 0%, #FFE7D1 50%, #FFEFDF 100%);
+  background: linear-gradient(180deg, var(--peach) 0%, var(--apricot) 50%, var(--cream-2) 100%);
 }
 .icon-btn {
   width: 36px; height: 36px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  color: var(--text-sub, #9C8B7E);
+  color: var(--text-sub);
 }
 .loading-state {
   padding: 24px 20px;
@@ -390,7 +390,7 @@ function formatDate(dateStr: string): string {
 /* ====== 系统-引用大卡片 ====== */
 .big-card {
   margin: 12px 0 16px;
-  background: linear-gradient(135deg, #FFE7D1 0%, #FFD4C2 50%, #FFC8A8 100%);
+  background: linear-gradient(135deg, var(--apricot) 0%, var(--peach) 50%, var(--peach-soft) 100%);
   border-radius: 28px;
   padding: 32px 28px;
   box-shadow: 0 20px 40px rgba(244, 169, 136, 0.3);
@@ -423,18 +423,18 @@ function formatDate(dateStr: string): string {
 }
 .big-card .text-area .q {
   font-size: 60px; line-height: 0.6;
-  color: #fff; opacity: 0.5;
+  color: var(--card-bg); opacity: 0.5;
 }
 .big-card .text-area .text {
   font-size: 22px; line-height: 1.6;
-  color: #4A3A2E; font-weight: 500; margin-top: 12px;
+  color: var(--text-main); font-weight: 500; margin-top: 12px;
 }
 .big-card .bottom {
   display: flex; justify-content: space-between; align-items: flex-end;
   position: relative; z-index: 1;
 }
-.big-card .sign { font-size: 12px; color: #6B5A4D; }
-.big-card .date-tag { font-size: 11px; color: #9C8B7E; }
+.big-card .sign { font-size: 12px; color: var(--text-main); }
+.big-card .date-tag { font-size: 11px; color: var(--text-sub); }
 
 /* ====== 系统-风景大卡片 ====== */
 .big-landscape {
@@ -449,13 +449,13 @@ function formatDate(dateStr: string): string {
   color: #fff;
 }
 .big-landscape.l-1 {
-  background: linear-gradient(135deg, #FFB89A 0%, #F4A988 50%, #C28F76 100%);
+  background: linear-gradient(135deg, var(--accent-soft) 0%, var(--accent) 50%, var(--accent-deep) 100%);
 }
 .big-landscape .mountain {
   position: absolute; inset: 0; opacity: 0.4;
   background:
     radial-gradient(circle at 20% 60%, #fff 0%, transparent 6%),
-    radial-gradient(circle at 70% 40%, #FFE9D6 0%, transparent 4%),
+    radial-gradient(circle at 70% 40%, var(--cream) 0%, transparent 4%),
     radial-gradient(circle at 50% 70%, #fff 0%, transparent 8%);
 }
 .big-landscape .overlay-text { position: relative; z-index: 1; }
@@ -477,8 +477,8 @@ function formatDate(dateStr: string): string {
   overflow: hidden;
   box-shadow: 0 20px 40px rgba(156, 139, 126, 0.15);
 }
-.big-user-card.warm { background: linear-gradient(135deg, #FFE7D1 0%, #FFF4E8 100%); }
-.big-user-card.calm { background: linear-gradient(135deg, #CDE3F2 0%, #E5F1F8 100%); }
+.big-user-card.warm { background: linear-gradient(135deg, var(--apricot) 0%, var(--cream) 100%); }
+.big-user-card.calm { background: linear-gradient(135deg, var(--blue-mist) 0%, var(--blue-soft) 100%); }
 .big-user-card.dream { background: linear-gradient(135deg, #E8D8F0 0%, #F0E6F8 100%); }
 
 .user-top { display: flex; justify-content: space-between; align-items: flex-start; }
@@ -486,17 +486,17 @@ function formatDate(dateStr: string): string {
 .user-avatar-big {
   width: 36px; height: 36px;
   border-radius: 50%;
-  background: #F4A988;
+  background: var(--accent);
   color: #fff;
   display: flex; align-items: center; justify-content: center;
   font-size: 16px;
 }
-.user-name-big { font-size: 14px; font-weight: 600; color: #4A3A2E; }
-.user-date-big { font-size: 11px; color: #9C8B7E; margin-top: 2px; }
+.user-name-big { font-size: 14px; font-weight: 600; color: var(--text-main); }
+.user-date-big { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
 .user-text-big {
   font-size: 22px;
   line-height: 1.7;
-  color: #4A3A2E;
+  color: var(--text-main);
   font-weight: 500;
   margin-top: 28px;
   white-space: pre-wrap;
@@ -512,12 +512,12 @@ function formatDate(dateStr: string): string {
 .actions { display: flex; gap: 10px; }
 .actions .action {
   flex: 1;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 18px;
   padding: 14px;
   display: flex; flex-direction: column;
   align-items: center; gap: 6px;
-  font-size: 12px; color: #4A3A2E;
+  font-size: 12px; color: var(--text-main);
   box-shadow: var(--shadow-sm);
   cursor: pointer;
   transition: all 0.2s;
@@ -526,14 +526,14 @@ function formatDate(dateStr: string): string {
   width: 36px; height: 36px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  background: #FFE7D1; color: #E88A6B;
+  background: var(--apricot); color: var(--accent-deep);
   transition: all 0.2s;
 }
 .actions .action.active .ic {
-  background: #E88A6B; color: #fff;
+  background: var(--accent-deep); color: #fff;
 }
 .actions .action.active {
-  color: #E88A6B;
+  color: var(--accent-deep);
   font-weight: 600;
 }
 
@@ -543,7 +543,7 @@ function formatDate(dateStr: string): string {
   text-align: center;
 }
 .switch-link {
-  color: #9C8B7E;
+  color: var(--text-sub);
   font-size: 13px;
   display: inline-flex;
   align-items: center;
@@ -557,7 +557,7 @@ function formatDate(dateStr: string): string {
   padding: 16px 20px 0;
   font-size: 16px;
   font-weight: 600;
-  color: #4A3A2E;
+  color: var(--text-main);
 }
 .collection-drawer :deep(.el-drawer__body) {
   padding: 12px 20px 24px;
@@ -581,22 +581,22 @@ function formatDate(dateStr: string): string {
   justify-content: space-between;
   padding: 12px 16px;
   border-radius: 12px;
-  background: #FFF8F1;
+  background: var(--cream);
   cursor: pointer;
   transition: all 0.2s;
 }
 .collection-item.active {
-  background: #FFE7D1;
-  border: 1px solid #F4A988;
+  background: var(--apricot);
+  border: 1px solid var(--accent);
 }
 .col-name {
   font-size: 14px;
   font-weight: 500;
-  color: #4A3A2E;
+  color: var(--text-main);
 }
 .col-count {
   font-size: 11px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   margin-top: 2px;
 }
 .create-collection {

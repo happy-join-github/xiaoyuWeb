@@ -162,8 +162,8 @@
 
 /* ██ 暖茶 — 焦糖暖意，温润醇厚 */
 [data-theme="tea"] {
-  --cream: #FDF6EE;
-  --cream-2: #F8EDE0;
+  --cream: #FDF5EC;
+  --cream-2: #F8ECE0;
   --apricot: #F0E0CC;
   --peach: #E8D0B8;
   --peach-soft: #F0E0CC;
@@ -175,17 +175,20 @@
   --text-sub: #9C8870;
   --text-mute: #C4B098;
   --line: #E8DCC8;
-  --accent: #C9A87C;
-  --accent-deep: #B89060;
-  --accent-soft: #F0E8D8;
+  --accent: #E8A87C;
+  --accent-deep: #D4885C;
+  --accent-soft: #F5E0D0;
   --card-bg: #FFFFFF;
   --input-bg: #FFFFFF;
-  --tabbar-bg: rgba(253, 246, 238, 0.92);
+  --tabbar-bg: rgba(253, 245, 236, 0.92);
   --overlay-bg: rgba(74, 53, 40, 0.4);
   --body-bg:
     radial-gradient(1200px 800px at 10% 10%, #F0E0CC 0%, transparent 50%),
     radial-gradient(900px 700px at 100% 100%, #E8DCC8 0%, transparent 50%),
-    linear-gradient(180deg, #FDF6EE 0%, #F8EDE0 100%);
+    linear-gradient(180deg, #FDF5EC 0%, #F8ECE0 100%);
+  --shadow-sm: 0 2px 8px rgba(232, 168, 124, 0.08);
+  --shadow-md: 0 6px 20px rgba(232, 168, 124, 0.12);
+  --shadow-lg: 0 12px 32px rgba(212, 136, 92, 0.16);
 }
 
 /* ██ 深色模式全局覆盖 — 通过 .dark class 触发 */

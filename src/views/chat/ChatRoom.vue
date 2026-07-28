@@ -244,7 +244,7 @@ onMounted(() => {
 .bg-gradient {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, #FFEFDF 0%, #F4E3D0 100%);
+  background: var(--cream);
   z-index: 0;
 }
 .blob-1 {
@@ -288,7 +288,7 @@ onMounted(() => {
 }
 .ai-status {
   font-size: 12px;
-  color: #6ABF69;
+  color: var(--accent);
   font-weight: 500;
 }
 .ai-status::before {
@@ -297,7 +297,7 @@ onMounted(() => {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #6ABF69;
+  background: var(--accent);
   margin-right: 4px;
   vertical-align: middle;
 }
@@ -353,13 +353,13 @@ onMounted(() => {
   line-height: 1.6;
 }
 .ai-bubble {
-  background: #fff;
+  background: var(--card-bg);
   color: var(--text-main);
   border-radius: 16px 16px 16px 4px;
   box-shadow: var(--shadow-sm);
 }
 .user-bubble {
-  background: linear-gradient(135deg, #F4A988 0%, #E88A6B 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
   color: #fff;
   border-radius: 16px 16px 4px 16px;
 }

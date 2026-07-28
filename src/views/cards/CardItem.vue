@@ -83,7 +83,7 @@ function formatDate(dateStr: string): string {
 <style scoped>
 /* ========== 引用卡片 ========== */
 .quote-card {
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 20px;
   padding: 18px;
   box-shadow: var(--shadow-sm);
@@ -94,14 +94,14 @@ function formatDate(dateStr: string): string {
   position: relative;
   overflow: hidden;
 }
-.quote-card.c-1 { background: linear-gradient(135deg, #FFE7D1 0%, #FFF4E8 100%); }
-.quote-card.c-2 { background: linear-gradient(135deg, #CDE3F2 0%, #E5F1F8 100%); }
-.quote-card.c-3 { background: linear-gradient(135deg, #D8E4D2 0%, #E8F0E2 100%); }
-.quote-card.c-4 { background: linear-gradient(135deg, #FFD4C2 0%, #FFE4D6 100%); }
-.quote-card .quote-mark { font-size: 30px; color: #F4A988; line-height: 1; }
-.quote-card .text { font-size: 14px; line-height: 1.7; color: #4A3A2E; flex: 1; }
+.quote-card.c-1 { background: linear-gradient(135deg, var(--apricot) 0%, var(--cream) 100%); }
+.quote-card.c-2 { background: linear-gradient(135deg, var(--blue-mist) 0%, var(--blue-soft) 100%); }
+.quote-card.c-3 { background: linear-gradient(135deg, var(--sage) 0%, var(--blue-soft) 100%); }
+.quote-card.c-4 { background: linear-gradient(135deg, var(--peach) 0%, var(--peach-soft) 100%); }
+.quote-card .quote-mark { font-size: 30px; color: var(--accent); line-height: 1; }
+.quote-card .text { font-size: 14px; line-height: 1.7; color: var(--text-main); flex: 1; }
 .quote-card .foot { display: flex; align-items: center; justify-content: space-between; }
-.quote-card .foot .date { font-size: 11px; color: #9C8B7E; }
+.quote-card .foot .date { font-size: 11px; color: var(--text-sub); }
 
 /* ========== 风景卡片 ========== */
 .landscape-card {
@@ -115,14 +115,14 @@ function formatDate(dateStr: string): string {
   color: #fff;
 }
 .landscape-card.l-1 {
-  background: linear-gradient(135deg, #FFB89A 0%, #F4A988 50%, #C28F76 100%);
+  background: linear-gradient(135deg, var(--accent-soft) 0%, var(--accent) 50%, var(--accent-deep) 100%);
 }
 .landscape-card .mountain {
   position: absolute; inset: 0;
   opacity: 0.4;
   background:
     radial-gradient(circle at 20% 60%, #fff 0%, transparent 6%),
-    radial-gradient(circle at 70% 40%, #FFE9D6 0%, transparent 4%),
+    radial-gradient(circle at 70% 40%, var(--cream) 0%, transparent 4%),
     radial-gradient(circle at 50% 70%, #fff 0%, transparent 8%);
 }
 .landscape-card .text { position: relative; z-index: 1; }
@@ -151,7 +151,7 @@ function formatDate(dateStr: string): string {
   display: flex; gap: 2px; align-items: flex-end; height: 20px; margin-top: 12px;
 }
 .audio-card .wave span {
-  width: 2px; background: #F4A988; border-radius: 1px;
+  width: 2px; background: var(--accent); border-radius: 1px;
   animation: wave 1.2s ease-in-out infinite;
 }
 @keyframes wave {
@@ -171,8 +171,8 @@ function formatDate(dateStr: string): string {
   overflow: hidden;
   box-shadow: var(--shadow-sm);
 }
-.user-card.warm { background: linear-gradient(135deg, #FFE7D1 0%, #FFF4E8 100%); }
-.user-card.calm { background: linear-gradient(135deg, #CDE3F2 0%, #E5F1F8 100%); }
+.user-card.warm { background: linear-gradient(135deg, var(--apricot) 0%, var(--cream) 100%); }
+.user-card.calm { background: linear-gradient(135deg, var(--blue-mist) 0%, var(--blue-soft) 100%); }
 .user-card.dream { background: linear-gradient(135deg, #E8D8F0 0%, #F0E6F8 100%); }
 
 .user-header {
@@ -180,24 +180,24 @@ function formatDate(dateStr: string): string {
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #6B5A4D;
+  color: var(--text-main);
 }
 .user-avatar {
   width: 22px; height: 22px;
   border-radius: 50%;
-  background: #F4A988;
+  background: var(--accent);
   color: #fff;
   display: flex; align-items: center; justify-content: center;
   font-size: 11px;
   flex-shrink: 0;
 }
 .user-name { font-weight: 500; }
-.user-date { color: #9C8B7E; margin-left: auto; }
+.user-date { color: var(--text-sub); margin-left: auto; }
 
 .user-text {
   font-size: 16px;
   line-height: 1.8;
-  color: #4A3A2E;
+  color: var(--text-main);
   font-weight: 500;
   flex: 1;
 }
@@ -220,14 +220,14 @@ function formatDate(dateStr: string): string {
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.6);
   display: flex; align-items: center; justify-content: center;
-  color: #9C8B7E;
+  color: var(--text-sub);
   cursor: pointer; border: none;
   transition: all 0.2s;
   gap: 2px;
   font-size: 11px;
 }
 .like-btn.liked {
-  background: #E88A6B;
+  background: var(--accent-deep);
   color: #fff;
 }
 </style>
