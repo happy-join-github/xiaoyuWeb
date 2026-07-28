@@ -25,7 +25,7 @@ const props = withDefaults(defineProps<{
   center?: boolean
 }>(), {
   title: '',
-  left: 'back',
+  left: '',
   center: false,
 })
 

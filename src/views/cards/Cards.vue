@@ -3,7 +3,7 @@
   <template v-else>
     <div class="screen-bg"></div>
     <StatusBar />
-    <NavBar title="治愈卡片" left="">
+    <NavBar title="治愈卡片">
       <template #right>
         <router-link to="/cards/create" class="icon-btn">
           <el-icon :size="20"><Plus /></el-icon>
@@ -37,17 +37,17 @@
 
         <!-- Tabs -->
         <div class="tabs-wrap">
-          <el-tabs
-            v-model="cardStore.activeTab"
-            class="card-tabs"
-          >
-            <el-tab-pane
+          <div class="card-tabs no-scrollbar">
+            <div
               v-for="tab in TAB_CONFIG"
               :key="tab.key"
-              :label="tab.label"
-              :name="tab.key"
-            />
-          </el-tabs>
+              class="card-tab"
+              :class="{ active: cardStore.activeTab === tab.key }"
+              @click="cardStore.setActiveTab(tab.key)"
+            >
+              {{ tab.label }}
+            </div>
+          </div>
         </div>
 
         <!-- 今日推荐 Hero（仅 recommend Tab） -->
@@ -185,7 +185,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage, ElSkeleton, ElEmpty, ElButton, ElInput, ElTabs, ElTabPane, ElTag, ElIcon } from 'element-plus'
+import { ElMessage, ElSkeleton, ElEmpty, ElButton, ElInput, ElTag, ElIcon } from 'element-plus'
 import { Plus, Search, Refresh } from '@element-plus/icons-vue'
 import StatusBar from '../../components/StatusBar.vue'
 import NavBar from '../../components/NavBar.vue'
@@ -304,46 +304,39 @@ onUnmounted(() => {
   flex: 1; overflow-y: auto;
 }
 
-/* ====== Tabs ====== */
+/* ====== Custom Tabs ====== */
 .tabs-wrap {
   padding: 0 16px;
 }
-.card-tabs :deep(.el-tabs__header) {
-  margin: 0;
+.card-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  flex-wrap: nowrap;
 }
-.card-tabs :deep(.el-tabs__nav-wrap::after) {
-  display: none;
-}
-.card-tabs :deep(.el-tabs__item) {
+.card-tab {
   font-size: 13px;
   color: var(--text-sub);
-  padding: 0 12px;
-  height: 36px;
-  line-height: 36px;
+  padding: 0 16px;
+  height: 32px;
   border-radius: 999px;
   transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
 }
-.card-tabs :deep(.el-tabs__item:hover) {
+.card-tab:hover {
   color: var(--accent-deep);
 }
-.card-tabs :deep(.el-tabs__item.is-active) {
+.card-tab.active {
   color: #fff;
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
   box-shadow: var(--shadow-md);
-  border-radius: 999px;
   font-weight: 500;
-}
-.card-tabs :deep(.el-tabs__active-bar) {
-  display: none;
-}
-.card-tabs :deep(.el-tabs__nav) {
-  border: none;
-  gap: 8px;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-}
-.card-tabs :deep(.el-tabs__content) {
-  display: none;
 }
 
 /* ====== Loading / Error ====== */
@@ -394,13 +387,14 @@ onUnmounted(() => {
   overflow: hidden;
   box-shadow: var(--shadow-md);
   text-decoration: none;
+  text-align: center;
 }
 .hero .date { font-size: 12px; color: var(--text-sub); letter-spacing: 1px; }
 .hero h2 {
   font-size: 22px; line-height: 1.5;
   color: var(--text-main); margin: 12px 0 16px; font-weight: 600;
 }
-.hero .signature { font-size: 12px; color: var(--text-sub); display: flex; align-items: center; gap: 6px; }
+.hero .signature { font-size: 12px; color: var(--text-sub); display: flex; align-items: center; justify-content: center; gap: 6px; }
 .hero .deco {
   position: absolute; top: -30px; right: -20px;
   font-size: 120px; opacity: 0.15; transform: rotate(15deg);
