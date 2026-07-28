@@ -103,7 +103,7 @@ async function onSubmit() {
   if (!await formRef.value.validate()) return
   submitting.value = true
   try {
-    const res: any = await service.post('/login', {
+    const res: any = await service.post('/auth/login', {
       phone: ruleForm.phone,
       password: ruleForm.password,
     })
@@ -116,8 +116,8 @@ async function onSubmit() {
     } else {
       ElMessage.error(res?.msg || '登录失败')
     }
-  } catch {
-    ElMessage.error('登录失败，请稍后重试')
+  } catch (err: any) {
+    ElMessage.error(err?.message || '登录失败，请稍后重试')
   } finally {
     submitting.value = false
   }

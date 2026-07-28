@@ -213,7 +213,7 @@ async function onSubmit() {
   }
   submitting.value = true
   try {
-    const userinfo: any = await service.post('/register', ruleForm)
+    const userinfo: any = await service.post('/auth/register', ruleForm)
     if (userinfo?.code === 200) {
       // 更新用户信息
       userStore.updateProfile(userinfo.data)

@@ -15,8 +15,8 @@ const service = axios.create({
 
 // 无需鉴权的公开接口白名单（注册、发送验证码等）
 const PUBLIC_URLS = new Set([
-  '/login',
-  '/register',
+  '/auth/login',
+  '/auth/register',
 ])
 
 // 请求拦截器：从  sessionStorage 读取 token 注入请求头；
@@ -52,12 +52,13 @@ service.interceptors.response.use(
 
     if (code === 401) {
       // 处理 token 过期逻辑
-      ElMessage.error('登录过期，请重新登录');
-      useUserStore().logout()
+      ElMessage.error(msg || '登录过期，请重新登录');
+      useUserStore().logout();
+      return Promise.reject(new Error(msg || '未授权'));
     }
 
-    // 其它业务错误：原样返回，由调用方按需处理
-    return response.data;
+    // 其它业务错误：reject，由调用方按需捕获
+    return Promise.reject(new Error(msg || `请求失败 (code: ${code})`));
   },
   (error: any) => {
     // 网络错误或服务器异常
