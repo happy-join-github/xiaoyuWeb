@@ -171,14 +171,19 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  /** 保存应用设置到后端 */
+  /** 保存应用设置到后端（后端返回 data 可能为 null，此时不覆盖本地已设置的值） */
   async function saveAppSettings(
     payload: Partial<UserSettings>,
   ): Promise<UserSettings | null> {
     try {
       const data = await updateAppSettings(payload)
-      applyAppSettings(data)
-      return data
+      // 后端 code=200 但 data 为 null 时，本地用 payload 更新（乐观更新）
+      if (data) {
+        applyAppSettings(data)
+      } else {
+        applyAppSettings(payload)
+      }
+      return data ?? (payload as UserSettings)
     } catch {
       return null
     }
