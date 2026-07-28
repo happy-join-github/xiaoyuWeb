@@ -60,8 +60,9 @@ export const useUserStore = defineStore('user', () => {
   const settings = ref<UserSettings>({ ...DEFAULT_SETTINGS })
   const availableThemes = ref<ThemeItem[]>([...FALLBACK_THEMES])
 
-  /** 根据接口数据填充本地资料字段（缺失字段保持现状） */
-  function applyProfileData(data: Partial<UserProfileData>) {
+  /** 根据接口数据填充本地资料字段（缺失字段保持现状；data 为空时直接返回） */
+  function applyProfileData(data: Partial<UserProfileData> | null | undefined) {
+    if (!data) return
     if (data.name !== undefined) name.value = data.name
     if (data.aiName !== undefined) aiName.value = data.aiName
     if (data.avatar !== undefined) avatar.value = data.avatar || '🦊'
@@ -78,7 +79,8 @@ export const useUserStore = defineStore('user', () => {
   }
 
   /** 根据接口数据填充 AI 设置 */
-  function applyAiSettings(data: Partial<AiSettings>) {
+  function applyAiSettings(data: Partial<AiSettings> | null | undefined) {
+    if (!data) return
     if (data.aiName !== undefined) aiName.value = data.aiName
     if (data.voice !== undefined) voice.value = data.voice
     if (data.characterTags !== undefined) characterTags.value = normalizeTags(data.characterTags)
@@ -113,7 +115,8 @@ export const useUserStore = defineStore('user', () => {
   }
 
   /** 根据接口数据填充应用设置 */
-  function applyAppSettings(data: Partial<UserSettings>) {
+  function applyAppSettings(data: Partial<UserSettings> | null | undefined) {
+    if (!data) return
     settings.value = { ...settings.value, ...data }
   }
 
@@ -146,7 +149,8 @@ export const useUserStore = defineStore('user', () => {
   } | null> {
     try {
       const data = await getAppSettings()
-      applyAppSettings(data.userSettings || {})
+      if (!data) return null
+      applyAppSettings(data.userSettings)
       if (data.availableThemes?.length) {
         availableThemes.value = data.availableThemes
       }

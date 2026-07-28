@@ -106,7 +106,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed } from 'vue'
+import { reactive, ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElInput, ElButton } from 'element-plus'
 import StatusBar from '../../components/StatusBar.vue'
@@ -153,6 +153,18 @@ const editForm = reactive({
   chatCount: userStore.chatCount,
   diaryCount: userStore.diaryCount,
   collectionCount: userStore.collectionCount,
+})
+
+/** 进入页面：拉取后端最新资料，保证读到的是当前账号数据 */
+onMounted(async () => {
+  await userStore.loadProfile()
+  editForm.name = userStore.name
+  editForm.avatar = userStore.avatar
+  editForm.phone = userStore.phone
+  editForm.companionDays = userStore.companionDays
+  editForm.chatCount = userStore.chatCount
+  editForm.diaryCount = userStore.diaryCount
+  editForm.collectionCount = userStore.collectionCount
 })
 
 const saving = ref(false)

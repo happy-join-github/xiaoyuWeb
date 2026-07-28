@@ -19,7 +19,7 @@
     <div class="section fade-up">
       <div class="section-title">基础信息</div>
       <div class="field">
-        <span class="label">ai的名字</span>
+        <span class="label">ai伙伴名字</span>
         <el-input v-model="aiName" />
       </div>
 
