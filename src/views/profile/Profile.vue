@@ -210,7 +210,7 @@ onMounted(async () => {
 .screen-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, #FFEAD9 0%, #FFF8F1 60%);
+  background: linear-gradient(180deg, var(--cream-2) 0%, var(--cream) 60%);
 }
 
 .scroll-area {
@@ -232,7 +232,7 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #9C8B7E;
+  color: var(--text-sub);
   font-size: inherit;
 }
 .nav-icon-btn.el-button:hover {
@@ -251,7 +251,7 @@ onMounted(async () => {
   width: 72px;
   height: 72px;
   font-size: 36px;
-  box-shadow: 0 8px 24px rgba(244, 169, 136, 0.3);
+  box-shadow: var(--shadow-md);
   position: relative;
 }
 .user-avatar::after {
@@ -261,8 +261,8 @@ onMounted(async () => {
   bottom: 0;
   width: 16px;
   height: 16px;
-  background: #fff;
-  border: 3px solid #FFEAD9;
+  background: var(--card-bg);
+  border: 3px solid var(--cream-2);
   border-radius: 50%;
   box-sizing: border-box;
 }
@@ -278,7 +278,7 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #9C8B7E;
+  color: var(--text-sub);
   flex-shrink: 0;
   font-size: inherit;
 }
@@ -293,12 +293,12 @@ onMounted(async () => {
 .user-hero .name {
   font-size: 20px;
   font-weight: 700;
-  color: #4A3A2E;
+  color: var(--text-main);
 }
 
 .user-hero .meta {
   font-size: 12px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   margin-top: 4px;
   display: flex;
   align-items: center;
@@ -308,11 +308,11 @@ onMounted(async () => {
 /* 数据面板 */
 .data-panel {
   margin: 0 16px 16px;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 20px;
   padding: 20px 16px 12px;
-  box-shadow: 0 2px 12px rgba(232, 138, 107, 0.12);
-  border: 1.5px solid #FFE0CB;
+  box-shadow: var(--shadow-sm);
+  border: 1.5px solid var(--line);
 }
 
 .data-panel .row {
@@ -325,13 +325,13 @@ onMounted(async () => {
 .data-panel .item .num {
   font-size: 22px;
   font-weight: 700;
-  color: #E88A6B;
+  color: var(--accent-deep);
   line-height: 1.2;
 }
 
 .data-panel .item .label {
   font-size: 11px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   margin-top: 2px;
 }
 
@@ -345,7 +345,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 14px;
-  box-shadow: 0 6px 20px rgba(74, 58, 46, 0.2);
+  box-shadow: var(--shadow-md);
 }
 
 .ai-card .info {
@@ -375,7 +375,7 @@ onMounted(async () => {
 /* 列表 */
 .section {
   margin: 0 16px 16px;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 20px;
   overflow: hidden;
   box-shadow: var(--shadow-sm);
@@ -386,7 +386,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 12px;
-  border-bottom: 1px solid #FAF1E5;
+  border-bottom: 1px solid var(--line);
 }
 
 .list-item:last-child {
@@ -404,22 +404,22 @@ onMounted(async () => {
 }
 
 .list-item .ic.peach {
-  background: #FFE7D1;
-  color: #E88A6B;
+  background: var(--apricot);
+  color: var(--accent-deep);
 }
 
 .list-item .ic.blue {
-  background: #E5F1F8;
+  background: var(--blue-soft);
   color: #6BA4C9;
 }
 
 .list-item .ic.sage {
-  background: #E8F0E2;
+  background: var(--sage);
   color: #7BA970;
 }
 
 .list-item .ic.cream {
-  background: #FFF4E8;
+  background: var(--cream-2);
   color: #D4A574;
 }
 
@@ -429,24 +429,24 @@ onMounted(async () => {
 
 .list-item .text .t1 {
   font-size: 14px;
-  color: #4A3A2E;
+  color: var(--text-main);
 }
 
 .list-item .text .t2 {
   font-size: 11px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   margin-top: 2px;
 }
 
 .list-item .right {
-  color: #C4B5A6;
+  color: var(--text-mute);
   flex-shrink: 0;
 }
 
 /* 手机号显示 */
 .phone {
   font-size: 12px;
-  color: #9C8B7E;
+  color: var(--text-sub);
   margin-top: 2px;
 }
 
@@ -454,7 +454,7 @@ onMounted(async () => {
 .section-inner-title {
   padding: 14px 16px 4px;
   font-size: 12px;
-  color: #9C8B7E;
+  color: var(--text-sub);
 }
 
 .setting-item {
@@ -462,7 +462,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 12px;
-  border-bottom: 1px solid #FAF1E5;
+  border-bottom: 1px solid var(--line);
 }
 
 .setting-item:last-child {
@@ -480,33 +480,33 @@ onMounted(async () => {
 }
 
 .setting-item .ic.peach {
-  background: #FFE7D1;
-  color: #E88A6B;
+  background: var(--apricot);
+  color: var(--accent-deep);
 }
 
 .setting-item .ic.blue {
-  background: #E5F1F8;
+  background: var(--blue-soft);
   color: #6BA4C9;
 }
 
 .setting-item .ic.sage {
-  background: #E8F0E2;
+  background: var(--sage);
   color: #7BA970;
 }
 
 .setting-item .ic.cream {
-  background: #FFF4E8;
+  background: var(--cream-2);
   color: #D4A574;
 }
 
 .setting-item .label {
   flex: 1;
   font-size: 14px;
-  color: #4A3A2E;
+  color: var(--text-main);
 }
 
 .setting-item .right-text {
-  color: #9C8B7E;
+  color: var(--text-sub);
   font-size: 12px;
 }
 </style>

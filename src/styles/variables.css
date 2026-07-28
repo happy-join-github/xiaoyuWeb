@@ -187,3 +187,34 @@
     radial-gradient(900px 700px at 100% 100%, #E8DCC8 0%, transparent 50%),
     linear-gradient(180deg, #FDF6EE 0%, #F8EDE0 100%);
 }
+
+/* ██ 深色模式全局覆盖 — 通过 .dark class 触发 */
+.dark {
+  --cream: #1A1D2E;
+  --cream-2: #232740;
+  --apricot: #2D3150;
+  --peach: #383D60;
+  --peach-soft: #2D3150;
+  --blue-mist: #1E2340;
+  --blue-soft: #252A48;
+  --coffee: #2A2E4A;
+  --sage: #343858;
+  --text-main: #E8E4F0;
+  --text-sub: #9C98B0;
+  --text-mute: #6A6880;
+  --line: #2E3250;
+  --accent: #7C9ED0;
+  --accent-deep: #5880B8;
+  --accent-soft: #283050;
+  --card-bg: #2D3150;
+  --input-bg: #2D3150;
+  --tabbar-bg: rgba(26, 29, 46, 0.92);
+  --overlay-bg: rgba(0, 0, 0, 0.6);
+  --body-bg:
+    radial-gradient(1200px 800px at 10% 10%, #2D3150 0%, transparent 50%),
+    radial-gradient(900px 700px at 100% 100%, #1E2340 0%, transparent 50%),
+    linear-gradient(180deg, #1A1D2E 0%, #232740 100%);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
