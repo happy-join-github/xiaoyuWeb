@@ -22,17 +22,21 @@ import SvgIcon from './SvgIcon.vue'
 const props = withDefaults(defineProps<{
   title?: string
   left?: string
+  backTo?: string
   center?: boolean
 }>(), {
   title: '',
   left: '',
+  backTo: '',
   center: false,
 })
 
 const router = useRouter()
 
 function goBack() {
-  if (window.history.length > 1) {
+  if (props.backTo) {
+    router.push(props.backTo)
+  } else if (window.history.length > 1) {
     router.back()
   } else {
     router.push('/chat')
