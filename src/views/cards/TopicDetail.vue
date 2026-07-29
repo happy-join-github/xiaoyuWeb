@@ -20,20 +20,20 @@
       <div class="topic-header" :class="topic.class">
         <div class="topic-sub">{{ topic.sub }}</div>
         <div class="topic-title">{{ topic.label }}</div>
-        <div class="topic-count">{{ cards.length }} 张卡片</div>
+        <div class="topic-count">{{ topicCards.length }} 张卡片</div>
       </div>
 
       <!-- 卡片列表 -->
       <div class="card-section">
         <h3>包含的卡片</h3>
-        <div v-if="cards.length" class="card-grid">
+        <div v-if="topicCards.length" class="card-grid">
           <div
-            v-for="card in cards"
+            v-for="card in topicCards"
             :key="card.id"
             class="card-link clickable"
             @click="router.push(`/cards/${card.id}`)"
           >
-            <CardItem :card="card" @collect="cardStore.toggleCollect" />
+            <CardItemComp :card="card" @collect="cardStore.toggleCollect" />
           </div>
         </div>
         <el-empty v-else description="这个主题还没有卡片" />
@@ -50,7 +50,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElSkeleton, ElEmpty, ElButton } from 'element-plus'
 import StatusBar from '../../components/StatusBar.vue'
 import NavBar from '../../components/NavBar.vue'
-import CardItem from './CardItem.vue'
+import CardItemComp from './CardItem.vue'
+import type { CardItem } from '../../api/cards'
 import { useCardStore } from '../../stores/cards'
 
 const route = useRoute()
@@ -58,21 +59,18 @@ const router = useRouter()
 const cardStore = useCardStore()
 
 const loading = ref(true)
+const topicCards = ref<CardItem[]>([])
 
 const topicId = computed(() => Number(route.params.topicId))
 const topic = computed(() => {
-  const t = cardStore.topics.find((t) => t.id === topicId.value)
-  return t || null
-})
-const cards = computed(() => {
-  if (!topic.value) return []
-  return cardStore.systemCards.filter((c) => topic.value!.cardIds.includes(c.id))
+  return cardStore.topics.find((t) => t.id === topicId.value) || null
 })
 
 onMounted(async () => {
   if (cardStore.topics.length === 0) {
     await cardStore.fetchAllCards()
   }
+  topicCards.value = await cardStore.fetchCardsByTopicId(topicId.value)
   loading.value = false
 })
 </script>

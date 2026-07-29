@@ -140,7 +140,7 @@
             >
               <div class="col-info">
                 <div class="col-name">{{ col.name }}</div>
-                <div class="col-count">{{ col.cardIds.length }} 张</div>
+                <div class="col-count">{{ col.cardCount }} 张</div>
               </div>
               <el-icon v-if="cardStore.getCollectionsByCard(card.id).some((c) => c.id === col.id)" color="#E88A6B" :size="18">
                 <Check />
@@ -242,6 +242,7 @@ async function loadCard() {
   if (cardStore.systemCards.length === 0) {
     await cardStore.fetchAllCards()
   }
+  await cardStore.loadCollections()
   loading.value = false
 }
 
@@ -335,22 +336,22 @@ function onDelete() {
 }
 
 // ====== 收藏集 ======
-function onCreateCollection() {
+async function onCreateCollection() {
   const name = newCollectionName.value.trim()
   if (!name || !card.value) return
-  const col = cardStore.createCollection(name)
-  cardStore.addCardToCollection(col.id, card.value.id)
+  const col = await cardStore.createCollection(name)
+  await cardStore.addCardToCollection(col.id, card.value.id)
   newCollectionName.value = ''
 }
 
-function onToggleCollection(colId: number) {
+async function onToggleCollection(colId: number) {
   if (!card.value) return
   const collections = cardStore.getCollectionsByCard(card.value.id)
   const inCol = collections.find((c) => c.id === colId)
   if (inCol) {
-    cardStore.removeCardFromCollection(colId, card.value.id)
+    await cardStore.removeCardFromCollection(colId, card.value.id)
   } else {
-    cardStore.addCardToCollection(colId, card.value.id)
+    await cardStore.addCardToCollection(colId, card.value.id)
   }
 }
 
