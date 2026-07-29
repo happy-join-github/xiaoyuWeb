@@ -4,25 +4,34 @@ import { useUserStore } from './user'
 import {
   fetchSystemCards,
   fetchUserCards,
-  fetchCardById,
-  createCard,
-  updateCard,
-  deleteCard,
-  fetchTopics,
   fetchCommunityCards,
+  fetchTopics,
+  fetchTopicCards,
+  fetchCardById as apiFetchCardById,
+  createCard as apiCreateCard,
+  updateCard as apiUpdateCard,
+  deleteCard as apiDeleteCard,
+  fetchDailyCard,
+  fetchCollectedIds,
+  collectCard as apiCollectCard,
+  uncollectCard as apiUncollectCard,
+  fetchCollections as apiFetchCollections,
+  createCollection as apiCreateCollection,
+  deleteCollection as apiDeleteCollection,
+  addCardToCollection as apiAddCardToCollection,
+  removeCardFromCollection as apiRemoveCardFromCollection,
   type CardItem,
   type TopicItem,
+  type CollectionItem,
 } from '../api/cards'
 
 const PAGE_SIZE = 10
 
 export type CardsTab = 'recommend' | 'my-cards' | 'warm' | 'audio' | 'scene' | 'community'
 
-export interface Collection {
-  id: number
-  name: string
+/** 收藏集（本地扩展：cardIds 为运行时追踪，不来自后端） */
+export interface Collection extends CollectionItem {
   cardIds: number[]
-  createdAt: string
 }
 
 export const TAB_CONFIG: { key: CardsTab; label: string }[] = [
@@ -48,8 +57,14 @@ export const useCardStore = defineStore('cards', () => {
   const page = ref(1)
   const total = ref(0)
 
-  // 收藏集：已收藏/点赞的卡片 ID 集合
+  // 收藏集（本地扩展 cardIds 数组，由 UI 操作维护）
+  const collections = ref<Collection[]>([])
+
+  // 已收藏的卡片 ID 集合
   const collectedIds = ref<Set<number>>(new Set())
+
+  /** E2 每日推荐卡片（由 fetchAllCards 调用时填充） */
+  const dailyCard = ref<CardItem | null>(null)
 
   // ====== 计算属性 ======
   const hasMore = computed(() => systemCards.value.length < total.value)
@@ -88,11 +103,11 @@ export const useCardStore = defineStore('cards', () => {
     }
   })
 
-  /** 今日推荐：取系统卡片第一条，每日可做伪随机 */
+  /** 今日推荐：优先使用 E2 接口的每日推荐，兜底从本地选 */
   const todayRecommend = computed(() => {
+    if (dailyCard.value) return dailyCard.value
     const cards = systemCards.value
     if (!cards.length) return null
-    // 用日期做种子，每天推荐不同卡片
     const dayOfYear = getDayOfYear(new Date())
     return cards[dayOfYear % cards.length]
   })
@@ -113,21 +128,30 @@ export const useCardStore = defineStore('cards', () => {
     try {
       const [sys, usr, com, tpc] = await Promise.all([
         fetchSystemCards(1, PAGE_SIZE),
-        fetchUserCards(),
-        fetchCommunityCards(),
+        fetchUserCards(1, PAGE_SIZE),
+        fetchCommunityCards(1, PAGE_SIZE),
         fetchTopics(),
       ])
       systemCards.value = sys.list
       total.value = sys.total
-      userCards.value = usr
-      communityCards.value = com
-      topics.value = tpc
+      userCards.value = usr.list
+      communityCards.value = com.list
+      topics.value = tpc.list.map((t) => ({ ...t, class: `t-${t.id}` }))
 
-      // 初始化已收藏状态
-      const allCards = [...sys.list, ...usr, ...com]
-      allCards.forEach((c) => {
-        if (c.liked) collectedIds.value.add(c.id)
-      })
+      // 单独获取 E2 每日推荐（包含正确的 date 标签）
+      try {
+        dailyCard.value = await fetchDailyCard()
+      } catch {
+        // 后端暂不可用时静默，兜底由 todayRecommend 从 systemCards 选取
+      }
+
+      // 加载已收藏 ID
+      try {
+        const res = await fetchCollectedIds()
+        collectedIds.value = new Set(res.collectedIds)
+      } catch {
+        // 未登录等情况静默失败
+      }
 
       // 同步收藏数到 userStore
       const userStore = useUserStore()
@@ -140,7 +164,7 @@ export const useCardStore = defineStore('cards', () => {
     }
   }
 
-  /** 加载更多卡片（分页） */
+  /** 加载更多系统卡片（分页） */
   async function loadMoreCards() {
     if (loadingMore.value || !hasMore.value) return
     loadingMore.value = true
@@ -156,20 +180,36 @@ export const useCardStore = defineStore('cards', () => {
     }
   }
 
-  /** 获取单张卡片（含详情页） */
+  /** 获取单张卡片详情（系统卡片走 E3，用户卡片本地找） */
   async function getCardById(id: number): Promise<CardItem | null> {
-    const card = await fetchCardById(id)
-    return card ?? null
+    const local = [...systemCards.value, ...userCards.value, ...communityCards.value].find((c) => c.id === id)
+    if (local) return local
+    try {
+      const card = await apiFetchCardById(id)
+      return card ?? null
+    } catch {
+      return null
+    }
   }
 
-  /** 切换收藏/取消收藏 */
-  function toggleCollect(id: number) {
+  /** 收藏/取消收藏 */
+  async function toggleCollect(id: number) {
     const set = collectedIds.value
-    if (set.has(id)) {
-      set.delete(id)
-    } else {
-      set.add(id)
+    const isCollecting = !set.has(id)
+
+    try {
+      if (isCollecting) {
+        await apiCollectCard(id)
+        set.add(id)
+      } else {
+        await apiUncollectCard(id)
+        set.delete(id)
+      }
+    } catch {
+      // 请求失败时回滚 UI 不生效
+      return
     }
+
     // 同步卡片自身的 liked 状态
     const allCards = [...systemCards.value, ...userCards.value, ...communityCards.value]
     const card = allCards.find((c) => c.id === id)
@@ -194,28 +234,43 @@ export const useCardStore = defineStore('cards', () => {
     customImage?: string
     isPublic: boolean
   }): Promise<CardItem> {
-    const card = await createCard(data)
+    const card = await apiCreateCard(data)
     userCards.value.unshift(card)
     return card
   }
 
   /** 更新用户卡片 */
-  async function updateUserCard(id: number, data: Partial<CardItem>): Promise<CardItem | null> {
-    const updated = await updateCard(id, data)
-    if (!updated) return null
-    const idx = userCards.value.findIndex((c) => c.id === id)
-    if (idx !== -1) userCards.value[idx] = updated
-    return updated
+  async function updateUserCard(id: number, data: Record<string, any>): Promise<CardItem | null> {
+    try {
+      const updated = await apiUpdateCard(id, data)
+      const idx = userCards.value.findIndex((c) => c.id === id)
+      if (idx !== -1) userCards.value[idx] = updated
+      return updated
+    } catch {
+      return null
+    }
   }
 
   /** 删除用户卡片 */
   async function removeUserCard(id: number): Promise<boolean> {
-    const ok = await deleteCard(id)
-    if (ok) {
+    try {
+      await apiDeleteCard(id)
       userCards.value = userCards.value.filter((c) => c.id !== id)
       collectedIds.value.delete(id)
+      return true
+    } catch {
+      return false
     }
-    return ok
+  }
+
+  /** 获取主题下的卡片列表 */
+  async function fetchCardsByTopicId(topicId: number): Promise<CardItem[]> {
+    try {
+      const res = await fetchTopicCards(topicId)
+      return res.list
+    } catch {
+      return []
+    }
   }
 
   /** 切换 Tab */
@@ -223,39 +278,61 @@ export const useCardStore = defineStore('cards', () => {
     activeTab.value = tab
   }
 
-  // ====== 收藏集管理 ======
-  const collections = ref<Collection[]>([])
-  let collectionIdCounter = 1
+  // ====== 收藏集管理（E16-E21） ======
 
-  function createCollection(name: string): Collection {
-    const col: Collection = {
-      id: collectionIdCounter++,
-      name,
-      cardIds: [],
-      createdAt: new Date().toISOString().slice(0, 10),
+  /** 从后端加载收藏集列表 */
+  async function loadCollections() {
+    try {
+      const res = await apiFetchCollections()
+      collections.value = res.list.map((c) => ({
+        ...c,
+        cardIds: [], // cardIds 由运行时维护
+      }))
+    } catch {
+      // 静默失败
     }
-    collections.value.push(col)
+  }
+
+  /** 创建收藏集 */
+  async function createCollection(name: string): Promise<Collection> {
+    const item = await apiCreateCollection(name)
+    const col: Collection = {
+      ...item,
+      cardIds: [],
+    }
+    collections.value.unshift(col)
     return col
   }
 
-  function deleteCollection(id: number) {
+  /** 删除收藏集 */
+  async function deleteCollection(id: number) {
+    await apiDeleteCollection(id)
     collections.value = collections.value.filter((c) => c.id !== id)
   }
 
-  function addCardToCollection(collectionId: number, cardId: number) {
+  /** 添加卡片到收藏集 */
+  async function addCardToCollection(collectionId: number, cardId: number) {
+    await apiAddCardToCollection(collectionId, cardId)
     const col = collections.value.find((c) => c.id === collectionId)
-    if (col && !col.cardIds.includes(cardId)) {
-      col.cardIds.push(cardId)
+    if (col) {
+      if (!col.cardIds.includes(cardId)) {
+        col.cardIds.push(cardId)
+      }
+      col.cardCount++
     }
   }
 
-  function removeCardFromCollection(collectionId: number, cardId: number) {
+  /** 从收藏集移除卡片 */
+  async function removeCardFromCollection(collectionId: number, cardId: number) {
+    await apiRemoveCardFromCollection(collectionId, cardId)
     const col = collections.value.find((c) => c.id === collectionId)
     if (col) {
       col.cardIds = col.cardIds.filter((id) => id !== cardId)
+      col.cardCount = Math.max(0, col.cardCount - 1)
     }
   }
 
+  /** 获取包含指定卡片的收藏集 */
   function getCollectionsByCard(cardId: number): Collection[] {
     return collections.value.filter((c) => c.cardIds.includes(cardId))
   }
@@ -272,6 +349,8 @@ export const useCardStore = defineStore('cards', () => {
     error,
     searchQuery,
     collectedIds,
+    dailyCard,
+    collections,
     page,
     total,
     // 计算
@@ -290,9 +369,10 @@ export const useCardStore = defineStore('cards', () => {
     createUserCard,
     updateUserCard,
     removeUserCard,
+    fetchCardsByTopicId,
     setActiveTab,
     // 收藏集
-    collections,
+    loadCollections,
     createCollection,
     deleteCollection,
     addCardToCollection,
