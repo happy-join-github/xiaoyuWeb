@@ -21,6 +21,11 @@ export interface UserProfileData {
   characterBio: string | null
   morningGreeting: string
   eveningGreeting: string
+  /** 最近活跃时间（不带时区的本地时间字符串）
+   * 后端原始格式："2026-07-29 10:30:33"，即 YYYY-MM-DD HH:mm:ss
+   * 注意：空格分隔非标准 ISO 8601，UI 解析时已归一化为 'T' 分隔
+   */
+  lastActiveDate?: string | null
 }
 
 /** F3/F4 AI 设置 */

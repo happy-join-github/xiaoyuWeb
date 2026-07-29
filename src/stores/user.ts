@@ -60,6 +60,9 @@ export const useUserStore = defineStore('user', () => {
   const settings = ref<UserSettings>({ ...DEFAULT_SETTINGS })
   const availableThemes = ref<ThemeItem[]>([...FALLBACK_THEMES])
 
+  /** 最近活跃时间（ISO 字符串） */
+  const lastActiveDate = ref<string | null>(null)
+
   /** 根据接口数据填充本地资料字段（缺失字段保持现状；data 为空时直接返回） */
   function applyProfileData(data: Partial<UserProfileData> | null | undefined) {
     if (!data) return
@@ -76,6 +79,7 @@ export const useUserStore = defineStore('user', () => {
     if (data.characterBio !== undefined) characterBio.value = data.characterBio || ''
     if (data.morningGreeting !== undefined) morningGreeting.value = data.morningGreeting
     if (data.eveningGreeting !== undefined) eveningGreeting.value = data.eveningGreeting
+    if (data.lastActiveDate !== undefined) lastActiveDate.value = data.lastActiveDate ?? null
   }
 
   /** 根据接口数据填充 AI 设置 */
@@ -215,6 +219,7 @@ export const useUserStore = defineStore('user', () => {
       eveningGreeting.value = '22:00'
       settings.value = { ...DEFAULT_SETTINGS }
       availableThemes.value = [...FALLBACK_THEMES]
+      lastActiveDate.value = null
       router.push('/login')
       ElMessage.success('退出成功')
     } catch {
@@ -229,7 +234,9 @@ export const useUserStore = defineStore('user', () => {
     // AI 设置
     voice, characterTags, characterBio, morningGreeting, eveningGreeting,
     // 应用设置
-    settings, availableThemes,
+    settings,
+    availableThemes,
+    lastActiveDate,
     // 方法
     updateProfile, applyProfileData, applyAiSettings, applyAppSettings,
     loadProfile, loadAiSettings, loadAppSettings, loadStats, saveAppSettings,

@@ -26,7 +26,7 @@
              <svg style="vertical-align: middle" width="16" height="16" viewBox="0 0 24 24" fill="#E88A6B">
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
             </svg>
-            <span>今天 9:32 在线</span>
+            <span>{{ lastActiveText }}</span>
           </div>
         </div>
         <router-link to="/profile/edit">
@@ -179,6 +179,30 @@ const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 const isChildRoute = computed(() => route.path !== '/profile')
+
+/** 把 lastActiveDate 格式化为「今天 HH:mm / 昨天 HH:mm / X月X日 HH:mm」
+ * 后端返回格式形如 "2026-07-29 10:30:33"（空格分隔、非标准 ISO 8601），
+ * 这里把空格替换为 'T' 以保证跨浏览器/环境都能被 Date 正确解析。
+ */
+const lastActiveText = computed(() => {
+  const raw = userStore.lastActiveDate
+  if (!raw) return '最近在线'
+  // 兼容 "YYYY-MM-DD HH:mm:ss" 与标准 ISO 字符串
+  const d = new Date(raw.includes('T') ? raw : raw.replace(' ', 'T'))
+  if (Number.isNaN(d.getTime())) return '最近在线'
+  const now = new Date()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const hm = `${pad(d.getHours())}:${pad(d.getMinutes())}`
+  const sameDay = (a: Date, b: Date) =>
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  if (sameDay(d, now)) return `今天 ${hm} 在线`
+  const yest = new Date(now)
+  yest.setDate(yest.getDate() - 1)
+  if (sameDay(d, yest)) return `昨天 ${hm} 在线`
+  return `${d.getMonth() + 1}月${d.getDate()}日 ${hm} 在线`
+})
 
 function onLogout() {
   userStore.logout()
