@@ -79,7 +79,7 @@
           </div>
           <SvgIcon class="right" name="right" :size="18" />
         </router-link>
-        <router-link class="list-item" to="/mood/report">
+        <div class="list-item" style="cursor: pointer;" @click="goToReport">
           <div class="ic blue">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M3 3v18h18" />
@@ -87,11 +87,11 @@
             </svg>
           </div>
           <div class="text">
-            <div class="t1">情绪周报 <el-tag size="small" type="danger">NEW</el-tag></div>
-            <div class="t2">这一周的你 · 已生成</div>
+            <div class="t1">情绪周报</div>
+            <div class="t2">{{ reportSubtitle }}</div>
           </div>
           <SvgIcon class="right" name="right" :size="18" />
-        </router-link>
+        </div>
         <router-link class="list-item" to="/chat/history">
           <div class="ic sage">
             <SvgIcon name="chat" :size="16" />
@@ -203,6 +203,26 @@ const lastActiveText = computed(() => {
   if (sameDay(d, yest)) return `昨天 ${hm} 在线`
   return `${d.getMonth() + 1}月${d.getDate()}日 ${hm} 在线`
 })
+
+/** 情绪周报仅在周五、周六、周日开放 */
+const REPORT_ALLOWED_DAYS = [0, 5, 6] // 0=周日, 5=周五, 6=周六
+const todayDayOfWeek = new Date().getDay()
+const canAccessReport = REPORT_ALLOWED_DAYS.includes(todayDayOfWeek)
+
+const reportSubtitle = computed(() => {
+  const labels: Record<number, string> = { 0: '周日', 5: '周五', 6: '周六' }
+  if (canAccessReport) return '这一周的你 · 已生成'
+  const dayNames = [0, 5, 6].map(d => labels[d]).join('、')
+  return `仅在 ${dayNames} 开放`
+})
+
+function goToReport() {
+  if (canAccessReport) {
+    router.push('/mood/report')
+  } else {
+    ElMessage.info('情绪周报仅在周五、周六、周日开放查看')
+  }
+}
 
 function onLogout() {
   userStore.logout()
