@@ -160,7 +160,10 @@
 
     <!-- 浮动打卡按钮 -->
     <router-link to="/mood/checkin" class="fab-checkin">
-      <el-button type="warning" :icon="Plus" circle size="large" />
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round">
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
+      </svg>
     </router-link>
 
     <TabBar activeKey="me" />
@@ -171,7 +174,7 @@
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElButton, ElIcon, ElEmpty } from 'element-plus'
-import { Plus, Delete } from '@element-plus/icons-vue'
+import { Delete } from '@element-plus/icons-vue'
 import StatusBar from '../../components/StatusBar.vue'
 import NavBar from '../../components/NavBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
@@ -705,7 +708,7 @@ function selectDay(day: CalDay) {
   width: 54px;
   height: 54px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-deep) 100%);
+  background: var(--accent);
   color: #fff;
   display: flex;
   align-items: center;
