@@ -13,17 +13,17 @@
     </div>
 
     <div class="hero fade-in">
-      <div class="week">WEEK 29 · 7.13 - 7.19</div>
-      <h1>这一周的你 ✨</h1>
-      <p>像被温柔地托着，慢慢稳下来</p>
+      <div class="week">{{ weekDisplay }}</div>
+      <h1>{{ dominantMood ? weekMoodTitle : '这一周的你 ✨' }}</h1>
+      <p>{{ summaryText || '记录每一天的心情' }}</p>
     </div>
 
     <div class="section-card fade-up">
       <div class="head">
         <h3>情绪曲线</h3>
-        <span class="sub">平均 4.1 / 5</span>
+        <span class="sub">平均 {{ avgScore ?? '-' }} / 5</span>
       </div>
-      <div class="chart">
+      <div class="chart" v-if="chartPath.path">
         <svg viewBox="0 0 320 140" preserveAspectRatio="none">
           <defs>
             <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
@@ -34,49 +34,40 @@
           <line x1="0" y1="35" x2="320" y2="35" stroke="#F1E5D7" stroke-dasharray="3 3"/>
           <line x1="0" y1="70" x2="320" y2="70" stroke="#F1E5D7" stroke-dasharray="3 3"/>
           <line x1="0" y1="105" x2="320" y2="105" stroke="#F1E5D7" stroke-dasharray="3 3"/>
-          <path d="M 25 60 L 70 45 L 115 70 L 160 25 L 205 35 L 250 50 L 295 20 L 295 140 L 25 140 Z" fill="url(#lineGrad)"/>
-          <path d="M 25 60 L 70 45 L 115 70 L 160 25 L 205 35 L 250 50 L 295 20" fill="none" stroke="#E88A6B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="25" cy="60" r="4" fill="#fff" stroke="#E88A6B" stroke-width="2"/>
-          <circle cx="70" cy="45" r="4" fill="#fff" stroke="#E88A6B" stroke-width="2"/>
-          <circle cx="115" cy="70" r="4" fill="#fff" stroke="#E88A6B" stroke-width="2"/>
-          <circle cx="160" cy="25" r="4" fill="#fff" stroke="#E88A6B" stroke-width="2"/>
-          <circle cx="205" cy="35" r="4" fill="#fff" stroke="#E88A6B" stroke-width="2"/>
-          <circle cx="250" cy="50" r="4" fill="#fff" stroke="#E88A6B" stroke-width="2"/>
-          <circle cx="295" cy="20" r="5" fill="#E88A6B"/>
+          <path :d="chartPath.fill" fill="url(#lineGrad)"/>
+          <path :d="chartPath.path" fill="none" stroke="#E88A6B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle v-for="(dot, i) in chartPath.dots" :key="i" :cx="dot.split(',')[0]" :cy="dot.split(',')[1]" :r="i === chartPath.dots.length - 1 ? 5 : 4" fill="#fff" stroke="#E88A6B" stroke-width="2"/>
         </svg>
       </div>
+      <div class="chart" v-else>
+        <div class="no-data">本周暂无数据</div>
+      </div>
       <div class="chart-labels">
-        <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span class="active">日</span>
+        <span v-for="d in dailyMoods" :key="d.label" :class="{ active: d.active }">{{ d.label }}</span>
       </div>
     </div>
 
-    <div class="section-card fade-up">
+    <div class="section-card fade-up" v-if="keywords.length > 0">
       <div class="head">
         <h3>本周关键词</h3>
-        <span class="sub">共 24 个</span>
+        <span class="sub">共 {{ keywords.length }} 个</span>
       </div>
       <div class="kw-cloud">
-        <div class="kw hot">#工作压力</div>
-        <div class="kw hot">#好天气</div>
-        <div class="kw">#咖啡</div>
-        <div class="kw">#运动</div>
-        <div class="kw">#失眠</div>
-        <div class="kw">#追剧</div>
-        <div class="kw">#朋友</div>
+        <div class="kw" v-for="kw in keywords" :key="kw">{{ kw }}</div>
       </div>
     </div>
 
     <div class="weekly-letter fade-up">
-      <div class="text">{{ userStore.name }}，这一周你辛苦了 💛<br><br>周中有一阵子看起来有点累，但慢慢地，你又把自己找回来了。喜欢看你写下的那些小事——天气、咖啡、窗外的猫，它们是这一周里最温柔的部分。<br><br>下周想不想试试：<b>每天给自己 5 分钟</b>，做一件只为自己、不为别人的小事？</div>
+      <div class="text" v-html="weekLetter"></div>
       <div class="sign">— {{ userStore.aiName }} 🌸</div>
     </div>
 
     <div class="section-card fade-up">
       <div class="head"><h3>这一周的数据</h3></div>
       <div class="stats">
-        <div class="stat"><div class="num">7</div><div class="label">打卡天数</div></div>
-        <div class="stat"><div class="num">23</div><div class="label">聊天轮次</div></div>
-        <div class="stat"><div class="num">12</div><div class="label">收藏卡片</div></div>
+        <div class="stat"><div class="num">{{ recordCount }}</div><div class="label">打卡天数</div></div>
+        <div class="stat"><div class="num">{{ userStore.chatCount }}</div><div class="label">聊天轮次</div></div>
+        <div class="stat"><div class="num">{{ userStore.collectionCount }}</div><div class="label">收藏卡片</div></div>
       </div>
     </div>
 
@@ -101,14 +92,114 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElButton } from 'element-plus'
 import StatusBar from '../../components/StatusBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
 import { useUserStore } from '../../stores/user'
+import { useMoodStore, MOOD_CONFIG } from '../../stores/mood'
 
 const router = useRouter()
 const userStore = useUserStore()
+const moodStore = useMoodStore()
+
+const loading = ref(true)
+const error = ref(false)
+
+onMounted(async () => {
+  try {
+    await moodStore.fetchReport()
+  } catch {
+    error.value = true
+  }
+  loading.value = false
+})
+
+/** API 返回的报告数据 */
+const reportData = computed(() => moodStore.weeklyReport)
+
+/** 星期标签映射 */
+const WEEK_LABELS = ['一', '二', '三', '四', '五', '六', '日']
+
+/** 周标题 */
+const weekDisplay = computed(() => {
+  if (!reportData.value) return 'WEEK --'
+  const r = reportData.value.report
+  return `WEEK ${r.yearWeek?.replace('W', '') || '--'}${r.weekRange ? ' · ' + r.weekRange : ''}`
+})
+
+/** 情绪曲线 svg 路径 */
+const chartPath = computed(() => {
+  if (!reportData.value) return { path: '', fill: '', dots: [] as string[] }
+  const daily = reportData.value.dailyMoods
+  const points = daily.map((d, i) => {
+    const x = 25 + i * 45
+    let y = 105  // 默认最低
+    if (d.mood && MOOD_CONFIG[d.mood as keyof typeof MOOD_CONFIG]) {
+      const score = MOOD_CONFIG[d.mood as keyof typeof MOOD_CONFIG].score
+      // score 1-5 → y 105-20 (分数越高 y 越小)
+      y = 120 - score * 20
+    }
+    return { x, y, mood: d.mood }
+  })
+  if (points.length === 0) return { path: '', fill: '', dots: [] as string[] }
+
+  const pathStr = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
+  const fillStr = pathStr + ` L ${points[points.length - 1].x} 140 L ${points[0].x} 140 Z`
+  const dots = points.map(p => `${p.x},${p.y}`)
+  return {
+    path: pathStr,
+    fill: fillStr,
+    dots,
+    lastMood: points[points.length - 1]?.mood || null,
+  }
+})
+
+/** 本周关键词（从报告取） */
+const keywords = computed(() => {
+  return reportData.value?.report?.keywords || []
+})
+
+/** 打卡天数 */
+const recordCount = computed(() => reportData.value?.report?.recordCount ?? 0)
+
+/** 平均分 */
+const avgScore = computed(() => reportData.value?.report?.avgScore)
+
+/** 主导情绪 */
+const dominantMood = computed(() => reportData.value?.report?.dominantMood)
+
+/** 摘要文案 */
+const summaryText = computed(() => reportData.value?.report?.summaryText || '')
+
+/** 周情绪标题 */
+const weekMoodTitle = computed(() => {
+  if (!dominantMood.value) return '这一周的你 ✨'
+  const config = MOOD_CONFIG[dominantMood.value as keyof typeof MOOD_CONFIG]
+  return `这周的你 · ${config?.emoji || ''} ${config?.label || dominantMood.value}`
+})
+
+/** 周报寄语 */
+const weekLetter = computed(() => {
+  const name = userStore.name || '你'
+  if (summaryText.value) {
+    return `${name}，这一周你辛苦了 💛<br><br>${summaryText.value}<br><br>继续加油，新的一周也会更好的 ✨`
+  }
+  return `${name}，这一周你辛苦了 💛<br><br>记录每一天的心情，好好照顾自己。<br><br>新的一周也要加油哦 ✨`
+})
+
+/** 每日情绪映射 */
+const dailyMoods = computed<Array<{ label: string; mood: string | null; active: boolean }>>(() => {
+  if (!reportData.value) {
+    return WEEK_LABELS.map(label => ({ label, mood: null, active: false }))
+  }
+  return reportData.value.dailyMoods.map((d, i) => ({
+    label: WEEK_LABELS[i] || d.label,
+    mood: d.mood,
+    active: d.mood !== null,
+  }))
+})
 
 function onShare() {}
 function onFavorite() {}
@@ -223,6 +314,14 @@ function onFavorite() {}
 .chart svg {
   width: 100%;
   height: 100%;
+}
+.chart .no-data {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 13px;
+  color: var(--text-mute);
 }
 .chart-labels {
   display: flex;

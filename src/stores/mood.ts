@@ -1,13 +1,20 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import {
+  getMoodRecords,
+  getDailyRecord,
+  checkinMood,
+  getMoodReport,
+  getMoodStreak,
+  type MoodType,
+  type MoodRecord,
+  type MonthlyRecordsResponse,
+  type WeeklyReportResponse,
+  type MoodStreak,
+} from '../api/mood'
 
-export type MoodType = 'happy' | 'calm' | 'sad' | 'anxious' | 'irritable' | 'tearful'
-
-export interface MoodRecord {
-  date: string
-  mood: MoodType
-  note: string
-}
+// 导出 MoodType 和 MOOD_CONFIG 给组件用（兼容旧引用）
+export type { MoodType, MoodRecord }
 
 export const MOOD_CONFIG: Record<MoodType, { label: string; emoji: string; score: number; color: string }> = {
   happy: { label: '开心', emoji: '😊', score: 5, color: '#7BC97B' },
@@ -18,72 +25,50 @@ export const MOOD_CONFIG: Record<MoodType, { label: string; emoji: string; score
   tearful: { label: '想哭', emoji: '🥺', score: 1, color: '#F4A988' },
 }
 
-const INITIAL_RECORDS: MoodRecord[] = [
-  { date: '2026-07-13', mood: 'calm', note: '今天心情不错，和朋友聊了天' },
-  { date: '2026-07-14', mood: 'sad', note: '工作有点累' },
-  { date: '2026-07-15', mood: 'anxious', note: '项目延期了，很焦虑' },
-  { date: '2026-07-16', mood: 'calm', note: '问题解决了，松了口气' },
-  { date: '2026-07-17', mood: 'happy', note: '周末去公园散步了' },
-  { date: '2026-07-18', mood: 'sad', note: '有点无聊' },
-  { date: '2026-07-19', mood: 'calm', note: '新的一周开始了' },
-  { date: '2026-07-20', mood: 'happy', note: '今天天气很好，出门拍了照片 📷' },
-  { date: '2026-07-21', mood: 'happy', note: '约了朋友吃饭，聊得很开心' },
-  { date: '2026-07-22', mood: 'calm', note: '安静地看了一本书' },
-  { date: '2026-07-23', mood: 'irritable', note: '被莫名其妙的事情惹到了' },
-  { date: '2026-07-24', mood: 'calm', note: '整理了一下房间，心情变好了' },
-  { date: '2026-07-25', mood: 'happy', note: '收到了一束花 💐' },
-  { date: '2026-07-26', mood: 'happy', note: '今天做了顿好吃的犒劳自己 🍳' },
-]
-
 export const useMoodStore = defineStore('mood', () => {
-  const records = ref<MoodRecord[]>(INITIAL_RECORDS)
+  // ====== 状态 ======
+  /** 当月心情记录列表 */
+  const records = ref<MoodRecord[]>([])
+  /** 月度统计数据 */
+  const monthStats = ref<MonthlyRecordsResponse['stats'] | null>(null)
+  /** 连续打卡 */
+  const streak = ref<MoodStreak>({ streakDays: 0, totalDays: 0 })
+  /** 周报数据 */
+  const weeklyReport = ref<WeeklyReportResponse | null>(null)
 
-  const currentYear = ref(2026)
-  const currentMonth = ref(7)
+  // 导航状态
+  const currentYear = ref(new Date().getFullYear())
+  const currentMonth = ref(new Date().getMonth() + 1)
+
+  // ====== 计算属性 ======
 
   /** 当月记录数 */
   const monthCount = computed(() =>
-    records.value.filter(r => {
-      const [y, m] = r.date.split('-')
-      return Number(y) === currentYear.value && Number(m) === currentMonth.value
-    }).length
+    records.value.length
   )
 
   /** 当月平均分 */
   const monthAvgScore = computed(() => {
-    const monthRecords = records.value.filter(r => {
-      const [y, m] = r.date.split('-')
-      return Number(y) === currentYear.value && Number(m) === currentMonth.value
-    })
-    if (!monthRecords.length) return 0
-    const total = monthRecords.reduce((sum, r) => sum + MOOD_CONFIG[r.mood].score, 0)
-    return Math.round((total / monthRecords.length) * 10) / 10
+    if (!records.value.length) return 0
+    const total = records.value.reduce((sum, r) => sum + (r.score || MOOD_CONFIG[r.mood]?.score || 0), 0)
+    return Math.round((total / records.value.length) * 10) / 10
   })
 
-  /** 当月情绪摘要文案 */
+  /** 当月情绪摘要文案（优先用后端返回，回退本地计算） */
   const monthSummary = computed(() => {
+    if (monthStats.value?.summary) {
+      return monthStats.value.summary
+    }
     const avg = monthAvgScore.value
     if (avg >= 4) return { text: '好心情居多，像夏天的风一样温柔', emoji: '✨' }
     if (avg >= 3) return { text: '有甜有涩，都是生活', emoji: '🌊' }
     return { text: '这个月需要多一些关怀', emoji: '🌷' }
   })
 
-  /** 连续打卡天数（计算到当天） */
-  const streakDays = computed(() => {
-    const today = new Date()
-    let count = 0
-    for (let i = 0; i < 365; i++) {
-      const d = new Date(today)
-      d.setDate(d.getDate() - i)
-      const dateStr = formatDate(d)
-      if (records.value.some(r => r.date === dateStr)) {
-        count++
-      } else if (i > 0) {
-        break
-      }
-    }
-    return count
-  })
+  /** 连续打卡天数 */
+  const streakDays = computed(() => streak.value.streakDays)
+
+  // ====== 工具方法 ======
 
   function formatDate(d: Date): string {
     const y = d.getFullYear()
@@ -92,29 +77,90 @@ export const useMoodStore = defineStore('mood', () => {
     return `${y}-${m}-${day}`
   }
 
-  function getRecordByDate(dateStr: string): MoodRecord | undefined {
-    return records.value.find(r => r.date === dateStr)
+  function isToday(dateStr: string): boolean {
+    return dateStr === formatDate(new Date())
   }
 
+  /** 从 records 中查找指定日期的记录 */
+  function getRecordByDate(dateStr: string): MoodRecord | undefined {
+    return records.value.find(r => r.recordDate === dateStr)
+  }
+
+  /** 从 records 中按月筛选 */
   function getRecordsByMonth(year: number, month: number): MoodRecord[] {
     return records.value.filter(r => {
-      const [y, m] = r.date.split('-')
+      // recordDate 格式 YYYY-MM-DD
+      const [y, m] = r.recordDate.split('-')
       return Number(y) === year && Number(m) === month
-    }).sort((a, b) => b.date.localeCompare(a.date))
+    }).sort((a, b) => b.recordDate.localeCompare(a.recordDate))
   }
 
-  function addRecord(date: string, mood: MoodType, note: string): boolean {
-    // 只允许记录/更新今天的心情
-    if (date !== formatDate(new Date())) return false
-    const existing = records.value.findIndex(r => r.date === date)
-    if (existing >= 0) {
-      records.value[existing] = { date, mood, note }
-    } else {
-      records.value.push({ date, mood, note })
+  // ====== 异步操作 ======
+
+  /** 拉取月度记录 + 统计 */
+  async function fetchMonthRecords(year?: number, month?: number): Promise<void> {
+    const y = year ?? currentYear.value
+    const m = month ?? currentMonth.value
+    try {
+      const data = await getMoodRecords(y, m)
+      records.value = data.records || []
+      monthStats.value = data.stats || null
+    } catch {
+      records.value = []
+      monthStats.value = null
     }
-    return true
   }
 
+  /** 拉取单日记录 */
+  async function fetchDailyRecord(date: string): Promise<MoodRecord | null> {
+    try {
+      return await getDailyRecord(date)
+    } catch {
+      return null
+    }
+  }
+
+  /** 提交今日心情打卡 */
+  async function submitCheckin(mood: MoodType, note?: string): Promise<MoodRecord | null> {
+    try {
+      const record = await checkinMood({ mood, note })
+      // 更新本地 records（替换或追加）
+      const idx = records.value.findIndex(r => r.recordDate === record.recordDate)
+      if (idx >= 0) {
+        records.value[idx] = record
+      } else {
+        records.value.push(record)
+      }
+      // 同时刷新 streak
+      await fetchStreak()
+      return record
+    } catch {
+      return null
+    }
+  }
+
+  /** 拉取周报 */
+  async function fetchReport(year?: number, week?: number): Promise<WeeklyReportResponse | null> {
+    try {
+      const data = await getMoodReport(year, week)
+      weeklyReport.value = data
+      return data
+    } catch {
+      weeklyReport.value = null
+      return null
+    }
+  }
+
+  /** 拉取连续打卡天数 */
+  async function fetchStreak(): Promise<void> {
+    try {
+      streak.value = await getMoodStreak()
+    } catch {
+      streak.value = { streakDays: 0, totalDays: 0 }
+    }
+  }
+
+  /** 上一月 */
   function prevMonth() {
     if (currentMonth.value === 1) {
       currentMonth.value = 12
@@ -124,6 +170,7 @@ export const useMoodStore = defineStore('mood', () => {
     }
   }
 
+  /** 下一月 */
   function nextMonth() {
     if (currentMonth.value === 12) {
       currentMonth.value = 1
@@ -133,24 +180,32 @@ export const useMoodStore = defineStore('mood', () => {
     }
   }
 
-  function isToday(dateStr: string): boolean {
-    return dateStr === formatDate(new Date())
-  }
-
   return {
+    // 状态
     records,
+    monthStats,
+    streak,
+    weeklyReport,
     currentYear,
     currentMonth,
+    // 计算属性
     monthCount,
     monthAvgScore,
     monthSummary,
     streakDays,
+    // 工具方法
+    formatDate,
+    isToday,
     getRecordByDate,
     getRecordsByMonth,
-    addRecord,
+    // 异步操作
+    fetchMonthRecords,
+    fetchDailyRecord,
+    submitCheckin,
+    fetchReport,
+    fetchStreak,
+    // 导航
     prevMonth,
     nextMonth,
-    isToday,
-    formatDate,
   }
 })

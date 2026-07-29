@@ -113,9 +113,14 @@ const streakDays = ref(0)
 let autoTimer: ReturnType<typeof setTimeout> | null = null
 
 /** 加载今天已有记录（编辑模式）；支持从树洞携带草稿 */
-onMounted(() => {
+onMounted(async () => {
+  // 拉取 streak 数据
+  try {
+    await moodStore.fetchStreak()
+    streakDays.value = moodStore.streakDays
+  } catch { /* ignore */ }
+
   const today = moodStore.formatDate(new Date())
-  const existing = moodStore.getRecordByDate(today)
 
   // 优先读取树洞传来的草稿
   const draft = sessionStorage.getItem('treehole_diary_draft')
@@ -141,10 +146,16 @@ onMounted(() => {
         }
       } catch { /* ignore */ }
     }
-  } else if (existing) {
-    selectedEmotion.value = existing.mood
-    note.value = existing.note
-    isEdit.value = true
+  } else {
+    // 从 API 获取今日记录（编辑模式）
+    try {
+      const record = await moodStore.fetchDailyRecord(today)
+      if (record) {
+        selectedEmotion.value = record.mood
+        note.value = record.note || ''
+        isEdit.value = true
+      }
+    } catch { /* ignore */ }
   }
 })
 
@@ -178,18 +189,21 @@ const savedLabel = computed(() => {
   return moodConfig[selectedEmotion.value]?.label || ''
 })
 
-function handleSave() {
+async function handleSave() {
   if (!selectedEmotion.value) return
 
-  const date = moodStore.formatDate(new Date())
-  moodStore.addRecord(date, selectedEmotion.value, note.value)
-  streakDays.value = moodStore.streakDays
-  saved.value = true
+  try {
+    await moodStore.submitCheckin(selectedEmotion.value, note.value || undefined)
+    streakDays.value = moodStore.streakDays
+    saved.value = true
 
-  // 2 秒后自动跳转
-  autoTimer = setTimeout(() => {
-    router.push('/mood')
-  }, 2000)
+    // 2 秒后自动跳转
+    autoTimer = setTimeout(() => {
+      router.push('/mood')
+    }, 2000)
+  } catch {
+    // 保存失败时不做跳转，留给用户重试
+  }
 }
 
 onBeforeUnmount(() => {

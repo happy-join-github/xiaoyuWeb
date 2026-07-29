@@ -18,7 +18,10 @@
   </div>
 
   <!-- 未找到记录 -->
-  <div v-if="!record" class="empty-state">
+  <div v-if="loading" class="empty-state">
+    <el-empty description="加载中..." />
+  </div>
+  <div v-else-if="!record" class="empty-state">
     <el-empty description="没有找到这一天的记录" />
     <el-button round @click="$router.push('/mood')">返回心情日历</el-button>
   </div>
@@ -86,20 +89,32 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElButton, ElEmpty } from 'element-plus'
 import StatusBar from '../../components/StatusBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
 import { useUserStore } from '../../stores/user'
 import { useMoodStore, MOOD_CONFIG } from '../../stores/mood'
+import { getDailyRecord, type MoodRecord } from '../../api/mood'
 
 const route = useRoute()
 const userStore = useUserStore()
 const moodStore = useMoodStore()
 
 const dateParam = computed(() => (route.query.date as string) || '')
-const record = computed(() => moodStore.getRecordByDate(dateParam.value))
+const record = ref<MoodRecord | null>(null)
+const loading = ref(true)
+
+onMounted(async () => {
+  if (dateParam.value) {
+    try {
+      record.value = await getDailyRecord(dateParam.value)
+    } catch { /* record stays null */ }
+  }
+  loading.value = false
+})
+
 const config = computed(() => {
   if (!record.value) return { emoji: '', label: '', score: 0, color: '' }
   return MOOD_CONFIG[record.value.mood]
@@ -133,10 +148,14 @@ const timeLabel = computed(() => {
   return '晚上'
 })
 
-/** 从日记文本中提取关键词 */
+/** 关键词：优先用 API 返回的 keywords，否则从文本中提取 */
 const keywords = computed(() => {
   if (!record.value) return []
-  const note = record.value.note
+  // API 已有 keywords 则直接使用
+  if (record.value.keywords && record.value.keywords.length > 0) {
+    return record.value.keywords.slice(0, 5)
+  }
+  const note = record.value.note || ''
   const found: string[] = []
   const patterns: { word: string; tag: string }[] = [
     { word: '天气', tag: '天气' },

@@ -4,7 +4,7 @@
     <div class="screen-bg"></div>
     <StatusBar />
 
-    <NavBar title="我的心情" left="back">
+    <NavBar title="我的心情" left="back" backTo="/profile">
       <template #right>
         <router-link to="/mood/report" class="icon-btn">
           <el-icon :size="18"><Delete /></el-icon>
@@ -13,8 +13,15 @@
     </NavBar>
 
     <div class="scroll-area no-scrollbar">
+      <!-- 加载中 -->
+      <div v-if="loading" class="empty-state fade-in">
+        <div class="empty-icon">⏳</div>
+        <h2>加载中...</h2>
+        <p>正在获取你的心情记录</p>
+      </div>
+
       <!-- 空状态 -->
-      <div v-if="moodStore.monthCount === 0 && moodStore.records.length === 0" class="empty-state fade-in">
+      <div v-else-if="moodStore.monthCount === 0 && moodStore.records.length === 0" class="empty-state fade-in">
         <div class="empty-icon">🌱</div>
         <h2>开始记录你的心情吧</h2>
         <p>每天 10 秒，把心情存进日记里</p>
@@ -116,13 +123,13 @@
             <div v-if="monthRecords.length === 0" class="empty-list">这个月还没有心情记录</div>
             <div
               v-for="rec in monthRecords"
-              :key="rec.date"
+              :key="rec.recordDate"
               class="record-row"
-              @click="$router.push(`/mood/detail?date=${rec.date}`)"
+              @click="$router.push(`/mood/detail?date=${rec.recordDate}`)"
             >
               <div class="record-emoji" :style="{ background: moodConfig[rec.mood].color + '18' }">{{ moodConfig[rec.mood].emoji }}</div>
               <div class="record-body">
-                <div class="record-date">{{ formatDateDisplay(rec.date) }}</div>
+                <div class="record-date">{{ formatDateDisplay(rec.recordDate) }}</div>
                 <div class="record-note">{{ rec.note }}</div>
               </div>
               <SvgIcon name="right" :size="14" />
@@ -171,7 +178,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElButton, ElIcon, ElEmpty } from 'element-plus'
 import { Delete } from '@element-plus/icons-vue'
@@ -190,6 +197,20 @@ const moodConfig = MOOD_CONFIG
 const isChildRoute = computed(() => route.path !== '/mood')
 const showAllRecords = ref(false)
 const selectedDate = ref(moodStore.formatDate(new Date()))
+const loading = ref(true)
+
+/** 初始化加载 + 监听月份变化 */
+onMounted(async () => {
+  await Promise.all([
+    moodStore.fetchMonthRecords(),
+    moodStore.fetchStreak(),
+  ])
+  loading.value = false
+})
+
+watch([() => moodStore.currentYear, () => moodStore.currentMonth], () => {
+  moodStore.fetchMonthRecords()
+})
 
 const SEASONS: Record<number, string> = {
   1: '冬日暖阳', 2: '早春微风', 3: '春暖花开',
