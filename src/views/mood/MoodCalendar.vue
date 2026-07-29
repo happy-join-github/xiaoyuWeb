@@ -20,8 +20,8 @@
         <p>正在获取你的心情记录</p>
       </div>
 
-      <!-- 空状态 -->
-      <div v-else-if="moodStore.monthCount === 0 && moodStore.records.length === 0" class="empty-state fade-in">
+      <!-- 空状态：仅当前月无记录时显示引导 -->
+      <div v-else-if="moodStore.monthCount === 0 && isCurrentMonth" class="empty-state fade-in">
         <div class="empty-icon">🌱</div>
         <h2>开始记录你的心情吧</h2>
         <p>每天 10 秒，把心情存进日记里</p>
@@ -198,6 +198,12 @@ const isChildRoute = computed(() => route.path !== '/mood')
 const showAllRecords = ref(false)
 const selectedDate = ref(moodStore.formatDate(new Date()))
 const loading = ref(true)
+
+/** 当前日历视图是否就是真实的当前月 */
+const isCurrentMonth = computed(() => {
+  const now = new Date()
+  return moodStore.currentYear === now.getFullYear() && moodStore.currentMonth === now.getMonth() + 1
+})
 
 /** 初始化加载 + 监听月份变化 */
 onMounted(async () => {
