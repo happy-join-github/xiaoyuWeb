@@ -26,6 +26,18 @@ const DEFAULT_SETTINGS: UserSettings = {
   checkinReminder: false,
 }
 
+/** localStorage 缓存键 —— 刷新后立即恢复主题/深色模式/通知等设置 */
+const SETTINGS_STORAGE_KEY = 'app_settings'
+
+/** 从 localStorage 恢复已保存的设置，无缓存时回退至默认值 */
+function loadSettingsFromStorage(): UserSettings {
+  try {
+    const raw = localStorage.getItem(SETTINGS_STORAGE_KEY)
+    if (raw) return { ...DEFAULT_SETTINGS, ...JSON.parse(raw) }
+  } catch { /* ignore */ }
+  return { ...DEFAULT_SETTINGS }
+}
+
 /** 5 套主题的兜底列表（接口失败时使用） */
 const FALLBACK_THEMES: ThemeItem[] = [
   { key: 'morning', name: '晨光', desc: '金色晨曦 · 温暖治愈', icon: '🌅', color: '#FF9800' },
@@ -56,8 +68,8 @@ export const useUserStore = defineStore('user', () => {
   const morningGreeting = ref('08:00')
   const eveningGreeting = ref('22:00')
 
-  // 应用设置
-  const settings = ref<UserSettings>({ ...DEFAULT_SETTINGS })
+  // 应用设置（优先从 localStorage 恢复，保证刷新后立即一致）
+  const settings = ref<UserSettings>(loadSettingsFromStorage())
   const availableThemes = ref<ThemeItem[]>([...FALLBACK_THEMES])
 
   /** 最近活跃时间（ISO 字符串） */
@@ -122,6 +134,10 @@ export const useUserStore = defineStore('user', () => {
   function applyAppSettings(data: Partial<UserSettings> | null | undefined) {
     if (!data) return
     settings.value = { ...settings.value, ...data }
+    // 持久化到 localStorage，保证刷新网页后主题色/深色模式等立即一致
+    try {
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings.value))
+    } catch { /* noop */ }
   }
 
   /** 拉取 /api/profile 并同步到 store */
@@ -201,8 +217,8 @@ export const useUserStore = defineStore('user', () => {
   /** 退出登录：清空用户态并移除 localStorage 中的凭证 */
   function logout() {
     try {
-      sessionStorage.removeItem('userInfo')
-      localStorage.removeItem('theme')
+      sessionStorage.clear()
+      localStorage.clear()
       // 重置 store 数据到默认值
       name.value = ''
       aiName.value = '小愈'
