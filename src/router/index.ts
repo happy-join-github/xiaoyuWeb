@@ -21,6 +21,11 @@ const routes: RouteRecordRaw[] = [
     name: 'Login',
     component: () => import('../views/Login.vue'),
   },
+  {
+    path: '/forget-password',
+    name: 'ForgetPassword',
+    component: () => import('../views/ForgetPassword.vue'),
+  },
   // ---- 树洞 ----
   {
     path: "/treehole",
@@ -125,7 +130,7 @@ const router = createRouter({
 })
 
 // 无需登录的白名单
-const whiteList = ['/welcome', '/register', '/login']
+const whiteList = ['/welcome', '/register', '/login', '/forget-password']
 
 router.beforeEach((to) => {
   if (whiteList.includes(to.path)) return true

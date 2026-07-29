@@ -17,6 +17,7 @@ const service = axios.create({
 const PUBLIC_URLS = new Set([
   '/auth/login',
   '/auth/register',
+  '/auth/reset-password',
 ])
 
 // 请求拦截器：从  sessionStorage 读取 token 注入请求头；

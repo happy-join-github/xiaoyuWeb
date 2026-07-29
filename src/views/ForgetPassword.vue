@@ -1,5 +1,5 @@
 <template>
-  <div class="login">
+  <div class="forget-password">
     <div class="deco deco-1"></div>
     <div class="deco deco-2"></div>
 
@@ -11,15 +11,15 @@
           <ArrowLeft />
         </el-icon>
       </el-button>
-      <span class="top-title">登录</span>
+      <span class="top-title">找回密码</span>
       <span class="top-placeholder"></span>
     </div>
 
     <div class="scroll">
       <div class="hero fade-in">
-        <div class="hero-avatar">🌸</div>
-        <h1>欢迎回来</h1>
-        <p>{{ userStore.aiName }}一直在等你 🌷</p>
+        <div class="hero-avatar">🔑</div>
+        <h1>重置密码</h1>
+        <p>输入手机号和新密码即可重置</p>
       </div>
 
       <el-form ref="formRef" class="form fade-up" :model="ruleForm" :rules="rules" label-position="top" @submit.prevent>
@@ -31,28 +31,29 @@
           </el-input>
         </el-form-item>
 
-        <el-form-item label="密码" prop="password">
-          <el-input v-model="ruleForm.password" type="password" placeholder="请输入密码" autocomplete="current-password" show-password>
+        <el-form-item label="新密码" prop="new_password">
+          <el-input v-model="ruleForm.new_password" type="password" placeholder="请输入新密码，至少 6 位" autocomplete="new-password" show-password>
             <template #prefix>
               <span class="input-ic">🔒</span>
             </template>
           </el-input>
         </el-form-item>
 
-        <div class="extra-row">
-          <el-checkbox v-model="ruleForm.remember">
-            <span class="remember-text">记住我</span>
-          </el-checkbox>
-          <router-link class="forgot" to="/forget-password">忘记密码？</router-link>
-        </div>
+        <el-form-item label="确认密码" prop="confirmPassword">
+          <el-input v-model="ruleForm.confirmPassword" type="password" placeholder="请再次输入新密码" autocomplete="new-password" show-password>
+            <template #prefix>
+              <span class="input-ic">🔒</span>
+            </template>
+          </el-input>
+        </el-form-item>
 
         <el-button type="primary" :loading="submitting" class="submit-btn" @click="onSubmit">
-          {{ submitting ? '登录中…' : '登录' }}
+          {{ submitting ? '重置中…' : '重置密码' }}
         </el-button>
       </el-form>
 
       <div class="footer-link">
-        还没有账号？<router-link to="/register">去注册一个</router-link>
+        记起密码了？<router-link to="/login">返回登录</router-link>
       </div>
     </div>
   </div>
@@ -66,21 +67,19 @@ import { ArrowLeft } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 import service from '../api/index.ts'
 import StatusBar from '../components/StatusBar.vue'
-import { useUserStore } from '../stores/user'
 
 const router = useRouter()
-const userStore = useUserStore()
 
 interface RuleForm {
   phone: string
-  password: string
-  remember: boolean
+  new_password: string
+  confirmPassword: string
 }
 
 const ruleForm = reactive<RuleForm>({
   phone: '',
-  password: '',
-  remember: true,
+  new_password: '',
+  confirmPassword: '',
 })
 
 const rules = reactive<FormRules<RuleForm>>({
@@ -88,9 +87,22 @@ const rules = reactive<FormRules<RuleForm>>({
     { required: true, message: '请输入手机号', trigger: 'change' },
     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的 11 位手机号', trigger: 'change' },
   ],
-  password: [
-    { required: true, message: '请输入密码', trigger: 'change' },
+  new_password: [
+    { required: true, message: '请输入新密码', trigger: 'change' },
     { min: 6, message: '密码至少需要 6 位', trigger: 'change' },
+  ],
+  confirmPassword: [
+    { required: true, message: '请再次输入新密码', trigger: 'change' },
+    {
+      validator: (_rule: any, value: string, callback: (e?: Error) => void) => {
+        if (value !== ruleForm.new_password) {
+          callback(new Error('两次输入的密码不一致'))
+        } else {
+          callback()
+        }
+      },
+      trigger: 'change',
+    },
   ],
 })
 
@@ -103,21 +115,18 @@ async function onSubmit() {
   if (!await formRef.value.validate()) return
   submitting.value = true
   try {
-    const res: any = await service.post('/auth/login', {
+    const res: any = await service.post('/auth/reset-password', {
       phone: ruleForm.phone,
-      password: ruleForm.password,
+      new_password: ruleForm.new_password,
     })
     if (res?.code === 200) {
-      userStore.updateProfile(res.data)
-
-      sessionStorage.setItem('userInfo', JSON.stringify(res.data))
-      ElMessage.success('登录成功')
-      router.replace('/chat')
+      ElMessage.success('密码重置成功，请重新登录')
+      router.replace('/login')
     } else {
-      ElMessage.error(res?.msg || '登录失败')
+      ElMessage.error(res?.msg || '重置失败')
     }
   } catch (err: any) {
-    ElMessage.error(err?.message || '登录失败，请稍后重试')
+    ElMessage.error(err?.message || '重置失败，请稍后重试')
   } finally {
     submitting.value = false
   }
@@ -125,7 +134,7 @@ async function onSubmit() {
 </script>
 
 <style scoped>
-.login {
+.forget-password {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -228,7 +237,7 @@ async function onSubmit() {
   color: #9C8B7E;
 }
 
-/* ===== 表单（覆盖 element-plus 默认外观） ===== */
+/* ===== 表单 ===== */
 .form :deep(.el-form-item) {
   margin-bottom: 16px;
 }
@@ -273,49 +282,6 @@ async function onSubmit() {
   line-height: 1;
 }
 
-/* 附加选项 */
-.extra-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 4px;
-  margin: -4px 0 8px;
-}
-.form :deep(.el-checkbox) {
-  display: flex;
-  align-items: center;
-  height: auto;
-}
-.form :deep(.el-checkbox__label) {
-  font-size: 12px;
-  color: #9C8B7E;
-  padding-left: 4px;
-}
-.form :deep(.el-checkbox__inner) {
-  width: 14px;
-  height: 14px;
-  background-color: #fff;
-  border: 1.5px solid #C4B5A6;
-  border-radius: 3px;
-  transition: background-color 0.2s, border-color 0.2s;
-}
-.form :deep(.el-checkbox__inner:hover) {
-  border-color: #E88A6B;
-}
-.form :deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
-  background-color: #E88A6B;
-  border-color: #E88A6B;
-}
-.form :deep(.el-checkbox__input.is-focus .el-checkbox__inner) {
-  box-shadow: 0 0 0 2px rgba(232, 138, 107, 0.2);
-}
-.forgot {
-  font-size: 12px;
-  color: #E88A6B;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
 /* 提交按钮 */
 .submit-btn {
   width: 100%;
@@ -325,6 +291,7 @@ async function onSubmit() {
   background: linear-gradient(135deg, #F4A988 0%, #E88A6B 100%);
   border: none;
   box-shadow: 0 6px 20px rgba(244, 169, 136, 0.25);
+  margin-top: 8px;
 }
 .submit-btn:hover {
   background: linear-gradient(135deg, #F4A988 0%, #E88A6B 100%);
