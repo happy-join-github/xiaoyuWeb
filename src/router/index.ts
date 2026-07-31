@@ -29,8 +29,14 @@ const routes: RouteRecordRaw[] = [
   // ---- 树洞 ----
   {
     path: "/treehole",
-    name: "Treehole",
     component: () => import('../views/treehole/Treehole.vue'),
+    children: [
+      {
+        path: 'history',
+        name: 'TreeholeHistory',
+        component: () => import('../views/treehole/TreeholeHistory.vue'),
+      },
+    ],
   },
   // ---- 情绪急救 ----
   {
