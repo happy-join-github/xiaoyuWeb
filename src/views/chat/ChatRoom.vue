@@ -17,8 +17,8 @@
           <span class="ai-status">在线</span>
         </div>
       </div>
-      <button class="more-btn" aria-label="更多">
-        <SvgIcon name="more" :size="22" />
+      <button class="more-btn" @click="goToHistory" aria-label="聊天历史">
+        <SvgIcon name="clock" :size="22" />
       </button>
     </div>
 
@@ -48,7 +48,7 @@
       <!-- 底部留白 -->
       <div class="scroll-spacer"></div>
 
-      <!-- FAB 急救按钮：浮动在消息区右下角 -->
+      <!-- FAB 急救按钮 -->
       <router-link to="/rescue" class="fab" aria-label="情绪急救">
         <SvgIcon name="heart" :size="24" />
       </router-link>
@@ -56,7 +56,6 @@
 
     <!-- 输入区（含情绪快捷行） -->
     <div class="input-area">
-      <!-- 情绪快捷行：折叠在输入区顶部，用表情按钮切换 -->
       <transition name="slide-down">
         <div v-if="showMoodStrip" class="mood-strip">
           <button
@@ -109,29 +108,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import StatusBar from '../../components/StatusBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
 import TabBar from '../../components/TabBar.vue'
 import { useUserStore } from '../../stores/user'
-import { getAiReply } from '../treehole/aiReply'
-import {
-  getOrCreateLatestSession,
-  getMessages,
-  appendMessage,
-  nextMessageId,
-  getTimeString,
-  type StoredSession,
-} from '../../utils/chatStorage'
+import { useSessionStore } from '../../stores/sessionStore'
+import * as chatStorage from '../../utils/chatStorage'
 import type { Message } from '../../api/mock'
+import { getAiReply } from '../treehole/aiReply'
+import { chatCompletionsStream } from '../../api/chat'
 
 const route = useRoute()
+const router = useRouter()
 const userStore = useUserStore()
+const sessionStore = useSessionStore()
 const isChildRoute = computed(() => route.path !== '/chat')
 
 // ====== 会话 & 消息 ======
-const session = ref<StoredSession | null>(null)
 const messages = ref<Message[]>([])
 const inputText = ref('')
 const isLoading = ref(false)
@@ -158,20 +153,26 @@ function sendMood(mood: { emoji: string; label: string }) {
   sendMessage()
 }
 
+// ====== SSE 控制器 ======
+let sseController: AbortController | null = null
+
 // ====== 核心交互：发送消息 ======
 async function sendMessage() {
   const text = inputText.value.trim()
-  if (!text || isLoading.value || !session.value) return
+  if (!text || isLoading.value) return
+
+  // 确保会话存在
+  const session = sessionStore.getOrCreateLatest('chat')
 
   // 添加用户消息
   const userMsg: Message = {
-    id: nextMessageId(messages.value),
+    id: chatStorage.nextMessageId(messages.value),
     role: 'user',
     content: escapeHtml(text),
-    time: getTimeString(),
+    time: chatStorage.getTimeString(),
   }
   messages.value.push(userMsg)
-  appendMessage(session.value.id, userMsg)
+  chatStorage.appendMessage(session.id, userMsg)
 
   inputText.value = ''
   selectedMood.value = null
@@ -180,21 +181,64 @@ async function sendMessage() {
   // AI 回复
   isLoading.value = true
 
-  try {
-    await delay(600 + Math.random() * 600)
-    const reply = getAiReply(text, messages.value)
-    const aiMsg: Message = {
-      id: nextMessageId(messages.value),
-      role: 'ai',
-      content: reply,
-      time: getTimeString(),
-    }
-    messages.value.push(aiMsg)
-    appendMessage(session.value.id, aiMsg)
-    scrollToBottom()
-  } finally {
-    isLoading.value = false
+  const aiMsgId = chatStorage.nextMessageId(messages.value)
+  const aiMsg: Message = {
+    id: aiMsgId,
+    role: 'ai',
+    content: '',
+    time: chatStorage.getTimeString(),
   }
+  messages.value.push(aiMsg)
+
+  try {
+    // Step 1: 确保后端有此会话，拿到真正的后端 sessionId
+    const remoteSessionId = await sessionStore.ensureRemoteSession(session.id)
+
+    // Step 2: 如果后端会话创建成功，走 SSE 流式；否则回退到 mock
+    if (remoteSessionId === null) {
+      throw new Error('无法创建后端会话，回退 mock')
+    }
+
+    let aiContent = ''
+    sseController = chatCompletionsStream(
+      remoteSessionId,  // ← 这里是后端数据库的真实 ID（如 1, 2, 3...），不是前端的 localStorage ID
+      text,
+      (token: string) => {
+        aiContent += token
+        aiMsg.content = aiContent
+        scrollToBottom()
+      },
+      () => {
+        // done
+        sseController = null
+        // 持久化到 localStorage
+        const persistedAiMsg: Message = { ...aiMsg, content: aiContent, time: chatStorage.getTimeString() }
+        chatStorage.appendMessage(session.id, persistedAiMsg)
+        isLoading.value = false
+        scrollToBottom()
+      },
+      () => {
+        // SSE 传输出错
+        sseController = null
+        fallbackAiReply(text, aiMsg, session.id)
+      },
+    )
+  } catch {
+    fallbackAiReply(text, aiMsg, session.id)
+  }
+}
+
+/** 模拟 AI 回复（SSE 回退方案） */
+async function fallbackAiReply(text: string, aiMsg: Message, sessionId: string) {
+  await delay(600 + Math.random() * 600)
+  const reply = getAiReply(text, messages.value)
+  aiMsg.content = reply
+  aiMsg.time = chatStorage.getTimeString()
+
+  // 持久化到 localStorage
+  chatStorage.appendMessage(sessionId, { ...aiMsg })
+  isLoading.value = false
+  scrollToBottom()
 }
 
 // ====== 滚动到底部 ======
@@ -203,6 +247,11 @@ async function scrollToBottom() {
   if (scrollRef.value) {
     scrollRef.value.scrollTop = scrollRef.value.scrollHeight
   }
+}
+
+// ====== 导航 ======
+function goToHistory() {
+  router.push({ name: 'ChatHistory' })
 }
 
 // ====== 工具函数 ======
@@ -218,15 +267,20 @@ function delay(ms: number): Promise<void> {
 
 // ====== 初始化 ======
 onMounted(() => {
-  // 获取或创建聊天会话
-  const s = getOrCreateLatestSession('chat')
-  session.value = s
-  messages.value = getMessages(s.id)
+  const session = sessionStore.getOrCreateLatest('chat')
+  messages.value = chatStorage.getMessages(session.id)
 
   nextTick(() => {
     scrollToBottom()
     inputRef.value?.focus()
   })
+})
+
+onUnmounted(() => {
+  if (sseController) {
+    sseController.abort()
+    sseController = null
+  }
 })
 </script>
 
@@ -332,12 +386,6 @@ onMounted(() => {
   gap: 16px;
   margin-top: 4px;
 }
-.time-label {
-  text-align: center;
-  font-size: 12px;
-  color: var(--text-mute);
-  padding: 4px 0;
-}
 .msg-row {
   display: flex;
   gap: 8px;
@@ -364,7 +412,7 @@ onMounted(() => {
   border-radius: 16px 16px 4px 16px;
 }
 
-/* ---- 输入区（含情绪快捷行） ---- */
+/* ---- 输入区 ---- */
 .input-area {
   display: flex;
   flex-direction: column;
@@ -374,7 +422,6 @@ onMounted(() => {
   z-index: 3;
 }
 
-/* 情绪快捷行：折叠在输入区顶部 */
 .mood-strip {
   display: flex;
   gap: 6px;
@@ -399,12 +446,7 @@ onMounted(() => {
   background: var(--accent-soft);
   color: var(--accent-deep);
 }
-.mood-chip.active {
-  background: var(--accent-soft);
-  color: var(--accent-deep);
-}
 
-/* 输入控件行 */
 .input-row {
   display: flex;
   align-items: center;
@@ -496,19 +538,16 @@ onMounted(() => {
   color: var(--text-mute);
 }
 
-/* ---- 情绪条选中 ---- */
 .mood-chip.active {
   background: var(--accent-soft);
   color: var(--accent-deep);
 }
 
-/* ---- 底部留白 ---- */
 .scroll-spacer {
   height: 16px;
   flex-shrink: 0;
 }
 
-/* ---- FAB 急救按钮：浮动在消息区右下角（覆盖全局 .fab 定位） ---- */
 .fab {
   position: absolute !important;
   right: 16px !important;
@@ -517,7 +556,6 @@ onMounted(() => {
   z-index: 10;
 }
 
-/* ---- 情绪行展开/收起动画 ---- */
 .slide-down-enter-active {
   transition: all 0.2s ease-out;
 }

@@ -28,21 +28,16 @@
         v-for="session in group.sessions"
         :key="session.id"
         class="conv-item fade-up"
-        :to="session.type === 'treehole' ? '/treehole' : '/chat'"
+        to="/chat"
       >
-        <div class="av" :class="session.type">
-          {{ session.type === 'treehole' ? '🌙' : '🌸' }}
-        </div>
+        <div class="av">🌸</div>
         <div class="body">
           <div class="top">
-            <span class="name">
-              {{ session.type === 'treehole' ? '树洞倾诉' : userStore.aiName }}
-            </span>
+            <span class="name">{{ userStore.aiName }}</span>
             <span class="time">{{ formatTime(session.lastMessageAt) }}</span>
           </div>
           <div class="preview">{{ session.preview || session.title }}</div>
         </div>
-        <el-tag v-if="session.type === 'treehole'" size="small" class="tag tree">树洞</el-tag>
       </router-link>
     </template>
   </div>
@@ -50,7 +45,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { ElInput, ElTag } from 'element-plus'
+import { ElInput } from 'element-plus'
 import StatusBar from '../../components/StatusBar.vue'
 import NavBar from '../../components/NavBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
@@ -60,8 +55,8 @@ import { getSessions, formatTime, getDateGroupLabel, type StoredSession } from '
 const userStore = useUserStore()
 const searchQuery = ref('')
 
-// 所有会话（已按时间倒序）
-const allSessions = computed(() => getSessions())
+// 仅展示聊聊会话（过滤掉树洞）
+const allSessions = computed(() => getSessions().filter(s => s.type === 'chat'))
 
 // 搜索过滤
 const filteredSessions = computed(() => {
