@@ -1,5 +1,7 @@
 <template>
-  <div class="treehole" :class="{ 'is-night': isNight, 'is-deep-night': isDeepNight }">
+  <!-- 树洞历史子路由 -->
+  <router-view v-if="isChildRoute" />
+  <div v-else class="treehole" :class="{ 'is-night': isNight, 'is-deep-night': isDeepNight }">
     <!-- 装饰层 -->
     <div class="deco-stars">
       <span class="star s1">✦</span>
@@ -37,6 +39,9 @@
       </div>
       <div class="title">树洞</div>
       <div class="right">
+        <button class="icon-btn" @click="goToHistory" aria-label="历史">
+          <SvgIcon name="clock" :size="20" />
+        </button>
         <button
           class="icon-btn soundscape-btn"
           :class="{ active: showSoundscape }"
@@ -106,18 +111,22 @@
         <div class="typing">
           <span></span><span></span><span></span>
         </div>
-        <span class="typing-label">{{ userStore.aiName }}正在输入...</span>
+        <span class="typing-label">正在输入...</span>
       </div>
 
-      <!-- 保存提示 -->
-      <div class="save-card" @click="saveToDiary">
-        <span class="save-icon">📔</span>
-        <span class="save-text">把今晚的对话存进日记</span>
-        <span class="save-hint" v-if="messages.length > 1">{{ messages.length }} 条消息</span>
-        <SvgIcon name="chevron_right" :size="18" />
+      <!-- 今日情绪标签栏（从 treeholeStore 获取） -->
+      <div v-if="todayEmotions.length > 0" class="today-emotion-bar">
+        <span class="emotion-bar-label">今日情绪</span>
+        <span
+          v-for="tag in todayEmotions"
+          :key="tag.emotion"
+          class="emotion-tag"
+        >
+          {{ tag.emoji }} {{ tag.label }}
+        </span>
       </div>
 
-      <!-- 底部留白，确保最后一条消息不被输入区遮挡 -->
+      <!-- 底部留白 -->
       <div class="scroll-spacer"></div>
     </div>
 
@@ -173,36 +182,37 @@
 
 <script setup lang="ts">
 import { ref, computed, nextTick, watch, onMounted, onUnmounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import StatusBar from '../../components/StatusBar.vue'
 import SvgIcon from '../../components/SvgIcon.vue'
 import { useUserStore } from '../../stores/user'
+import { useTreeholeStore } from '../../stores/treeholeStore'
+import { useSessionStore } from '../../stores/sessionStore'
+import * as treeholeStorage from '../../utils/treeholeStorage'
+import type { TreeholeStoredMessage } from '../../utils/treeholeStorage'
 import { getAiReply } from './aiReply'
+import { treeholeCompletionsStream } from '../../api/treehole'
 
-/** 消息结构 */
-interface Message {
+/** 消息本地接口 */
+interface LocalMessage {
   id: number
   role: 'ai' | 'user'
   content: string
   time: string
 }
 
+const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const treeholeStore = useTreeholeStore()
+const sessionStore = useSessionStore()
+const isChildRoute = computed(() => route.path !== '/treehole')
 
 // ====== 响应式状态 ======
-const messages = ref<Message[]>([
-  {
-    id: 1,
-    role: 'ai',
-    content: '我在这里 🌙<br>想说什么都可以，慢慢来。',
-    time: getTimeString(),
-  },
-])
-
+const messages = ref<LocalMessage[]>([])
 const inputText = ref('')
 const isLoading = ref(false)
-const nextId = ref(2)
+let nextMsgId = Date.now()
 const showExitOverlay = ref(false)
 const showSoundscape = ref(false)
 const activeSoundscape = ref<string | null>(null)
@@ -212,6 +222,12 @@ const emotionSaved = ref(false)
 const showGreeting = ref(true)
 const greetingDismissed = ref(false)
 const conversationRound = ref(0)
+
+// ====== 今日情绪标签（从 treeholeStore） ======
+const todayEmotions = computed(() => treeholeStore.todayEmotionsWithMeta)
+
+// ====== 当前会话 ID ======
+const sessionId = ref<string | null>(null)
 
 // ====== DOM 引用 ======
 const scrollRef = ref<HTMLElement | null>(null)
@@ -242,7 +258,11 @@ const emotions = [
 function selectEmotion(value: string) {
   selectedEmotion.value = value
   emotionSaved.value = true
-  // 存入 sessionStorage，供 MoodCheckin 页面读取
+  // 通过 treeholeStore 记录
+  if (sessionId.value) {
+    treeholeStore.recordEmotion(sessionId.value, value)
+  }
+  // 存入 sessionStorage，供 MoodCheckin 读取（兼容旧逻辑）
   const existing = sessionStorage.getItem('treehole_emotion')
   const record = existing ? JSON.parse(existing) : {}
   record[getToday()] = value
@@ -293,7 +313,6 @@ function stopPlaceholderRotation() {
   }
 }
 
-// 用户开始输入时停止轮换
 watch(inputText, (val) => {
   if (val.trim()) {
     stopPlaceholderRotation()
@@ -302,24 +321,50 @@ watch(inputText, (val) => {
   }
 })
 
+// ====== SSE 控制器 ======
+let sseController: AbortController | null = null
+
 // ====== 核心交互：发送消息 ======
 async function sendMessage() {
   const text = inputText.value.trim()
   if (!text || isLoading.value) return
 
-  // 关闭进入引导
   if (showGreeting.value) {
     showGreeting.value = false
     greetingDismissed.value = true
   }
 
+  // 确保有会话
+  let s = sessionId.value ? treeholeStorage.getSession(sessionId.value) : null
+  if (!s) {
+    s = treeholeStorage.createSession()
+    sessionId.value = s.id
+    treeholeStore.switchSession(s.id)
+  }
+
+  const now = new Date().toISOString()
+  const h = String(new Date().getHours()).padStart(2, '0')
+  const m = String(new Date().getMinutes()).padStart(2, '0')
+  const timeStr = `${h}:${m}`
+
   // 添加用户消息
-  messages.value.push({
-    id: nextId.value++,
+  const userMsg: LocalMessage = {
+    id: nextMsgId++,
     role: 'user',
     content: escapeHtml(text),
-    time: getTimeString(),
-  })
+    time: timeStr,
+  }
+  messages.value.push(userMsg)
+
+  // 持久化到 treeholeStorage
+  const storedUserMsg: TreeholeStoredMessage = {
+    id: userMsg.id,
+    role: 'user',
+    content: userMsg.content,
+    emotionTag: null,
+    createdAt: now,
+  }
+  treeholeStorage.appendMessage(s.id, storedUserMsg)
 
   inputText.value = ''
   scrollToBottom()
@@ -328,25 +373,94 @@ async function sendMessage() {
   isLoading.value = true
   conversationRound.value++
 
+  const aiMsgId = nextMsgId++
+  const aiLocalMsg: LocalMessage = {
+    id: aiMsgId,
+    role: 'ai',
+    content: '',
+    time: timeStr,
+  }
+  messages.value.push(aiLocalMsg)
+
   try {
-    await delay(800 + Math.random() * 600) // 模拟思考时间
-    const reply = getAiReply(text, messages.value)
-    messages.value.push({
-      id: nextId.value++,
+    // 获取后端远程 sessionId（通过 C5 接口创建/映射）
+    const remoteSessionId = await sessionStore.ensureRemoteTreeholeSession(s.id)
+    if (remoteSessionId === null) {
+      // 后端不可用，使用模拟回复
+      throw new Error('local')
+    }
+
+    let aiContent = ''
+    sseController = treeholeCompletionsStream(
+      remoteSessionId,  // ← 这是后端数据库的真实 ID（如 1, 2, 3...），不是前端的 localStorage ID
+      text,
+      (token: string) => {
+        aiContent += token
+        aiLocalMsg.content = aiContent
+        scrollToBottom()
+      },
+      () => {
+        // done
+        sseController = null
+        // 持久化 AI 回复
+        const storedAiMsg: TreeholeStoredMessage = {
+          id: aiMsgId,
+          role: 'ai',
+          content: aiContent,
+          emotionTag: null,
+          createdAt: new Date().toISOString(),
+        }
+        if (sessionId.value) {
+          treeholeStorage.appendMessage(sessionId.value, storedAiMsg)
+        }
+        isLoading.value = false
+        scrollToBottom()
+
+        // 对话 3 轮后弹出情绪标签
+        if (conversationRound.value >= 3 && !showEmotionPrompt.value) {
+          setTimeout(() => {
+            showEmotionPrompt.value = true
+            scrollToBottom()
+          }, 1200)
+        }
+      },
+      () => {
+        // error, fallback to mock
+        sseController = null
+        fallbackAiReply(text, aiLocalMsg)
+      },
+    )
+  } catch {
+    // fallback
+    fallbackAiReply(text, aiLocalMsg)
+  }
+}
+
+/** 模拟 AI 回复（SSE 回退方案） */
+async function fallbackAiReply(text: string, aiLocalMsg: LocalMessage) {
+  await delay(800 + Math.random() * 600)
+  const reply = getAiReply(text, messages.value as any)
+  aiLocalMsg.content = reply
+
+  // 持久化
+  if (sessionId.value) {
+    const storedAiMsg: TreeholeStoredMessage = {
+      id: aiLocalMsg.id,
       role: 'ai',
       content: reply,
-      time: getTimeString(),
-    })
-    scrollToBottom()
-
-    // 对话 3 轮后弹出情绪标签
-    if (conversationRound.value >= 3 && !showEmotionPrompt.value) {
-      await delay(1200)
-      showEmotionPrompt.value = true
-      scrollToBottom()
+      emotionTag: null,
+      createdAt: new Date().toISOString(),
     }
-  } finally {
-    isLoading.value = false
+    treeholeStorage.appendMessage(sessionId.value, storedAiMsg)
+  }
+
+  isLoading.value = false
+  scrollToBottom()
+
+  if (conversationRound.value >= 3 && !showEmotionPrompt.value) {
+    await delay(1200)
+    showEmotionPrompt.value = true
+    scrollToBottom()
   }
 }
 
@@ -361,7 +475,6 @@ async function scrollToBottom() {
 // ====== 离开处理 ======
 function handleExit() {
   if (messages.value.length <= 1) {
-    // 没有实质对话，直接离开
     doLeave()
     return
   }
@@ -389,7 +502,6 @@ function doLeave() {
 
 // ====== 保存到日记 ======
 function saveToDiary() {
-  // 提取最近一轮对话（最后 2-6 条）
   const recent = messages.value.slice(-6)
   const userParts: string[] = []
   const aiParts: string[] = []
@@ -420,24 +532,20 @@ function saveToDiary() {
     source: 'treehole',
   }
 
-  // 存入 sessionStorage，MoodCheckin 页面读取后自动填充
   sessionStorage.setItem('treehole_diary_draft', JSON.stringify(diaryData))
 
-  // 跳转到心情签到页并携带参数
   router.push({
     name: 'MoodCheckin',
     query: { from: 'treehole' },
   })
 }
 
-// ====== 工具函数 ======
-function getTimeString(): string {
-  const now = new Date()
-  const h = String(now.getHours()).padStart(2, '0')
-  const m = String(now.getMinutes()).padStart(2, '0')
-  return `${h}:${m}`
+// ====== 导航到历史 ======
+function goToHistory() {
+  router.push({ name: 'TreeholeHistory' })
 }
 
+// ====== 工具函数 ======
 function getToday(): string {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -460,9 +568,54 @@ function delay(ms: number): Promise<void> {
 }
 
 // ====== 生命周期 ======
-onMounted(() => {
-  // 自动聚焦输入框
-  nextTick(() => inputRef.value?.focus())
+onMounted(async () => {
+  // 加载今日情绪标签
+  treeholeStore.loadTodayEmotion()
+
+  // 检查是否有指定 sessionId（从历史页面跳转）
+  const querySessionId = route.query.sessionId as string | undefined
+  if (querySessionId) {
+    sessionId.value = querySessionId
+    treeholeStore.switchSession(querySessionId)
+    // 加载该会话的消息
+    const stored = treeholeStorage.getMessages(querySessionId)
+    // 转换成 LocalMessage 格式
+    const h = new Date().getHours()
+    const mi = new Date().getMinutes()
+    messages.value = stored.map(m => ({
+      id: m.id,
+      role: m.role,
+      content: m.content,
+      time: `${String(h).padStart(2, '0')}:${String(mi).padStart(2, '0')}`,
+    }))
+    showGreeting.value = false
+    greetingDismissed.value = true
+  } else {
+    // 获取或创建最新会话
+    const s = treeholeStorage.getOrCreateLatestSession()
+    sessionId.value = s.id
+    treeholeStore.switchSession(s.id)
+    // 加载已有消息
+    const stored = treeholeStorage.getMessages(s.id)
+    if (stored.length > 0) {
+      messages.value = stored.map(m => {
+        const d = new Date(m.createdAt)
+        return {
+          id: m.id,
+          role: m.role,
+          content: m.content,
+          time: `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`,
+        }
+      })
+      showGreeting.value = false
+      greetingDismissed.value = true
+    }
+  }
+
+  nextTick(() => {
+    scrollToBottom()
+    inputRef.value?.focus()
+  })
 
   // 进入问候 4 秒后自动淡出
   setTimeout(() => {
@@ -470,12 +623,15 @@ onMounted(() => {
     greetingDismissed.value = true
   }, 4000)
 
-  // 开始轮换 placeholder
   startPlaceholderRotation()
 })
 
 onUnmounted(() => {
   stopPlaceholderRotation()
+  if (sseController) {
+    sseController.abort()
+    sseController = null
+  }
 })
 </script>
 
@@ -493,7 +649,6 @@ onUnmounted(() => {
   background: linear-gradient(180deg, #1A1418 0%, #0E0A0C 100%);
 }
 
-/* ---- StatusBar 颜色 ---- */
 :deep(.status-bar) {
   color: rgba(255, 255, 255, 0.8);
 }
@@ -626,7 +781,6 @@ onUnmounted(() => {
   white-space: nowrap;
 }
 
-/* ---- 安全标签 ---- */
 .safety-label {
   text-align: center;
   font-size: 12px;
@@ -650,7 +804,6 @@ onUnmounted(() => {
   scroll-behavior: smooth;
 }
 
-/* ---- 进入引导 ---- */
 .greeting {
   text-align: center;
   padding: 32px 16px 16px;
@@ -672,7 +825,6 @@ onUnmounted(() => {
   color: rgba(255, 255, 255, 0.75);
 }
 
-/* ---- 引言 ---- */
 .intro-text {
   font-size: 16px;
   font-weight: 500;
@@ -681,7 +833,6 @@ onUnmounted(() => {
   padding: 8px 0;
 }
 
-/* ---- 消息时间线 ---- */
 .timeline {
   display: flex;
   flex-direction: column;
@@ -802,35 +953,28 @@ onUnmounted(() => {
   color: rgba(255, 255, 255, 0.35);
 }
 
-/* ---- 保存卡片 ---- */
-.save-card {
+/* ---- 今日情绪标签栏 ---- */
+.today-emotion-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 14px 16px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: var(--radius-md);
-  color: rgba(255, 255, 255, 0.7);
-  margin-top: 4px;
-  cursor: pointer;
-  transition: background 0.2s;
+  gap: 8px;
+  padding: 10px 0;
+  flex-wrap: wrap;
 }
-.save-card:active {
-  background: rgba(255, 255, 255, 0.1);
-}
-.save-icon {
-  font-size: 20px;
-  line-height: 1;
-}
-.save-text {
-  flex: 1;
-  font-size: 14px;
-  font-weight: 500;
-}
-.save-hint {
-  font-size: 12px;
+.emotion-bar-label {
+  font-size: 11px;
   color: rgba(255, 255, 255, 0.35);
+  white-space: nowrap;
 }
+.emotion-tag {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 4px 10px;
+  border-radius: 99px;
+  white-space: nowrap;
+}
+
 .scroll-spacer {
   height: 12px;
   flex-shrink: 0;
