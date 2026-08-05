@@ -2,6 +2,7 @@ import { ElMessage } from 'element-plus'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import router from '../router'
+import api from '../api'
 import {
   getProfile,
   getAiSettings,
@@ -214,9 +215,15 @@ export const useUserStore = defineStore('user', () => {
     applyProfileData(data)
   }
 
-  /** 退出登录：清空用户态并移除 localStorage 中的凭证 */
+  /** 退出登录：通知后端拉黑 token，清空用户态并移除 localStorage 中的凭证 */
   function logout() {
     try {
+      // 通知后端把 token 加入黑名单（fire-and-forget，不阻塞本地清理；失败也照常登出）
+      try {
+        api.post('/auth/logout').catch(() => { /* 网络/后端异常不阻塞登出 */ })
+      } catch {
+        /* 忽略 */
+      }
       sessionStorage.clear()
       localStorage.clear()
       // 重置 store 数据到默认值
