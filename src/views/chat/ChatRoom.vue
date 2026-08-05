@@ -29,20 +29,22 @@
         <div v-for="msg in messages" :key="msg.id" class="msg-row" :class="msg.role">
           <template v-if="msg.role === 'ai'">
             <div class="avatar sm">🌸</div>
-            <div class="bubble ai-bubble" v-html="msg.content"></div>
+            <div class="bubble ai-bubble">
+              <!-- 正在流式生成的 AI 消息：TTFT 期间显示打字圆点，之后逐字"打字"显示 -->
+              <template v-if="streamingMsgId === msg.id">
+                <template v-if="!streamDisplay">
+                  <span class="typing-dots"><span></span><span></span><span></span></span>
+                  <span v-if="waitSec >= 3" class="wait-hint">思考中 {{ waitSec }}s</span>
+                </template>
+                <span v-else v-html="streamDisplay"></span>
+              </template>
+              <span v-else v-html="msg.content"></span>
+            </div>
           </template>
           <template v-else>
             <div class="bubble user-bubble" v-html="msg.content"></div>
           </template>
         </div>
-      </div>
-
-      <!-- 打字中动画 -->
-      <div class="typing-indicator" v-if="isLoading">
-        <div class="typing">
-          <span></span><span></span><span></span>
-        </div>
-        <span class="typing-label">{{ userStore.aiName }} 正在输入...</span>
       </div>
 
       <!-- 底部留白 -->
@@ -133,6 +135,75 @@ const isLoading = ref(false)
 const selectedMood = ref<string | null>(null)
 const showMoodStrip = ref(true)
 
+// ====== 等待反馈（TTFT 期间显示"思考中 Ns"）======
+const waitSec = ref(0)
+let waitTimer: ReturnType<typeof setInterval> | null = null
+
+function startWaitTimer() {
+  waitSec.value = 0
+  stopWaitTimer()
+  waitTimer = setInterval(() => { waitSec.value++ }, 1000)
+}
+
+function stopWaitTimer() {
+  if (waitTimer) {
+    clearInterval(waitTimer)
+    waitTimer = null
+  }
+}
+
+// ====== 打字机效果（流式文本逐字显示）======
+const streamDisplay = ref('') // 当前 AI 消息正在"打字"显示的文本
+const streamingMsgId = ref<number | null>(null)
+let typeTimer: ReturnType<typeof setInterval> | null = null
+let typeBuffer = ''
+
+const TYPE_TICK_MS = 30
+
+/** 从缓冲取一段用于显示：HTML 标签整体输出，普通文本按缓冲量自适应取 1-3 字 */
+function takeTypeChunk(): string {
+  if (typeBuffer.startsWith('<')) {
+    const end = typeBuffer.indexOf('>')
+    if (end === -1) return '' // 标签未完整（被分片切开），等下一片
+    const tag = typeBuffer.slice(0, end + 1)
+    typeBuffer = typeBuffer.slice(end + 1)
+    return tag
+  }
+  let n = typeBuffer.length > 80 ? 3 : typeBuffer.length > 30 ? 2 : 1
+  const lt = typeBuffer.indexOf('<')
+  if (lt !== -1 && lt < n) n = lt // 不切到下一个标签中间
+  if (n === 0) return ''
+  const seg = typeBuffer.slice(0, n)
+  typeBuffer = typeBuffer.slice(n)
+  return seg
+}
+
+function startTypewriter(msgId: number) {
+  stopTypewriter()
+  typeBuffer = ''
+  streamDisplay.value = ''
+  streamingMsgId.value = msgId
+  typeTimer = setInterval(() => {
+    if (!typeBuffer) return
+    streamDisplay.value += takeTypeChunk()
+    scrollToBottom()
+  }, TYPE_TICK_MS)
+}
+
+function flushTypewriter() {
+  if (typeBuffer) {
+    streamDisplay.value += typeBuffer
+    typeBuffer = ''
+  }
+}
+
+function stopTypewriter() {
+  if (typeTimer) {
+    clearInterval(typeTimer)
+    typeTimer = null
+  }
+}
+
 // ====== DOM 引用 ======
 const scrollRef = ref<HTMLElement | null>(null)
 const inputRef = ref<HTMLInputElement | null>(null)
@@ -180,6 +251,7 @@ async function sendMessage() {
 
   // AI 回复
   isLoading.value = true
+  startWaitTimer()
 
   const aiMsgId = chatStorage.nextMessageId(messages.value)
   const aiMsg: Message = {
@@ -200,17 +272,23 @@ async function sendMessage() {
     }
 
     let aiContent = ''
+    startTypewriter(aiMsg.id)
     sseController = chatCompletionsStream(
       remoteSessionId,  // ← 这里是后端数据库的真实 ID（如 1, 2, 3...），不是前端的 localStorage ID
       text,
       (token: string) => {
         aiContent += token
         aiMsg.content = aiContent
+        typeBuffer += token // 进入打字机缓冲，由定时器逐字显示
         scrollToBottom()
       },
       () => {
         // done
         sseController = null
+        stopWaitTimer()
+        flushTypewriter() // 立即补全剩余内容
+        stopTypewriter()
+        streamingMsgId.value = null
         // 持久化到 localStorage
         const persistedAiMsg: Message = { ...aiMsg, content: aiContent, time: chatStorage.getTimeString() }
         chatStorage.appendMessage(session.id, persistedAiMsg)
@@ -230,6 +308,9 @@ async function sendMessage() {
 
 /** 模拟 AI 回复（SSE 回退方案） */
 async function fallbackAiReply(text: string, aiMsg: Message, sessionId: string) {
+  stopWaitTimer()
+  stopTypewriter()
+  streamingMsgId.value = null
   await delay(600 + Math.random() * 600)
   const reply = getAiReply(text, messages.value)
   aiMsg.content = reply
@@ -269,6 +350,8 @@ function delay(ms: number): Promise<void> {
 onMounted(() => {
   const session = sessionStore.getOrCreateLatest('chat')
   messages.value = chatStorage.getMessages(session.id)
+  // 预热：提前在后端创建并映射会话，消除发送路径上的 B2 往返
+  void sessionStore.ensureRemoteSession(session.id)
 
   nextTick(() => {
     scrollToBottom()
@@ -277,6 +360,8 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  stopWaitTimer()
+  stopTypewriter()
   if (sseController) {
     sseController.abort()
     sseController = null
@@ -508,32 +593,28 @@ onUnmounted(() => {
   opacity: 0.4;
 }
 
-/* ---- 打字中动画 ---- */
-.typing-indicator {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 0 4px 48px;
-}
-.typing {
+/* ---- 气泡内打字圆点 ---- */
+.typing-dots {
   display: inline-flex;
   gap: 4px;
   align-items: center;
+  padding: 4px 0;
 }
-.typing span {
+.typing-dots span {
   width: 6px;
   height: 6px;
   background: var(--text-mute);
   border-radius: 50%;
   animation: bounce 1.2s ease-in-out infinite;
 }
-.typing span:nth-child(2) { animation-delay: 0.15s; }
-.typing span:nth-child(3) { animation-delay: 0.3s; }
+.typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.3s; }
 @keyframes bounce {
   0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
   40% { transform: scale(1); opacity: 1; }
 }
-.typing-label {
+.wait-hint {
+  margin-left: 8px;
   font-size: 12px;
   color: var(--text-mute);
 }
