@@ -71,7 +71,7 @@ export const useSessionStore = defineStore('session', () => {
 
     // 2. 尝试通过 B2 接口在后端创建会话
     try {
-      const { default: api } = await import('../api/chat')
+      const api = await import('../api/chat')
       const res: any = await api.createChatSession()
       if (res.code === 200 && res.data?.session?.id) {
         const remoteId = res.data.session.id
@@ -121,7 +121,7 @@ export const useSessionStore = defineStore('session', () => {
 
     // 2. 尝试通过 C5 接口在后端创建会话
     try {
-      const { default: api } = await import('../api/treehole')
+      const api = await import('../api/treehole')
       const res: any = await api.createTreeholeSession()
       if (res.code === 200 && res.data?.session?.id) {
         const remoteId = res.data.session.id
